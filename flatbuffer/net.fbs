@@ -1,8 +1,19 @@
+// flatc -c -b ./net.fbs
 namespace flat;
 
-table Test{
-    t1:int;
-    t2:int;
+union Msg{Gtm,GtmAck}
+
+// 发送给gtm的类型
+table Gtm{
+    type:int;
 }
 
-root_type Test;
+table GtmAck{
+    txid:int;
+}
+
+table RootMsg{
+    any:Msg;
+}
+
+root_type RootMsg;

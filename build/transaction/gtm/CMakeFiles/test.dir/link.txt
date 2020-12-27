@@ -1,0 +1,1 @@
+/usr/bin/c++  -std=c++11 -Wall -Werror -fPIC -g -pthread  -rdynamic CMakeFiles/test.dir/test.cc.o  -o test  -L/home/gyz/grit/third_part/lib -Wl,-rpath,/home/gyz/grit/third_part/lib -lgtm.cc -lmuduo_net -lmuduo_base -lgflags -lglog 

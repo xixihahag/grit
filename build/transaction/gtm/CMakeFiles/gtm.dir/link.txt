@@ -1,0 +1,1 @@
+/usr/bin/c++  -std=c++11 -Wall -Werror -fPIC -g -pthread  -rdynamic CMakeFiles/gtm.dir/gtmmain.cc.o CMakeFiles/gtm.dir/gtm.cc.o CMakeFiles/gtm.dir/__/__/base/configManager.cc.o  -o gtm  -L/home/gyz/grit/third_part/lib -Wl,-rpath,/home/gyz/grit/third_part/lib -lmuduo_net -lmuduo_base -lgflags -lglog 

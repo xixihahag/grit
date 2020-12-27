@@ -1,5 +1,6 @@
 #pragma once
 #include <pthread.h>
+namespace grit {
 
 template <typename T>
 class Singleton
@@ -36,3 +37,5 @@ pthread_once_t Singleton<T>::m_InstanceFlag = PTHREAD_ONCE_INIT;
 
 template <typename T>
 T *Singleton<T>::m_pInstance = NULL;
+
+} // namespace grit

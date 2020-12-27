@@ -1,0 +1,32 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/gyz/grit/transaction/gtm/gtm.h
+atomic
+-
+muduo/net/TcpServer.h
+/home/gyz/grit/transaction/gtm/muduo/net/TcpServer.h
+muduo/net/EventLoop.h
+/home/gyz/grit/transaction/gtm/muduo/net/EventLoop.h
+singleton.h
+/home/gyz/grit/transaction/gtm/singleton.h
+
+/home/gyz/grit/transaction/gtm/test.cc
+iostream
+-
+glog/logging.h
+-
+gtm.h
+/home/gyz/grit/transaction/gtm/gtm.h
+muduo/net/TcpServer.h
+/home/gyz/grit/transaction/gtm/muduo/net/TcpServer.h
+tt.h
+/home/gyz/grit/transaction/gtm/tt.h
+
+/home/gyz/grit/transaction/gtm/tt.h
+

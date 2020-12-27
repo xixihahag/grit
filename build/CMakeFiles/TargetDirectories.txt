@@ -1,0 +1,7 @@
+/home/gyz/grit/build/CMakeFiles/rebuild_cache.dir
+/home/gyz/grit/build/CMakeFiles/edit_cache.dir
+/home/gyz/grit/build/transaction/CMakeFiles/rebuild_cache.dir
+/home/gyz/grit/build/transaction/CMakeFiles/edit_cache.dir
+/home/gyz/grit/build/transaction/gtm/CMakeFiles/rebuild_cache.dir
+/home/gyz/grit/build/transaction/gtm/CMakeFiles/gtm.dir
+/home/gyz/grit/build/transaction/gtm/CMakeFiles/edit_cache.dir

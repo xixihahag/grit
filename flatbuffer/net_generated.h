@@ -8,88 +8,271 @@
 
 namespace flat {
 
-struct Test;
-struct TestBuilder;
+struct Gtm;
+struct GtmBuilder;
 
-struct Test FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
-  typedef TestBuilder Builder;
-  enum FlatBuffersVTableOffset FLATBUFFERS_VTABLE_UNDERLYING_TYPE {
-    VT_T1 = 4,
-    VT_T2 = 6
+struct GtmAck;
+struct GtmAckBuilder;
+
+struct RootMsg;
+struct RootMsgBuilder;
+
+enum Msg {
+  Msg_NONE = 0,
+  Msg_Gtm = 1,
+  Msg_GtmAck = 2,
+  Msg_MIN = Msg_NONE,
+  Msg_MAX = Msg_GtmAck
+};
+
+inline const Msg (&EnumValuesMsg())[3] {
+  static const Msg values[] = {
+    Msg_NONE,
+    Msg_Gtm,
+    Msg_GtmAck
   };
-  int32_t t1() const {
-    return GetField<int32_t>(VT_T1, 0);
-  }
-  int32_t t2() const {
-    return GetField<int32_t>(VT_T2, 0);
+  return values;
+}
+
+inline const char * const *EnumNamesMsg() {
+  static const char * const names[4] = {
+    "NONE",
+    "Gtm",
+    "GtmAck",
+    nullptr
+  };
+  return names;
+}
+
+inline const char *EnumNameMsg(Msg e) {
+  if (flatbuffers::IsOutRange(e, Msg_NONE, Msg_GtmAck)) return "";
+  const size_t index = static_cast<size_t>(e);
+  return EnumNamesMsg()[index];
+}
+
+template<typename T> struct MsgTraits {
+  static const Msg enum_value = Msg_NONE;
+};
+
+template<> struct MsgTraits<flat::Gtm> {
+  static const Msg enum_value = Msg_Gtm;
+};
+
+template<> struct MsgTraits<flat::GtmAck> {
+  static const Msg enum_value = Msg_GtmAck;
+};
+
+bool VerifyMsg(flatbuffers::Verifier &verifier, const void *obj, Msg type);
+bool VerifyMsgVector(flatbuffers::Verifier &verifier, const flatbuffers::Vector<flatbuffers::Offset<void>> *values, const flatbuffers::Vector<uint8_t> *types);
+
+struct Gtm FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
+  typedef GtmBuilder Builder;
+  enum FlatBuffersVTableOffset FLATBUFFERS_VTABLE_UNDERLYING_TYPE {
+    VT_TYPE = 4
+  };
+  int32_t type() const {
+    return GetField<int32_t>(VT_TYPE, 0);
   }
   bool Verify(flatbuffers::Verifier &verifier) const {
     return VerifyTableStart(verifier) &&
-           VerifyField<int32_t>(verifier, VT_T1) &&
-           VerifyField<int32_t>(verifier, VT_T2) &&
+           VerifyField<int32_t>(verifier, VT_TYPE) &&
            verifier.EndTable();
   }
 };
 
-struct TestBuilder {
-  typedef Test Table;
+struct GtmBuilder {
+  typedef Gtm Table;
   flatbuffers::FlatBufferBuilder &fbb_;
   flatbuffers::uoffset_t start_;
-  void add_t1(int32_t t1) {
-    fbb_.AddElement<int32_t>(Test::VT_T1, t1, 0);
+  void add_type(int32_t type) {
+    fbb_.AddElement<int32_t>(Gtm::VT_TYPE, type, 0);
   }
-  void add_t2(int32_t t2) {
-    fbb_.AddElement<int32_t>(Test::VT_T2, t2, 0);
-  }
-  explicit TestBuilder(flatbuffers::FlatBufferBuilder &_fbb)
+  explicit GtmBuilder(flatbuffers::FlatBufferBuilder &_fbb)
         : fbb_(_fbb) {
     start_ = fbb_.StartTable();
   }
-  TestBuilder &operator=(const TestBuilder &);
-  flatbuffers::Offset<Test> Finish() {
+  GtmBuilder &operator=(const GtmBuilder &);
+  flatbuffers::Offset<Gtm> Finish() {
     const auto end = fbb_.EndTable(start_);
-    auto o = flatbuffers::Offset<Test>(end);
+    auto o = flatbuffers::Offset<Gtm>(end);
     return o;
   }
 };
 
-inline flatbuffers::Offset<Test> CreateTest(
+inline flatbuffers::Offset<Gtm> CreateGtm(
     flatbuffers::FlatBufferBuilder &_fbb,
-    int32_t t1 = 0,
-    int32_t t2 = 0) {
-  TestBuilder builder_(_fbb);
-  builder_.add_t2(t2);
-  builder_.add_t1(t1);
+    int32_t type = 0) {
+  GtmBuilder builder_(_fbb);
+  builder_.add_type(type);
   return builder_.Finish();
 }
 
-inline const flat::Test *GetTest(const void *buf) {
-  return flatbuffers::GetRoot<flat::Test>(buf);
+struct GtmAck FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
+  typedef GtmAckBuilder Builder;
+  enum FlatBuffersVTableOffset FLATBUFFERS_VTABLE_UNDERLYING_TYPE {
+    VT_TXID = 4
+  };
+  int32_t txid() const {
+    return GetField<int32_t>(VT_TXID, 0);
+  }
+  bool Verify(flatbuffers::Verifier &verifier) const {
+    return VerifyTableStart(verifier) &&
+           VerifyField<int32_t>(verifier, VT_TXID) &&
+           verifier.EndTable();
+  }
+};
+
+struct GtmAckBuilder {
+  typedef GtmAck Table;
+  flatbuffers::FlatBufferBuilder &fbb_;
+  flatbuffers::uoffset_t start_;
+  void add_txid(int32_t txid) {
+    fbb_.AddElement<int32_t>(GtmAck::VT_TXID, txid, 0);
+  }
+  explicit GtmAckBuilder(flatbuffers::FlatBufferBuilder &_fbb)
+        : fbb_(_fbb) {
+    start_ = fbb_.StartTable();
+  }
+  GtmAckBuilder &operator=(const GtmAckBuilder &);
+  flatbuffers::Offset<GtmAck> Finish() {
+    const auto end = fbb_.EndTable(start_);
+    auto o = flatbuffers::Offset<GtmAck>(end);
+    return o;
+  }
+};
+
+inline flatbuffers::Offset<GtmAck> CreateGtmAck(
+    flatbuffers::FlatBufferBuilder &_fbb,
+    int32_t txid = 0) {
+  GtmAckBuilder builder_(_fbb);
+  builder_.add_txid(txid);
+  return builder_.Finish();
 }
 
-inline const flat::Test *GetSizePrefixedTest(const void *buf) {
-  return flatbuffers::GetSizePrefixedRoot<flat::Test>(buf);
+struct RootMsg FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
+  typedef RootMsgBuilder Builder;
+  enum FlatBuffersVTableOffset FLATBUFFERS_VTABLE_UNDERLYING_TYPE {
+    VT_ANY_TYPE = 4,
+    VT_ANY = 6
+  };
+  flat::Msg any_type() const {
+    return static_cast<flat::Msg>(GetField<uint8_t>(VT_ANY_TYPE, 0));
+  }
+  const void *any() const {
+    return GetPointer<const void *>(VT_ANY);
+  }
+  template<typename T> const T *any_as() const;
+  const flat::Gtm *any_as_Gtm() const {
+    return any_type() == flat::Msg_Gtm ? static_cast<const flat::Gtm *>(any()) : nullptr;
+  }
+  const flat::GtmAck *any_as_GtmAck() const {
+    return any_type() == flat::Msg_GtmAck ? static_cast<const flat::GtmAck *>(any()) : nullptr;
+  }
+  bool Verify(flatbuffers::Verifier &verifier) const {
+    return VerifyTableStart(verifier) &&
+           VerifyField<uint8_t>(verifier, VT_ANY_TYPE) &&
+           VerifyOffset(verifier, VT_ANY) &&
+           VerifyMsg(verifier, any(), any_type()) &&
+           verifier.EndTable();
+  }
+};
+
+template<> inline const flat::Gtm *RootMsg::any_as<flat::Gtm>() const {
+  return any_as_Gtm();
 }
 
-inline bool VerifyTestBuffer(
+template<> inline const flat::GtmAck *RootMsg::any_as<flat::GtmAck>() const {
+  return any_as_GtmAck();
+}
+
+struct RootMsgBuilder {
+  typedef RootMsg Table;
+  flatbuffers::FlatBufferBuilder &fbb_;
+  flatbuffers::uoffset_t start_;
+  void add_any_type(flat::Msg any_type) {
+    fbb_.AddElement<uint8_t>(RootMsg::VT_ANY_TYPE, static_cast<uint8_t>(any_type), 0);
+  }
+  void add_any(flatbuffers::Offset<void> any) {
+    fbb_.AddOffset(RootMsg::VT_ANY, any);
+  }
+  explicit RootMsgBuilder(flatbuffers::FlatBufferBuilder &_fbb)
+        : fbb_(_fbb) {
+    start_ = fbb_.StartTable();
+  }
+  RootMsgBuilder &operator=(const RootMsgBuilder &);
+  flatbuffers::Offset<RootMsg> Finish() {
+    const auto end = fbb_.EndTable(start_);
+    auto o = flatbuffers::Offset<RootMsg>(end);
+    return o;
+  }
+};
+
+inline flatbuffers::Offset<RootMsg> CreateRootMsg(
+    flatbuffers::FlatBufferBuilder &_fbb,
+    flat::Msg any_type = flat::Msg_NONE,
+    flatbuffers::Offset<void> any = 0) {
+  RootMsgBuilder builder_(_fbb);
+  builder_.add_any(any);
+  builder_.add_any_type(any_type);
+  return builder_.Finish();
+}
+
+inline bool VerifyMsg(flatbuffers::Verifier &verifier, const void *obj, Msg type) {
+  switch (type) {
+    case Msg_NONE: {
+      return true;
+    }
+    case Msg_Gtm: {
+      auto ptr = reinterpret_cast<const flat::Gtm *>(obj);
+      return verifier.VerifyTable(ptr);
+    }
+    case Msg_GtmAck: {
+      auto ptr = reinterpret_cast<const flat::GtmAck *>(obj);
+      return verifier.VerifyTable(ptr);
+    }
+    default: return true;
+  }
+}
+
+inline bool VerifyMsgVector(flatbuffers::Verifier &verifier, const flatbuffers::Vector<flatbuffers::Offset<void>> *values, const flatbuffers::Vector<uint8_t> *types) {
+  if (!values || !types) return !values && !types;
+  if (values->size() != types->size()) return false;
+  for (flatbuffers::uoffset_t i = 0; i < values->size(); ++i) {
+    if (!VerifyMsg(
+        verifier,  values->Get(i), types->GetEnum<Msg>(i))) {
+      return false;
+    }
+  }
+  return true;
+}
+
+inline const flat::RootMsg *GetRootMsg(const void *buf) {
+  return flatbuffers::GetRoot<flat::RootMsg>(buf);
+}
+
+inline const flat::RootMsg *GetSizePrefixedRootMsg(const void *buf) {
+  return flatbuffers::GetSizePrefixedRoot<flat::RootMsg>(buf);
+}
+
+inline bool VerifyRootMsgBuffer(
     flatbuffers::Verifier &verifier) {
-  return verifier.VerifyBuffer<flat::Test>(nullptr);
+  return verifier.VerifyBuffer<flat::RootMsg>(nullptr);
 }
 
-inline bool VerifySizePrefixedTestBuffer(
+inline bool VerifySizePrefixedRootMsgBuffer(
     flatbuffers::Verifier &verifier) {
-  return verifier.VerifySizePrefixedBuffer<flat::Test>(nullptr);
+  return verifier.VerifySizePrefixedBuffer<flat::RootMsg>(nullptr);
 }
 
-inline void FinishTestBuffer(
+inline void FinishRootMsgBuffer(
     flatbuffers::FlatBufferBuilder &fbb,
-    flatbuffers::Offset<flat::Test> root) {
+    flatbuffers::Offset<flat::RootMsg> root) {
   fbb.Finish(root);
 }
 
-inline void FinishSizePrefixedTestBuffer(
+inline void FinishSizePrefixedRootMsgBuffer(
     flatbuffers::FlatBufferBuilder &fbb,
-    flatbuffers::Offset<flat::Test> root) {
+    flatbuffers::Offset<flat::RootMsg> root) {
   fbb.FinishSizePrefixed(root);
 }
 

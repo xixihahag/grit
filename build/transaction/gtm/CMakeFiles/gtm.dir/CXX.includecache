@@ -1,0 +1,44 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/gyz/grit/base/configManager.cc
+configManager.h
+/home/gyz/grit/base/configManager.h
+boost/property_tree/ptree.hpp
+-
+boost/property_tree/ini_parser.hpp
+-
+
+/home/gyz/grit/base/configManager.h
+string
+-
+singleton.h
+/home/gyz/grit/base/singleton.h
+
+/home/gyz/grit/base/singleton.h
+pthread.h
+-
+
+/home/gyz/grit/transaction/gtm/gtmmain.cc
+iostream
+-
+glog/logging.h
+-
+gtm/gtm.h
+/home/gyz/grit/transaction/gtm/gtm/gtm.h
+configManager.h
+/home/gyz/grit/transaction/gtm/configManager.h
+headerCmd.h
+/home/gyz/grit/transaction/gtm/headerCmd.h
+muduo/net/TcpServer.h
+/home/gyz/grit/transaction/gtm/muduo/net/TcpServer.h
+flatbuffers/flatbuffers.h
+/home/gyz/grit/transaction/gtm/flatbuffers/flatbuffers.h
+net_generated.h
+/home/gyz/grit/transaction/gtm/net_generated.h
+
