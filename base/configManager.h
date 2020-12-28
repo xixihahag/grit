@@ -15,6 +15,7 @@ class ConfigManager : public Singleton<ConfigManager>
     std::string address() { return address_; }
     int port() { return port_; }
     int threads() { return threads_; }
+    std::string transactionsDir() { return transactionsDir_; }
 
   private:
     // basis
@@ -24,6 +25,7 @@ class ConfigManager : public Singleton<ConfigManager>
     std::string address_;
     int port_;
     int threads_;
+    std::string transactionsDir_;
 };
 
 } // namespace grit

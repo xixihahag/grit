@@ -6,6 +6,7 @@ union Msg{Gtm,GtmAck}
 // 发送给gtm的类型
 table Gtm{
     type:int;
+    txid:int;
 }
 
 table GtmAck{

@@ -1,0 +1,4 @@
+Log file created at: 2020/12/28 22:01:25
+Running on machine: ceph-node2
+Log line format: [IWEF]mmdd hh:mm:ss.uuuuuu threadid file:line] msg
+I1228 22:01:25.984740 15580 gtmmain.cc:87] init gtm done

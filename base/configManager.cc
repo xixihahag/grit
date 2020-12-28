@@ -24,6 +24,7 @@ void ConfigManager::init(const char *configDir)
     SetOrDefaultS(address_, pt.get<string>({"gtm.address"}));
     SetOrDefaultI(port_, pt.get<int>("gtm.port"));
     SetOrDefaultI(threads_, pt.get<int>("gtm.threads"));
+    SetOrDefaultS(transactionsDir_, pt.get<string>("gtm.transactionsDir"));
 }
 
 } // namespace grit

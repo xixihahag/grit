@@ -53,19 +53,40 @@ CMAKE_BINARY_DIR = /home/gyz/grit/build
 # Directory level rules for the build root directory
 
 # The main recursive "all" target.
+all: flatbuffer/all
 all: transaction/all
 
 .PHONY : all
 
 # The main recursive "clean" target.
+clean: flatbuffer/clean
 clean: transaction/clean
 
 .PHONY : clean
 
 # The main recursive "preinstall" target.
+preinstall: flatbuffer/preinstall
 preinstall: transaction/preinstall
 
 .PHONY : preinstall
+
+#=============================================================================
+# Directory level rules for directory flatbuffer
+
+# Recursive "all" directory target.
+flatbuffer/all:
+
+.PHONY : flatbuffer/all
+
+# Recursive "clean" directory target.
+flatbuffer/clean:
+
+.PHONY : flatbuffer/clean
+
+# Recursive "preinstall" directory target.
+flatbuffer/preinstall:
+
+.PHONY : flatbuffer/preinstall
 
 #=============================================================================
 # Directory level rules for directory transaction

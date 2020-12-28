@@ -13,5 +13,7 @@ include_directories(${CMAKE_SOURCE_DIR}/flatbuffer)
 
 link_directories(${CMAKE_SOURCE_DIR}/third_part/lib)
 
-# add_subdirectory(flatbuffer)
+set(FLATC ${CMAKE_SOURCE_DIR}/third_part/bin/flatc)
+
+add_subdirectory(flatbuffer)
 add_subdirectory(transaction)

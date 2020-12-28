@@ -6,24 +6,6 @@
 
 #IncludeRegexTransform: 
 
-/home/gyz/grit/base/configManager.cc
-configManager.h
-/home/gyz/grit/base/configManager.h
-boost/property_tree/ptree.hpp
--
-boost/property_tree/ini_parser.hpp
--
-
-/home/gyz/grit/base/configManager.h
-string
--
-singleton.h
-/home/gyz/grit/base/singleton.h
-
-/home/gyz/grit/base/singleton.h
-pthread.h
--
-
 /home/gyz/grit/transaction/gtm/gtmmain.cc
 iostream
 -

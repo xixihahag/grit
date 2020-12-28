@@ -24,8 +24,7 @@ void onConnection(const TcpConnectionPtr &conn)
 
 void onMessage(const TcpConnectionPtr &conn, Buffer *buf, Timestamp)
 {
-    // conn->send(buf);
-    // TODO: 通过flatbuffers判断过来的请求是啥
+    // 通过flatbuffers判断过来的请求是啥
     auto msg = GetRootMsg((uint8_t *) buf->retrieveAllAsString().c_str());
     auto gtm = static_cast<const Gtm *>(msg->any());
     auto type = gtm->type();
@@ -44,27 +43,34 @@ int main(int argc, char *argv[])
     if (argc < 2) {
         fprintf(stderr, "Usage: server <config dir>\n");
     } else {
-        // LOG_INFO << "pid = " << getpid() << ", tid = " <<
-        // CurrentThread::tid(); Logger::setLogLevel(Logger::WARN);
-
         google::InitGoogleLogging(argv[0]);
-
-        // 初始化配置信息
-        ConfigManager::getInstance()->init(argv[1]);
-
-        // 将大于等于该级别的日志同时输出到stderr。
-        // 日志级别 INFO, WARNING, ERROR,FATAL 的值分别为0、1、2、3。
-        FLAGS_stderrthreshold = 2;
-        // 设置日志位置
-        FLAGS_log_dir = ConfigManager::getInstance()->logDir();
 
         // Glog库还提供了一个信号处理器
         // 能够在 SIGSEGV之类的信号导致的程序崩溃时导出有用的信息。
         google::InstallFailureSignalHandler();
 
+        // 初始化配置信息，给位置，读取配置
+        ConfigManager::getInstance()->init(argv[1]);
+        // LOG(INFO) << "init ConfigManager done" << endl;
+
+        // 将大于等于该级别的日志同时输出到stderr。
+        // 日志级别 INFO, WARNING, ERROR,FATAL 的值分别为0、1、2、3。
+        FLAGS_stderrthreshold = 0;
+        // FLAGS_logtostderr = true;
+        // 终端输出带颜色
+        FLAGS_colorlogtostderr = true;
+        // 磁盘已满时不记录日志
+        FLAGS_stop_logging_if_full_disk = true;
+        // 设置日志位置
+        FLAGS_log_dir = ConfigManager::getInstance()->logDir();
+
+        // 初始化gtm
+        GTM::getInstance()->init();
+
         const char *ip = ConfigManager::getInstance()->address().c_str();
         uint16_t port =
             static_cast<uint16_t>(ConfigManager::getInstance()->port());
+
         InetAddress listenAddr(ip, port);
         int threadCount = ConfigManager::getInstance()->threads();
 
@@ -76,6 +82,8 @@ int main(int argc, char *argv[])
         server.setMessageCallback(onMessage);
 
         if (threadCount > 1) { server.setThreadNum(threadCount); }
+
+        LOG(INFO) << "init gtm done";
 
         server.start();
 

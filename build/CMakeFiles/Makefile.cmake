@@ -11,6 +11,7 @@ set(CMAKE_MAKEFILE_DEPENDS
   "CMakeFiles/3.15.0/CMakeCCompiler.cmake"
   "CMakeFiles/3.15.0/CMakeCXXCompiler.cmake"
   "CMakeFiles/3.15.0/CMakeSystem.cmake"
+  "../flatbuffer/CMakeLists.txt"
   "../transaction/CMakeLists.txt"
   "../transaction/gtm/CMakeLists.txt"
   "/opt/cmake-3.15.0/share/cmake-3.15/Modules/CMakeCInformation.cmake"
@@ -43,6 +44,7 @@ set(CMAKE_MAKEFILE_OUTPUTS
 # Byproducts of CMake generate step:
 set(CMAKE_MAKEFILE_PRODUCTS
   "CMakeFiles/CMakeDirectoryInformation.cmake"
+  "flatbuffer/CMakeFiles/CMakeDirectoryInformation.cmake"
   "transaction/CMakeFiles/CMakeDirectoryInformation.cmake"
   "transaction/gtm/CMakeFiles/CMakeDirectoryInformation.cmake"
   )
