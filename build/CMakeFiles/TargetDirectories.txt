@@ -1,6 +1,7 @@
 /home/gyz/grit/build/CMakeFiles/rebuild_cache.dir
 /home/gyz/grit/build/CMakeFiles/edit_cache.dir
 /home/gyz/grit/build/flatbuffer/CMakeFiles/rebuild_cache.dir
+/home/gyz/grit/build/flatbuffer/CMakeFiles/BUILD_FLAT.dir
 /home/gyz/grit/build/flatbuffer/CMakeFiles/edit_cache.dir
 /home/gyz/grit/build/transaction/CMakeFiles/rebuild_cache.dir
 /home/gyz/grit/build/transaction/CMakeFiles/edit_cache.dir

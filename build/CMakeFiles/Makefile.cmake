@@ -51,5 +51,6 @@ set(CMAKE_MAKEFILE_PRODUCTS
 
 # Dependency information for all targets:
 set(CMAKE_DEPEND_INFO_FILES
+  "flatbuffer/CMakeFiles/BUILD_FLAT.dir/DependInfo.cmake"
   "transaction/gtm/CMakeFiles/gtm.dir/DependInfo.cmake"
   )
