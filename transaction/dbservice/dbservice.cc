@@ -6,6 +6,7 @@ using namespace grit;
 void DbService::getReadWriteSet(const flat::DbService *data)
 {
     transaction *tran = new transaction();
+    tran->txid = data->txid();
 
     int rsize = data->readSet()->size();
     for (int i = 0; i < rsize; i++) {
@@ -29,5 +30,7 @@ void DbService::getReadWriteSet(const flat::DbService *data)
         // wcheck.emplace(wdata->key);
     }
 
-    transaction_.emplace_back(tran);
+    // TODO: 发送给DBTM处理 考虑用不用线程池 讲道理n方的复杂度，还是用起来比较好
+
+    // transactions_.emplace_back(tran);
 }

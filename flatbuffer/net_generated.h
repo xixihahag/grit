@@ -414,14 +414,22 @@ struct DbService FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   enum FlatBuffersVTableOffset FLATBUFFERS_VTABLE_UNDERLYING_TYPE {
     VT_TYPE = 4,
     VT_TXID = 6,
-    VT_READSET = 8,
-    VT_WRITESET = 10
+    VT_ISCONFLICT = 8,
+    VT_LSN = 10,
+    VT_READSET = 12,
+    VT_WRITESET = 14
   };
   int32_t type() const {
     return GetField<int32_t>(VT_TYPE, 0);
   }
   int32_t txid() const {
     return GetField<int32_t>(VT_TXID, 0);
+  }
+  bool isConflict() const {
+    return GetField<uint8_t>(VT_ISCONFLICT, 0) != 0;
+  }
+  int32_t lsn() const {
+    return GetField<int32_t>(VT_LSN, 0);
   }
   const flatbuffers::Vector<flatbuffers::Offset<flat::ReadData>> *readSet() const {
     return GetPointer<const flatbuffers::Vector<flatbuffers::Offset<flat::ReadData>> *>(VT_READSET);
@@ -433,6 +441,8 @@ struct DbService FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
     return VerifyTableStart(verifier) &&
            VerifyField<int32_t>(verifier, VT_TYPE) &&
            VerifyField<int32_t>(verifier, VT_TXID) &&
+           VerifyField<uint8_t>(verifier, VT_ISCONFLICT) &&
+           VerifyField<int32_t>(verifier, VT_LSN) &&
            VerifyOffset(verifier, VT_READSET) &&
            verifier.VerifyVector(readSet()) &&
            verifier.VerifyVectorOfTables(readSet()) &&
@@ -452,6 +462,12 @@ struct DbServiceBuilder {
   }
   void add_txid(int32_t txid) {
     fbb_.AddElement<int32_t>(DbService::VT_TXID, txid, 0);
+  }
+  void add_isConflict(bool isConflict) {
+    fbb_.AddElement<uint8_t>(DbService::VT_ISCONFLICT, static_cast<uint8_t>(isConflict), 0);
+  }
+  void add_lsn(int32_t lsn) {
+    fbb_.AddElement<int32_t>(DbService::VT_LSN, lsn, 0);
   }
   void add_readSet(flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<flat::ReadData>>> readSet) {
     fbb_.AddOffset(DbService::VT_READSET, readSet);
@@ -475,13 +491,17 @@ inline flatbuffers::Offset<DbService> CreateDbService(
     flatbuffers::FlatBufferBuilder &_fbb,
     int32_t type = 0,
     int32_t txid = 0,
+    bool isConflict = false,
+    int32_t lsn = 0,
     flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<flat::ReadData>>> readSet = 0,
     flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<flat::WriteData>>> writeSet = 0) {
   DbServiceBuilder builder_(_fbb);
   builder_.add_writeSet(writeSet);
   builder_.add_readSet(readSet);
+  builder_.add_lsn(lsn);
   builder_.add_txid(txid);
   builder_.add_type(type);
+  builder_.add_isConflict(isConflict);
   return builder_.Finish();
 }
 
@@ -489,6 +509,8 @@ inline flatbuffers::Offset<DbService> CreateDbServiceDirect(
     flatbuffers::FlatBufferBuilder &_fbb,
     int32_t type = 0,
     int32_t txid = 0,
+    bool isConflict = false,
+    int32_t lsn = 0,
     const std::vector<flatbuffers::Offset<flat::ReadData>> *readSet = nullptr,
     const std::vector<flatbuffers::Offset<flat::WriteData>> *writeSet = nullptr) {
   auto readSet__ = readSet ? _fbb.CreateVector<flatbuffers::Offset<flat::ReadData>>(*readSet) : 0;
@@ -497,6 +519,8 @@ inline flatbuffers::Offset<DbService> CreateDbServiceDirect(
       _fbb,
       type,
       txid,
+      isConflict,
+      lsn,
       readSet__,
       writeSet__);
 }

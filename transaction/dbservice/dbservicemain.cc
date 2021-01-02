@@ -37,14 +37,6 @@ void onMessage(const TcpConnectionPtr &conn, Buffer *buf, Timestamp)
         break;
     default:
         // TODO: 扔给DBTM处理
-
-        // case kJudgeConflit:
-        //     // TODO: 回复为是否冲突的结果，做一个结构体，然后扔给DBTM处理
-        //     // Dbtm dbtm(kJudgeConflit);
-
-        //     break;
-        // case kLsn:
-        //     // TODO: 回复为lsn，做一个结构体，然后扔给DBTM处理
     }
 }
 
