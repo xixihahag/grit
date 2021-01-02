@@ -11,8 +11,20 @@ namespace flat {
 struct Gtm;
 struct GtmBuilder;
 
+struct ipAndPort;
+struct ipAndPortBuilder;
+
 struct GtmAck;
 struct GtmAckBuilder;
+
+struct WriteData;
+struct WriteDataBuilder;
+
+struct ReadData;
+struct ReadDataBuilder;
+
+struct DbService;
+struct DbServiceBuilder;
 
 struct RootMsg;
 struct RootMsgBuilder;
@@ -21,31 +33,34 @@ enum Msg {
   Msg_NONE = 0,
   Msg_Gtm = 1,
   Msg_GtmAck = 2,
+  Msg_DbService = 3,
   Msg_MIN = Msg_NONE,
-  Msg_MAX = Msg_GtmAck
+  Msg_MAX = Msg_DbService
 };
 
-inline const Msg (&EnumValuesMsg())[3] {
+inline const Msg (&EnumValuesMsg())[4] {
   static const Msg values[] = {
     Msg_NONE,
     Msg_Gtm,
-    Msg_GtmAck
+    Msg_GtmAck,
+    Msg_DbService
   };
   return values;
 }
 
 inline const char * const *EnumNamesMsg() {
-  static const char * const names[4] = {
+  static const char * const names[5] = {
     "NONE",
     "Gtm",
     "GtmAck",
+    "DbService",
     nullptr
   };
   return names;
 }
 
 inline const char *EnumNameMsg(Msg e) {
-  if (flatbuffers::IsOutRange(e, Msg_NONE, Msg_GtmAck)) return "";
+  if (flatbuffers::IsOutRange(e, Msg_NONE, Msg_DbService)) return "";
   const size_t index = static_cast<size_t>(e);
   return EnumNamesMsg()[index];
 }
@@ -62,6 +77,10 @@ template<> struct MsgTraits<flat::GtmAck> {
   static const Msg enum_value = Msg_GtmAck;
 };
 
+template<> struct MsgTraits<flat::DbService> {
+  static const Msg enum_value = Msg_DbService;
+};
+
 bool VerifyMsg(flatbuffers::Verifier &verifier, const void *obj, Msg type);
 bool VerifyMsgVector(flatbuffers::Verifier &verifier, const flatbuffers::Vector<flatbuffers::Offset<void>> *values, const flatbuffers::Vector<uint8_t> *types);
 
@@ -69,18 +88,19 @@ struct Gtm FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   typedef GtmBuilder Builder;
   enum FlatBuffersVTableOffset FLATBUFFERS_VTABLE_UNDERLYING_TYPE {
     VT_TYPE = 4,
-    VT_TXID = 6
+    VT_TRANSTYPE = 6
   };
   int32_t type() const {
     return GetField<int32_t>(VT_TYPE, 0);
   }
-  int32_t txid() const {
-    return GetField<int32_t>(VT_TXID, 0);
+  const flatbuffers::String *transType() const {
+    return GetPointer<const flatbuffers::String *>(VT_TRANSTYPE);
   }
   bool Verify(flatbuffers::Verifier &verifier) const {
     return VerifyTableStart(verifier) &&
            VerifyField<int32_t>(verifier, VT_TYPE) &&
-           VerifyField<int32_t>(verifier, VT_TXID) &&
+           VerifyOffset(verifier, VT_TRANSTYPE) &&
+           verifier.VerifyString(transType()) &&
            verifier.EndTable();
   }
 };
@@ -92,8 +112,8 @@ struct GtmBuilder {
   void add_type(int32_t type) {
     fbb_.AddElement<int32_t>(Gtm::VT_TYPE, type, 0);
   }
-  void add_txid(int32_t txid) {
-    fbb_.AddElement<int32_t>(Gtm::VT_TXID, txid, 0);
+  void add_transType(flatbuffers::Offset<flatbuffers::String> transType) {
+    fbb_.AddOffset(Gtm::VT_TRANSTYPE, transType);
   }
   explicit GtmBuilder(flatbuffers::FlatBufferBuilder &_fbb)
         : fbb_(_fbb) {
@@ -110,24 +130,106 @@ struct GtmBuilder {
 inline flatbuffers::Offset<Gtm> CreateGtm(
     flatbuffers::FlatBufferBuilder &_fbb,
     int32_t type = 0,
-    int32_t txid = 0) {
+    flatbuffers::Offset<flatbuffers::String> transType = 0) {
   GtmBuilder builder_(_fbb);
-  builder_.add_txid(txid);
+  builder_.add_transType(transType);
   builder_.add_type(type);
   return builder_.Finish();
+}
+
+inline flatbuffers::Offset<Gtm> CreateGtmDirect(
+    flatbuffers::FlatBufferBuilder &_fbb,
+    int32_t type = 0,
+    const char *transType = nullptr) {
+  auto transType__ = transType ? _fbb.CreateString(transType) : 0;
+  return flat::CreateGtm(
+      _fbb,
+      type,
+      transType__);
+}
+
+struct ipAndPort FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
+  typedef ipAndPortBuilder Builder;
+  enum FlatBuffersVTableOffset FLATBUFFERS_VTABLE_UNDERLYING_TYPE {
+    VT_IP = 4,
+    VT_PORT = 6
+  };
+  const flatbuffers::String *ip() const {
+    return GetPointer<const flatbuffers::String *>(VT_IP);
+  }
+  int32_t port() const {
+    return GetField<int32_t>(VT_PORT, 0);
+  }
+  bool Verify(flatbuffers::Verifier &verifier) const {
+    return VerifyTableStart(verifier) &&
+           VerifyOffset(verifier, VT_IP) &&
+           verifier.VerifyString(ip()) &&
+           VerifyField<int32_t>(verifier, VT_PORT) &&
+           verifier.EndTable();
+  }
+};
+
+struct ipAndPortBuilder {
+  typedef ipAndPort Table;
+  flatbuffers::FlatBufferBuilder &fbb_;
+  flatbuffers::uoffset_t start_;
+  void add_ip(flatbuffers::Offset<flatbuffers::String> ip) {
+    fbb_.AddOffset(ipAndPort::VT_IP, ip);
+  }
+  void add_port(int32_t port) {
+    fbb_.AddElement<int32_t>(ipAndPort::VT_PORT, port, 0);
+  }
+  explicit ipAndPortBuilder(flatbuffers::FlatBufferBuilder &_fbb)
+        : fbb_(_fbb) {
+    start_ = fbb_.StartTable();
+  }
+  ipAndPortBuilder &operator=(const ipAndPortBuilder &);
+  flatbuffers::Offset<ipAndPort> Finish() {
+    const auto end = fbb_.EndTable(start_);
+    auto o = flatbuffers::Offset<ipAndPort>(end);
+    return o;
+  }
+};
+
+inline flatbuffers::Offset<ipAndPort> CreateipAndPort(
+    flatbuffers::FlatBufferBuilder &_fbb,
+    flatbuffers::Offset<flatbuffers::String> ip = 0,
+    int32_t port = 0) {
+  ipAndPortBuilder builder_(_fbb);
+  builder_.add_port(port);
+  builder_.add_ip(ip);
+  return builder_.Finish();
+}
+
+inline flatbuffers::Offset<ipAndPort> CreateipAndPortDirect(
+    flatbuffers::FlatBufferBuilder &_fbb,
+    const char *ip = nullptr,
+    int32_t port = 0) {
+  auto ip__ = ip ? _fbb.CreateString(ip) : 0;
+  return flat::CreateipAndPort(
+      _fbb,
+      ip__,
+      port);
 }
 
 struct GtmAck FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   typedef GtmAckBuilder Builder;
   enum FlatBuffersVTableOffset FLATBUFFERS_VTABLE_UNDERLYING_TYPE {
-    VT_TXID = 4
+    VT_TXID = 4,
+    VT_LIST = 6
   };
   int32_t txid() const {
     return GetField<int32_t>(VT_TXID, 0);
   }
+  const flatbuffers::Vector<flatbuffers::Offset<flat::ipAndPort>> *list() const {
+    return GetPointer<const flatbuffers::Vector<flatbuffers::Offset<flat::ipAndPort>> *>(VT_LIST);
+  }
   bool Verify(flatbuffers::Verifier &verifier) const {
     return VerifyTableStart(verifier) &&
            VerifyField<int32_t>(verifier, VT_TXID) &&
+           VerifyOffset(verifier, VT_LIST) &&
+           verifier.VerifyVector(list()) &&
+           verifier.VerifyVectorOfTables(list()) &&
            verifier.EndTable();
   }
 };
@@ -138,6 +240,9 @@ struct GtmAckBuilder {
   flatbuffers::uoffset_t start_;
   void add_txid(int32_t txid) {
     fbb_.AddElement<int32_t>(GtmAck::VT_TXID, txid, 0);
+  }
+  void add_list(flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<flat::ipAndPort>>> list) {
+    fbb_.AddOffset(GtmAck::VT_LIST, list);
   }
   explicit GtmAckBuilder(flatbuffers::FlatBufferBuilder &_fbb)
         : fbb_(_fbb) {
@@ -153,10 +258,247 @@ struct GtmAckBuilder {
 
 inline flatbuffers::Offset<GtmAck> CreateGtmAck(
     flatbuffers::FlatBufferBuilder &_fbb,
-    int32_t txid = 0) {
+    int32_t txid = 0,
+    flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<flat::ipAndPort>>> list = 0) {
   GtmAckBuilder builder_(_fbb);
+  builder_.add_list(list);
   builder_.add_txid(txid);
   return builder_.Finish();
+}
+
+inline flatbuffers::Offset<GtmAck> CreateGtmAckDirect(
+    flatbuffers::FlatBufferBuilder &_fbb,
+    int32_t txid = 0,
+    const std::vector<flatbuffers::Offset<flat::ipAndPort>> *list = nullptr) {
+  auto list__ = list ? _fbb.CreateVector<flatbuffers::Offset<flat::ipAndPort>>(*list) : 0;
+  return flat::CreateGtmAck(
+      _fbb,
+      txid,
+      list__);
+}
+
+struct WriteData FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
+  typedef WriteDataBuilder Builder;
+  enum FlatBuffersVTableOffset FLATBUFFERS_VTABLE_UNDERLYING_TYPE {
+    VT_KEY = 4,
+    VT_RECORD = 6,
+    VT_VALUE = 8
+  };
+  const flatbuffers::String *key() const {
+    return GetPointer<const flatbuffers::String *>(VT_KEY);
+  }
+  const flatbuffers::String *record() const {
+    return GetPointer<const flatbuffers::String *>(VT_RECORD);
+  }
+  const flatbuffers::String *value() const {
+    return GetPointer<const flatbuffers::String *>(VT_VALUE);
+  }
+  bool Verify(flatbuffers::Verifier &verifier) const {
+    return VerifyTableStart(verifier) &&
+           VerifyOffset(verifier, VT_KEY) &&
+           verifier.VerifyString(key()) &&
+           VerifyOffset(verifier, VT_RECORD) &&
+           verifier.VerifyString(record()) &&
+           VerifyOffset(verifier, VT_VALUE) &&
+           verifier.VerifyString(value()) &&
+           verifier.EndTable();
+  }
+};
+
+struct WriteDataBuilder {
+  typedef WriteData Table;
+  flatbuffers::FlatBufferBuilder &fbb_;
+  flatbuffers::uoffset_t start_;
+  void add_key(flatbuffers::Offset<flatbuffers::String> key) {
+    fbb_.AddOffset(WriteData::VT_KEY, key);
+  }
+  void add_record(flatbuffers::Offset<flatbuffers::String> record) {
+    fbb_.AddOffset(WriteData::VT_RECORD, record);
+  }
+  void add_value(flatbuffers::Offset<flatbuffers::String> value) {
+    fbb_.AddOffset(WriteData::VT_VALUE, value);
+  }
+  explicit WriteDataBuilder(flatbuffers::FlatBufferBuilder &_fbb)
+        : fbb_(_fbb) {
+    start_ = fbb_.StartTable();
+  }
+  WriteDataBuilder &operator=(const WriteDataBuilder &);
+  flatbuffers::Offset<WriteData> Finish() {
+    const auto end = fbb_.EndTable(start_);
+    auto o = flatbuffers::Offset<WriteData>(end);
+    return o;
+  }
+};
+
+inline flatbuffers::Offset<WriteData> CreateWriteData(
+    flatbuffers::FlatBufferBuilder &_fbb,
+    flatbuffers::Offset<flatbuffers::String> key = 0,
+    flatbuffers::Offset<flatbuffers::String> record = 0,
+    flatbuffers::Offset<flatbuffers::String> value = 0) {
+  WriteDataBuilder builder_(_fbb);
+  builder_.add_value(value);
+  builder_.add_record(record);
+  builder_.add_key(key);
+  return builder_.Finish();
+}
+
+inline flatbuffers::Offset<WriteData> CreateWriteDataDirect(
+    flatbuffers::FlatBufferBuilder &_fbb,
+    const char *key = nullptr,
+    const char *record = nullptr,
+    const char *value = nullptr) {
+  auto key__ = key ? _fbb.CreateString(key) : 0;
+  auto record__ = record ? _fbb.CreateString(record) : 0;
+  auto value__ = value ? _fbb.CreateString(value) : 0;
+  return flat::CreateWriteData(
+      _fbb,
+      key__,
+      record__,
+      value__);
+}
+
+struct ReadData FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
+  typedef ReadDataBuilder Builder;
+  enum FlatBuffersVTableOffset FLATBUFFERS_VTABLE_UNDERLYING_TYPE {
+    VT_KEY = 4
+  };
+  const flatbuffers::String *key() const {
+    return GetPointer<const flatbuffers::String *>(VT_KEY);
+  }
+  bool Verify(flatbuffers::Verifier &verifier) const {
+    return VerifyTableStart(verifier) &&
+           VerifyOffset(verifier, VT_KEY) &&
+           verifier.VerifyString(key()) &&
+           verifier.EndTable();
+  }
+};
+
+struct ReadDataBuilder {
+  typedef ReadData Table;
+  flatbuffers::FlatBufferBuilder &fbb_;
+  flatbuffers::uoffset_t start_;
+  void add_key(flatbuffers::Offset<flatbuffers::String> key) {
+    fbb_.AddOffset(ReadData::VT_KEY, key);
+  }
+  explicit ReadDataBuilder(flatbuffers::FlatBufferBuilder &_fbb)
+        : fbb_(_fbb) {
+    start_ = fbb_.StartTable();
+  }
+  ReadDataBuilder &operator=(const ReadDataBuilder &);
+  flatbuffers::Offset<ReadData> Finish() {
+    const auto end = fbb_.EndTable(start_);
+    auto o = flatbuffers::Offset<ReadData>(end);
+    return o;
+  }
+};
+
+inline flatbuffers::Offset<ReadData> CreateReadData(
+    flatbuffers::FlatBufferBuilder &_fbb,
+    flatbuffers::Offset<flatbuffers::String> key = 0) {
+  ReadDataBuilder builder_(_fbb);
+  builder_.add_key(key);
+  return builder_.Finish();
+}
+
+inline flatbuffers::Offset<ReadData> CreateReadDataDirect(
+    flatbuffers::FlatBufferBuilder &_fbb,
+    const char *key = nullptr) {
+  auto key__ = key ? _fbb.CreateString(key) : 0;
+  return flat::CreateReadData(
+      _fbb,
+      key__);
+}
+
+struct DbService FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
+  typedef DbServiceBuilder Builder;
+  enum FlatBuffersVTableOffset FLATBUFFERS_VTABLE_UNDERLYING_TYPE {
+    VT_TYPE = 4,
+    VT_TXID = 6,
+    VT_READSET = 8,
+    VT_WRITESET = 10
+  };
+  int32_t type() const {
+    return GetField<int32_t>(VT_TYPE, 0);
+  }
+  int32_t txid() const {
+    return GetField<int32_t>(VT_TXID, 0);
+  }
+  const flatbuffers::Vector<flatbuffers::Offset<flat::ReadData>> *readSet() const {
+    return GetPointer<const flatbuffers::Vector<flatbuffers::Offset<flat::ReadData>> *>(VT_READSET);
+  }
+  const flatbuffers::Vector<flatbuffers::Offset<flat::WriteData>> *writeSet() const {
+    return GetPointer<const flatbuffers::Vector<flatbuffers::Offset<flat::WriteData>> *>(VT_WRITESET);
+  }
+  bool Verify(flatbuffers::Verifier &verifier) const {
+    return VerifyTableStart(verifier) &&
+           VerifyField<int32_t>(verifier, VT_TYPE) &&
+           VerifyField<int32_t>(verifier, VT_TXID) &&
+           VerifyOffset(verifier, VT_READSET) &&
+           verifier.VerifyVector(readSet()) &&
+           verifier.VerifyVectorOfTables(readSet()) &&
+           VerifyOffset(verifier, VT_WRITESET) &&
+           verifier.VerifyVector(writeSet()) &&
+           verifier.VerifyVectorOfTables(writeSet()) &&
+           verifier.EndTable();
+  }
+};
+
+struct DbServiceBuilder {
+  typedef DbService Table;
+  flatbuffers::FlatBufferBuilder &fbb_;
+  flatbuffers::uoffset_t start_;
+  void add_type(int32_t type) {
+    fbb_.AddElement<int32_t>(DbService::VT_TYPE, type, 0);
+  }
+  void add_txid(int32_t txid) {
+    fbb_.AddElement<int32_t>(DbService::VT_TXID, txid, 0);
+  }
+  void add_readSet(flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<flat::ReadData>>> readSet) {
+    fbb_.AddOffset(DbService::VT_READSET, readSet);
+  }
+  void add_writeSet(flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<flat::WriteData>>> writeSet) {
+    fbb_.AddOffset(DbService::VT_WRITESET, writeSet);
+  }
+  explicit DbServiceBuilder(flatbuffers::FlatBufferBuilder &_fbb)
+        : fbb_(_fbb) {
+    start_ = fbb_.StartTable();
+  }
+  DbServiceBuilder &operator=(const DbServiceBuilder &);
+  flatbuffers::Offset<DbService> Finish() {
+    const auto end = fbb_.EndTable(start_);
+    auto o = flatbuffers::Offset<DbService>(end);
+    return o;
+  }
+};
+
+inline flatbuffers::Offset<DbService> CreateDbService(
+    flatbuffers::FlatBufferBuilder &_fbb,
+    int32_t type = 0,
+    int32_t txid = 0,
+    flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<flat::ReadData>>> readSet = 0,
+    flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<flat::WriteData>>> writeSet = 0) {
+  DbServiceBuilder builder_(_fbb);
+  builder_.add_writeSet(writeSet);
+  builder_.add_readSet(readSet);
+  builder_.add_txid(txid);
+  builder_.add_type(type);
+  return builder_.Finish();
+}
+
+inline flatbuffers::Offset<DbService> CreateDbServiceDirect(
+    flatbuffers::FlatBufferBuilder &_fbb,
+    int32_t type = 0,
+    int32_t txid = 0,
+    const std::vector<flatbuffers::Offset<flat::ReadData>> *readSet = nullptr,
+    const std::vector<flatbuffers::Offset<flat::WriteData>> *writeSet = nullptr) {
+  auto readSet__ = readSet ? _fbb.CreateVector<flatbuffers::Offset<flat::ReadData>>(*readSet) : 0;
+  auto writeSet__ = writeSet ? _fbb.CreateVector<flatbuffers::Offset<flat::WriteData>>(*writeSet) : 0;
+  return flat::CreateDbService(
+      _fbb,
+      type,
+      txid,
+      readSet__,
+      writeSet__);
 }
 
 struct RootMsg FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
@@ -178,6 +520,9 @@ struct RootMsg FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   const flat::GtmAck *any_as_GtmAck() const {
     return any_type() == flat::Msg_GtmAck ? static_cast<const flat::GtmAck *>(any()) : nullptr;
   }
+  const flat::DbService *any_as_DbService() const {
+    return any_type() == flat::Msg_DbService ? static_cast<const flat::DbService *>(any()) : nullptr;
+  }
   bool Verify(flatbuffers::Verifier &verifier) const {
     return VerifyTableStart(verifier) &&
            VerifyField<uint8_t>(verifier, VT_ANY_TYPE) &&
@@ -193,6 +538,10 @@ template<> inline const flat::Gtm *RootMsg::any_as<flat::Gtm>() const {
 
 template<> inline const flat::GtmAck *RootMsg::any_as<flat::GtmAck>() const {
   return any_as_GtmAck();
+}
+
+template<> inline const flat::DbService *RootMsg::any_as<flat::DbService>() const {
+  return any_as_DbService();
 }
 
 struct RootMsgBuilder {
@@ -238,6 +587,10 @@ inline bool VerifyMsg(flatbuffers::Verifier &verifier, const void *obj, Msg type
     }
     case Msg_GtmAck: {
       auto ptr = reinterpret_cast<const flat::GtmAck *>(obj);
+      return verifier.VerifyTable(ptr);
+    }
+    case Msg_DbService: {
+      auto ptr = reinterpret_cast<const flat::DbService *>(obj);
       return verifier.VerifyTable(ptr);
     }
     default: return true;

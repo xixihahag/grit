@@ -2,6 +2,7 @@
 #include <string>
 #include <fstream>
 #include <glog/logging.h>
+#include <vector>
 #include "gtm.h"
 #include "flatbuffers/flatbuffers.h"
 #include "net_generated.h"
@@ -12,11 +13,20 @@ using namespace grit;
 using namespace flat;
 using namespace muduo::net;
 
-void GTM::getTxid(const TcpConnectionPtr &conn)
+void GTM::getTxid(const TcpConnectionPtr &conn, string transType)
 {
     flatbuffers::FlatBufferBuilder builder;
+    auto list = transInfo_[transType];
 
-    auto gtmAck = CreateGtmAck(builder, txid_.load());
+    vector<flatbuffers::Offset<ipAndPort> > ipAndPortVec;
+    for (auto it = list.begin(); it != list.end(); it++) {
+        auto ip = builder.CreateString((*it)->ip_);
+        auto data = CreateipAndPort(builder, ip, (*it)->port_);
+        ipAndPortVec.push_back(data);
+    }
+    auto ipAndPort = builder.CreateVector(ipAndPortVec);
+
+    auto gtmAck = CreateGtmAck(builder, txid_.load(), ipAndPort);
     builder.Finish(gtmAck);
 
     char *ptr = (char *) builder.GetBufferPointer();
@@ -50,7 +60,7 @@ void GTM::init()
                     info.substr(st, pos - st + 1),
                     stoi(info.substr(pos + 1, ed - pos - 1)));
 
-                transInfo_[type].emplace(tmp);
+                transInfo_[type].emplace_back(tmp);
                 st = ed + 1;
             }
         }

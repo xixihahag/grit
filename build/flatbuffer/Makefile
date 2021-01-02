@@ -110,21 +110,6 @@ depend:
 	cd /home/gyz/grit/build && $(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 1
 .PHONY : depend
 
-# Convenience name for target.
-flatbuffer/CMakeFiles/BUILD_FLAT.dir/rule:
-	cd /home/gyz/grit/build && $(MAKE) -f CMakeFiles/Makefile2 flatbuffer/CMakeFiles/BUILD_FLAT.dir/rule
-.PHONY : flatbuffer/CMakeFiles/BUILD_FLAT.dir/rule
-
-# Convenience name for target.
-BUILD_FLAT: flatbuffer/CMakeFiles/BUILD_FLAT.dir/rule
-
-.PHONY : BUILD_FLAT
-
-# fast build rule for target.
-BUILD_FLAT/fast:
-	cd /home/gyz/grit/build && $(MAKE) -f flatbuffer/CMakeFiles/BUILD_FLAT.dir/build.make flatbuffer/CMakeFiles/BUILD_FLAT.dir/build
-.PHONY : BUILD_FLAT/fast
-
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -132,7 +117,6 @@ help:
 	@echo "... clean"
 	@echo "... depend"
 	@echo "... rebuild_cache"
-	@echo "... BUILD_FLAT"
 	@echo "... edit_cache"
 .PHONY : help
 

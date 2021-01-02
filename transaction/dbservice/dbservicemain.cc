@@ -1,11 +1,11 @@
 #include <iostream>
 #include <glog/logging.h>
-#include "gtm/gtm.h"
+#include "dbservice/dbservice.h"
 #include "configManager.h"
 #include "headerCmd.h"
 #include "muduo/net/TcpServer.h"
-#include "flatbuffers/flatbuffers.h"
 #include "muduo/net/EventLoop.h"
+#include "flatbuffers/flatbuffers.h"
 #include "net_generated.h"
 
 using namespace std;
@@ -13,6 +13,8 @@ using namespace muduo;
 using namespace muduo::net;
 using namespace flat;
 using namespace grit;
+
+grit::DbService *db;
 
 void onConnection(const TcpConnectionPtr &conn)
 {
@@ -25,17 +27,24 @@ void onConnection(const TcpConnectionPtr &conn)
 
 void onMessage(const TcpConnectionPtr &conn, Buffer *buf, Timestamp)
 {
-    // 通过flatbuffers判断过来的请求是啥
     auto msg = GetRootMsg((uint8_t *) buf->retrieveAllAsString().c_str());
-    auto gtm = static_cast<const Gtm *>(msg->any());
-    auto type = gtm->type();
+    auto data = static_cast<const flat::DbService *>(msg->any());
+    auto type = data->type();
 
     switch (type) {
-    case kGetTxid:
-        GTM::getInstance()->getTxid(conn, gtm->transType());
+    case kData:
+        db->getReadWriteSet(data);
         break;
-    case kJudgeConflit:
-        GTM::getInstance()->judgeConflict();
+    default:
+        // TODO: 扔给DBTM处理
+
+        // case kJudgeConflit:
+        //     // TODO: 回复为是否冲突的结果，做一个结构体，然后扔给DBTM处理
+        //     // Dbtm dbtm(kJudgeConflit);
+
+        //     break;
+        // case kLsn:
+        //     // TODO: 回复为lsn，做一个结构体，然后扔给DBTM处理
     }
 }
 
@@ -52,11 +61,11 @@ int main(int argc, char *argv[])
 
         // 初始化配置信息，给位置，读取配置
         ConfigManager::getInstance()->init(argv[1]);
-        // LOG(INFO) << "init ConfigManager done" << endl;
 
         // 将大于等于该级别的日志同时输出到stderr。
         // 日志级别 INFO, WARNING, ERROR,FATAL 的值分别为0、1、2、3。
         FLAGS_stderrthreshold = 0;
+        // 只输出到stderr
         // FLAGS_logtostderr = true;
         // 终端输出带颜色
         FLAGS_colorlogtostderr = true;
@@ -65,8 +74,11 @@ int main(int argc, char *argv[])
         // 设置日志位置
         FLAGS_log_dir = ConfigManager::getInstance()->logDir();
 
-        // 初始化gtm
-        GTM::getInstance()->init();
+        // 此处可以选择用带对端数据库ip的初始化方式，但方便测试使用默认构造即可
+        // 初始化dbservice
+        db = new grit::DbService();
+
+        // TODO: 起线程池，跑DBTM
 
         const char *ip = ConfigManager::getInstance()->address().c_str();
         uint16_t port =
@@ -77,14 +89,14 @@ int main(int argc, char *argv[])
 
         EventLoop loop;
 
-        TcpServer server(&loop, listenAddr, "gtm");
+        TcpServer server(&loop, listenAddr, "dbserwvice");
 
         server.setConnectionCallback(onConnection);
         server.setMessageCallback(onMessage);
 
         if (threadCount > 1) { server.setThreadNum(threadCount); }
 
-        LOG(INFO) << "init gtm done";
+        LOG(INFO) << "init dbserwvice done";
 
         server.start();
 

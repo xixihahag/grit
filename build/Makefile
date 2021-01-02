@@ -111,19 +111,6 @@ depend:
 .PHONY : depend
 
 #=============================================================================
-# Target rules for targets named BUILD_FLAT
-
-# Build rule for target.
-BUILD_FLAT: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 BUILD_FLAT
-.PHONY : BUILD_FLAT
-
-# fast build rule for target.
-BUILD_FLAT/fast:
-	$(MAKE) -f flatbuffer/CMakeFiles/BUILD_FLAT.dir/build.make flatbuffer/CMakeFiles/BUILD_FLAT.dir/build
-.PHONY : BUILD_FLAT/fast
-
-#=============================================================================
 # Target rules for targets named gtm
 
 # Build rule for target.
@@ -144,7 +131,6 @@ help:
 	@echo "... depend"
 	@echo "... rebuild_cache"
 	@echo "... edit_cache"
-	@echo "... BUILD_FLAT"
 	@echo "... gtm"
 .PHONY : help
 

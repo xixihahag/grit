@@ -1,16 +1,43 @@
 // flatc -c -b ./net.fbs
 namespace flat;
 
-union Msg{Gtm,GtmAck}
+union Msg{Gtm,GtmAck,DbService}
 
 // 发送给gtm的类型
 table Gtm{
     type:int;
-    txid:int;
+    transType:string;
 }
 
+table ipAndPort{
+    ip:string;
+    port:int;
+}
+// gtm回复的类型
 table GtmAck{
     txid:int;
+    list:[ipAndPort];
+}
+
+// 此数据结构可以改，看看怎么才能定位到具体数据
+table WriteData{
+    key:string;
+    record:string;
+    value:string;
+}
+
+// 同上，怎么才能具体定位到想要读的数据
+table ReadData{
+    key:string;
+}
+
+table DbService{
+    type:int;
+    txid:int;
+    isConflict:bool;
+    lsn:int;
+    readSet:[ReadData];
+    writeSet:[WriteData];
 }
 
 table RootMsg{

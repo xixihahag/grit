@@ -3,7 +3,7 @@
 #include <atomic>
 #include <unordered_map>
 #include <map>
-#include <queue>
+#include <list>
 #include "muduo/net/TcpServer.h"
 #include "muduo/net/EventLoop.h"
 #include "singleton.h"
@@ -11,7 +11,7 @@ namespace grit {
 class GTM : public Singleton<GTM>
 {
   public:
-    void getTxid(const muduo::net::TcpConnectionPtr &);
+    void getTxid(const muduo::net::TcpConnectionPtr &, std::string);
     void judgeConflict();
 
     // 读取文件，缓存每个事务涉及的DB在哪
@@ -36,7 +36,7 @@ class GTM : public Singleton<GTM>
         int port_;
     };
 
-    std::unordered_map<std::string, std::queue<struct IpandPort *> > transInfo_;
+    std::unordered_map<std::string, std::list<struct IpandPort *> > transInfo_;
 };
 
 } // namespace grit

@@ -79,7 +79,7 @@ flatbuffer/all:
 .PHONY : flatbuffer/all
 
 # Recursive "clean" directory target.
-flatbuffer/clean: flatbuffer/CMakeFiles/BUILD_FLAT.dir/clean
+flatbuffer/clean:
 
 .PHONY : flatbuffer/clean
 
@@ -87,33 +87,6 @@ flatbuffer/clean: flatbuffer/CMakeFiles/BUILD_FLAT.dir/clean
 flatbuffer/preinstall:
 
 .PHONY : flatbuffer/preinstall
-
-#=============================================================================
-# Target rules for target flatbuffer/CMakeFiles/BUILD_FLAT.dir
-
-# All Build rule for target.
-flatbuffer/CMakeFiles/BUILD_FLAT.dir/all:
-	$(MAKE) -f flatbuffer/CMakeFiles/BUILD_FLAT.dir/build.make flatbuffer/CMakeFiles/BUILD_FLAT.dir/depend
-	$(MAKE) -f flatbuffer/CMakeFiles/BUILD_FLAT.dir/build.make flatbuffer/CMakeFiles/BUILD_FLAT.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/gyz/grit/build/CMakeFiles --progress-num= "Built target BUILD_FLAT"
-.PHONY : flatbuffer/CMakeFiles/BUILD_FLAT.dir/all
-
-# Build rule for subdir invocation for target.
-flatbuffer/CMakeFiles/BUILD_FLAT.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/gyz/grit/build/CMakeFiles 0
-	$(MAKE) -f CMakeFiles/Makefile2 flatbuffer/CMakeFiles/BUILD_FLAT.dir/all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/gyz/grit/build/CMakeFiles 0
-.PHONY : flatbuffer/CMakeFiles/BUILD_FLAT.dir/rule
-
-# Convenience name for target.
-BUILD_FLAT: flatbuffer/CMakeFiles/BUILD_FLAT.dir/rule
-
-.PHONY : BUILD_FLAT
-
-# clean rule for target.
-flatbuffer/CMakeFiles/BUILD_FLAT.dir/clean:
-	$(MAKE) -f flatbuffer/CMakeFiles/BUILD_FLAT.dir/build.make flatbuffer/CMakeFiles/BUILD_FLAT.dir/clean
-.PHONY : flatbuffer/CMakeFiles/BUILD_FLAT.dir/clean
 
 #=============================================================================
 # Directory level rules for directory transaction
