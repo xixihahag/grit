@@ -1,10 +1,8 @@
 #pragma once
 #include "net_generated.h"
 #include "dbservice/dbservice.h"
-// #include "muduo/net/TcpClient.h"
 #include "muduo/net/EventLoop.h"
 #include <string>
-// #include <list>
 #include <unordered_map>
 #include <unordered_set>
 
@@ -44,11 +42,7 @@ class Dbtm
     // 用于txid和对应事务的映射
     std::unordered_map<int, struct transaction *> table;
 
-    // FIXME: 事务的集合 好像没啥用
-    // std::list<transaction *> transactions_;
-
     // 连接dbtl和gtm
-    // TcpClient *dbtlClient_, *gtmClient_;
     TcpConnectionPtr dbtlConn_, gtmConn_;
 };
 

@@ -1,7 +1,19 @@
 #include "dbservice.h"
+#include "configManager.h"
 
 using namespace std;
 using namespace grit;
+
+void DbService::test() {}
+
+DbService::DbService(muduo::net::EventLoop *loop)
+{
+    dbtm_ = new Dbtm();
+    dbtm_->init(loop);
+
+    // 开启线程池
+    threadPool_ = new ThreadPool(ConfigManager::getInstance()->dbtmThreadNum());
+}
 
 void DbService::getReadWriteSet(const flat::DbService *data)
 {
@@ -30,7 +42,6 @@ void DbService::getReadWriteSet(const flat::DbService *data)
         tran->twcheck.emplace(wdata->key);
     }
 
-    // TODO: 发送给DBTM处理 考虑用不用线程池 讲道理n方的复杂度，还是用起来比较好
-
-    // transactions_.emplace_back(tran);
+    // 发送给DBTM处理 考虑用不用线程池 讲道理n方的复杂度，还是用起来比较好
+    threadPool_->enqueue(bind(&Dbtm::judgeLocalConflict, dbtm_, tran));
 }

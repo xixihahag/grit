@@ -7,7 +7,10 @@
 #include <string>
 #include <list>
 #include <unordered_set>
+#include "muduo/net/EventLoop.h"
 #include "net_generated.h"
+#include "threadPool.h"
+#include "dbtm/dbtm.h"
 
 namespace grit {
 
@@ -56,7 +59,7 @@ class DbService
     std::string passwd_;
 
   public:
-    DbService();
+    DbService(muduo::net::EventLoop *);
 
     DbService(
         std::string ip,
@@ -69,11 +72,16 @@ class DbService
         , passwd_(passwd)
     {}
 
+    void test();
+
     // 连接远端的数据库
     void connectToDatabase();
 
     // 从传输过来的数据中解析读写集
     void getReadWriteSet(const flat::DbService *);
+
+    ThreadPool *threadPool_;
+    Dbtm *dbtm_;
 };
 
 } // namespace grit

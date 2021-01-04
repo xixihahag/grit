@@ -21,6 +21,8 @@ class ConfigManager : public Singleton<ConfigManager>
     std::string dbtlAddress() { return dbtlAddress_; }
     int dbtlPort() { return dbtlPort_; }
 
+    int dbtmThreadNum() { return dbtmThreadNum_; }
+
   private:
     // basis
     std::string logDir_;
@@ -34,6 +36,9 @@ class ConfigManager : public Singleton<ConfigManager>
     // dbtl
     std::string dbtlAddress_;
     int dbtlPort_;
+
+    // dbtm
+    int dbtmThreadNum_;
 };
 
 } // namespace grit

@@ -37,6 +37,7 @@ void onMessage(const TcpConnectionPtr &conn, Buffer *buf, Timestamp)
         break;
     default:
         // TODO: 扔给DBTM处理
+        db->threadPool_->enqueue(bind(&Dbtm::solve, db->dbtm_, data));
     }
 }
 

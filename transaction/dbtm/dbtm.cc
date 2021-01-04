@@ -30,7 +30,7 @@ void Dbtm::init(EventLoop *loop)
     InetAddress servAddr(ip, port);
     TcpClient *dbtlClient_ = new TcpClient(loop, servAddr, "dbtl");
     dbtlClient_->connect();
-    dbtlClient_->setConnectionCallback(std::bind(&onDbtlConnection, this, _1));
+    dbtlClient_->setConnectionCallback(bind(&onDbtlConnection, this, _1));
 
     // 连接gtm
     ip = ConfigManager::getInstance()->gtmAddress().c_str();
@@ -38,7 +38,7 @@ void Dbtm::init(EventLoop *loop)
     InetAddress servAddr(ip, port);
     TcpClient *gtmClient_ = new TcpClient(loop, servAddr, "gtm");
     gtmClient_->connect();
-    gtmClient_->setConnectionCallback(std::bind(&onGtmConnection, this, _1));
+    gtmClient_->setConnectionCallback(bind(&onGtmConnection, this, _1));
 }
 
 void Dbtm::judgeLocalConflict(struct transaction *trans)
@@ -76,7 +76,26 @@ void Dbtm::judgeLocalConflict(struct transaction *trans)
     }
 }
 
-void Dbtm::getLsnAndGlobalConflict(int txid) {}
+void Dbtm::getLsnAndGlobalConflict(int txid)
+{
+    flatbuffers::FlatBufferBuilder builder;
+    auto logstore = CreateLogStore(builder, kLsn, txid);
+    builder.Finish(logstore);
+
+    char *ptr = (char *) builder.GetBufferPointer();
+    uint64_t size = builder.GetSize();
+
+    dbtlConn_->send(ptr, size);
+
+    flatbuffers::FlatBufferBuilder builder1;
+    auto gtm = CreateGtm(builder1, kJudgeConflit, txid);
+    builder.Finish(gtm);
+
+    ptr = (char *) builder1.GetBufferPointer();
+    size = builder1.GetSize();
+
+    gtmConn_->send(ptr, size);
+}
 
 void Dbtm::solve(const flat::DbService *data)
 {

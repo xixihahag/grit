@@ -26,6 +26,12 @@ struct ReadDataBuilder;
 struct DbService;
 struct DbServiceBuilder;
 
+struct LogStore;
+struct LogStoreBuilder;
+
+struct LogStoreAck;
+struct LogStoreAckBuilder;
+
 struct RootMsg;
 struct RootMsgBuilder;
 
@@ -34,33 +40,39 @@ enum Msg {
   Msg_Gtm = 1,
   Msg_GtmAck = 2,
   Msg_DbService = 3,
+  Msg_LogStore = 4,
+  Msg_LogStoreAck = 5,
   Msg_MIN = Msg_NONE,
-  Msg_MAX = Msg_DbService
+  Msg_MAX = Msg_LogStoreAck
 };
 
-inline const Msg (&EnumValuesMsg())[4] {
+inline const Msg (&EnumValuesMsg())[6] {
   static const Msg values[] = {
     Msg_NONE,
     Msg_Gtm,
     Msg_GtmAck,
-    Msg_DbService
+    Msg_DbService,
+    Msg_LogStore,
+    Msg_LogStoreAck
   };
   return values;
 }
 
 inline const char * const *EnumNamesMsg() {
-  static const char * const names[5] = {
+  static const char * const names[7] = {
     "NONE",
     "Gtm",
     "GtmAck",
     "DbService",
+    "LogStore",
+    "LogStoreAck",
     nullptr
   };
   return names;
 }
 
 inline const char *EnumNameMsg(Msg e) {
-  if (flatbuffers::IsOutRange(e, Msg_NONE, Msg_DbService)) return "";
+  if (flatbuffers::IsOutRange(e, Msg_NONE, Msg_LogStoreAck)) return "";
   const size_t index = static_cast<size_t>(e);
   return EnumNamesMsg()[index];
 }
@@ -79,6 +91,14 @@ template<> struct MsgTraits<flat::GtmAck> {
 
 template<> struct MsgTraits<flat::DbService> {
   static const Msg enum_value = Msg_DbService;
+};
+
+template<> struct MsgTraits<flat::LogStore> {
+  static const Msg enum_value = Msg_LogStore;
+};
+
+template<> struct MsgTraits<flat::LogStoreAck> {
+  static const Msg enum_value = Msg_LogStoreAck;
 };
 
 bool VerifyMsg(flatbuffers::Verifier &verifier, const void *obj, Msg type);
@@ -525,6 +545,110 @@ inline flatbuffers::Offset<DbService> CreateDbServiceDirect(
       writeSet__);
 }
 
+struct LogStore FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
+  typedef LogStoreBuilder Builder;
+  enum FlatBuffersVTableOffset FLATBUFFERS_VTABLE_UNDERLYING_TYPE {
+    VT_TYPE = 4,
+    VT_TXID = 6
+  };
+  int32_t type() const {
+    return GetField<int32_t>(VT_TYPE, 0);
+  }
+  int32_t txid() const {
+    return GetField<int32_t>(VT_TXID, 0);
+  }
+  bool Verify(flatbuffers::Verifier &verifier) const {
+    return VerifyTableStart(verifier) &&
+           VerifyField<int32_t>(verifier, VT_TYPE) &&
+           VerifyField<int32_t>(verifier, VT_TXID) &&
+           verifier.EndTable();
+  }
+};
+
+struct LogStoreBuilder {
+  typedef LogStore Table;
+  flatbuffers::FlatBufferBuilder &fbb_;
+  flatbuffers::uoffset_t start_;
+  void add_type(int32_t type) {
+    fbb_.AddElement<int32_t>(LogStore::VT_TYPE, type, 0);
+  }
+  void add_txid(int32_t txid) {
+    fbb_.AddElement<int32_t>(LogStore::VT_TXID, txid, 0);
+  }
+  explicit LogStoreBuilder(flatbuffers::FlatBufferBuilder &_fbb)
+        : fbb_(_fbb) {
+    start_ = fbb_.StartTable();
+  }
+  LogStoreBuilder &operator=(const LogStoreBuilder &);
+  flatbuffers::Offset<LogStore> Finish() {
+    const auto end = fbb_.EndTable(start_);
+    auto o = flatbuffers::Offset<LogStore>(end);
+    return o;
+  }
+};
+
+inline flatbuffers::Offset<LogStore> CreateLogStore(
+    flatbuffers::FlatBufferBuilder &_fbb,
+    int32_t type = 0,
+    int32_t txid = 0) {
+  LogStoreBuilder builder_(_fbb);
+  builder_.add_txid(txid);
+  builder_.add_type(type);
+  return builder_.Finish();
+}
+
+struct LogStoreAck FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
+  typedef LogStoreAckBuilder Builder;
+  enum FlatBuffersVTableOffset FLATBUFFERS_VTABLE_UNDERLYING_TYPE {
+    VT_LSN = 4,
+    VT_TXID = 6
+  };
+  int32_t lsn() const {
+    return GetField<int32_t>(VT_LSN, 0);
+  }
+  int32_t txid() const {
+    return GetField<int32_t>(VT_TXID, 0);
+  }
+  bool Verify(flatbuffers::Verifier &verifier) const {
+    return VerifyTableStart(verifier) &&
+           VerifyField<int32_t>(verifier, VT_LSN) &&
+           VerifyField<int32_t>(verifier, VT_TXID) &&
+           verifier.EndTable();
+  }
+};
+
+struct LogStoreAckBuilder {
+  typedef LogStoreAck Table;
+  flatbuffers::FlatBufferBuilder &fbb_;
+  flatbuffers::uoffset_t start_;
+  void add_lsn(int32_t lsn) {
+    fbb_.AddElement<int32_t>(LogStoreAck::VT_LSN, lsn, 0);
+  }
+  void add_txid(int32_t txid) {
+    fbb_.AddElement<int32_t>(LogStoreAck::VT_TXID, txid, 0);
+  }
+  explicit LogStoreAckBuilder(flatbuffers::FlatBufferBuilder &_fbb)
+        : fbb_(_fbb) {
+    start_ = fbb_.StartTable();
+  }
+  LogStoreAckBuilder &operator=(const LogStoreAckBuilder &);
+  flatbuffers::Offset<LogStoreAck> Finish() {
+    const auto end = fbb_.EndTable(start_);
+    auto o = flatbuffers::Offset<LogStoreAck>(end);
+    return o;
+  }
+};
+
+inline flatbuffers::Offset<LogStoreAck> CreateLogStoreAck(
+    flatbuffers::FlatBufferBuilder &_fbb,
+    int32_t lsn = 0,
+    int32_t txid = 0) {
+  LogStoreAckBuilder builder_(_fbb);
+  builder_.add_txid(txid);
+  builder_.add_lsn(lsn);
+  return builder_.Finish();
+}
+
 struct RootMsg FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   typedef RootMsgBuilder Builder;
   enum FlatBuffersVTableOffset FLATBUFFERS_VTABLE_UNDERLYING_TYPE {
@@ -547,6 +671,12 @@ struct RootMsg FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   const flat::DbService *any_as_DbService() const {
     return any_type() == flat::Msg_DbService ? static_cast<const flat::DbService *>(any()) : nullptr;
   }
+  const flat::LogStore *any_as_LogStore() const {
+    return any_type() == flat::Msg_LogStore ? static_cast<const flat::LogStore *>(any()) : nullptr;
+  }
+  const flat::LogStoreAck *any_as_LogStoreAck() const {
+    return any_type() == flat::Msg_LogStoreAck ? static_cast<const flat::LogStoreAck *>(any()) : nullptr;
+  }
   bool Verify(flatbuffers::Verifier &verifier) const {
     return VerifyTableStart(verifier) &&
            VerifyField<uint8_t>(verifier, VT_ANY_TYPE) &&
@@ -566,6 +696,14 @@ template<> inline const flat::GtmAck *RootMsg::any_as<flat::GtmAck>() const {
 
 template<> inline const flat::DbService *RootMsg::any_as<flat::DbService>() const {
   return any_as_DbService();
+}
+
+template<> inline const flat::LogStore *RootMsg::any_as<flat::LogStore>() const {
+  return any_as_LogStore();
+}
+
+template<> inline const flat::LogStoreAck *RootMsg::any_as<flat::LogStoreAck>() const {
+  return any_as_LogStoreAck();
 }
 
 struct RootMsgBuilder {
@@ -615,6 +753,14 @@ inline bool VerifyMsg(flatbuffers::Verifier &verifier, const void *obj, Msg type
     }
     case Msg_DbService: {
       auto ptr = reinterpret_cast<const flat::DbService *>(obj);
+      return verifier.VerifyTable(ptr);
+    }
+    case Msg_LogStore: {
+      auto ptr = reinterpret_cast<const flat::LogStore *>(obj);
+      return verifier.VerifyTable(ptr);
+    }
+    case Msg_LogStoreAck: {
+      auto ptr = reinterpret_cast<const flat::LogStoreAck *>(obj);
       return verifier.VerifyTable(ptr);
     }
     default: return true;

@@ -26,9 +26,12 @@ void ConfigManager::init(const char *configDir)
     SetOrDefaultI(threads_, pt.get<int>("gtm.threads"));
     SetOrDefaultS(transactionsDir_, pt.get<string>("gtm.transactionsDir"));
 
+    // dbtl
+    SetOrDefaultS(dbtlAddress_, pt.get<string>({"dbtl.address"}));
+    SetOrDefaultI(dbtlPort_, pt.get<int>("dbtl.port"));
+
     // dbtm
-    SetOrDefaultS(dbtlAddress_, pt.get<string>({"gtm.address"}));
-    SetOrDefaultI(dbtlPort_, pt.get<int>("gtm.port"));
+    SetOrDefaultI(dbtmThreadNum_, pt.get<int>("dbtm.threadnum"));
 }
 
 } // namespace grit
