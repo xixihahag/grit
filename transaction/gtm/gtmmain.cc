@@ -32,7 +32,7 @@ void onMessage(const TcpConnectionPtr &conn, Buffer *buf, Timestamp)
 
     switch (type) {
     case kGetTxid:
-        GTM::getInstance()->getTxid(conn, gtm->transType());
+        GTM::getInstance()->getTxid(conn, gtm->transType()->str());
         break;
     case kJudgeConflit:
         GTM::getInstance()->judgeConflict();
@@ -68,9 +68,9 @@ int main(int argc, char *argv[])
         // 初始化gtm
         GTM::getInstance()->init();
 
-        const char *ip = ConfigManager::getInstance()->address().c_str();
+        const char *ip = ConfigManager::getInstance()->gtmAddress().c_str();
         uint16_t port =
-            static_cast<uint16_t>(ConfigManager::getInstance()->port());
+            static_cast<uint16_t>(ConfigManager::getInstance()->gtmPort());
 
         InetAddress listenAddr(ip, port);
         int threadCount = ConfigManager::getInstance()->threads();

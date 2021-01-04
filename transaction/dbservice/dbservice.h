@@ -6,6 +6,7 @@
 
 #include <string>
 #include <list>
+#include <unordered_set>
 #include "net_generated.h"
 
 namespace grit {
@@ -42,6 +43,7 @@ struct transaction
     std::list<writeData *> writeSet;
     bool isConflict;
     std::string lsn;
+    std::unordered_set<std::string> trcheck, twcheck;
 };
 
 class DbService

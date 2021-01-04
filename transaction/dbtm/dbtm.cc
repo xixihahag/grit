@@ -1,10 +1,45 @@
 #include "dbtm.h"
 #include "headerCmd.h"
-// #include "dbservice/dbservice.h"
+#include "configManager.h"
+#include "muduo/net/TcpClient.h"
+#include <glog/logging.h>
 
 using namespace grit;
 using namespace std;
 using namespace flat;
+using namespace muduo;
+using namespace muduo::net;
+
+void Dbtm::onDbtlConnection(const muduo::net::TcpConnectionPtr &conn)
+{
+    LOG(INFO) << "connect tbtl success";
+    dbtlConn_ = conn;
+}
+void Dbtm::onGtmConnection(const muduo::net::TcpConnectionPtr &conn)
+{
+    LOG(INFO) << "connect gtm success";
+    gtmConn_ = conn;
+}
+
+void Dbtm::init(EventLoop *loop)
+{
+    // 连接dbtl
+    const char *ip = ConfigManager::getInstance()->dbtlAddress().c_str();
+    uint16_t port =
+        static_cast<uint16_t>(ConfigManager::getInstance()->dbtlPort());
+    InetAddress servAddr(ip, port);
+    TcpClient *dbtlClient_ = new TcpClient(loop, servAddr, "dbtl");
+    dbtlClient_->connect();
+    dbtlClient_->setConnectionCallback(std::bind(&onDbtlConnection, this, _1));
+
+    // 连接gtm
+    ip = ConfigManager::getInstance()->gtmAddress().c_str();
+    port = static_cast<uint16_t>(ConfigManager::getInstance()->gtmPort());
+    InetAddress servAddr(ip, port);
+    TcpClient *gtmClient_ = new TcpClient(loop, servAddr, "gtm");
+    gtmClient_->connect();
+    gtmClient_->setConnectionCallback(std::bind(&onGtmConnection, this, _1));
+}
 
 void Dbtm::judgeLocalConflict(struct transaction *trans)
 {
@@ -16,11 +51,8 @@ void Dbtm::judgeLocalConflict(struct transaction *trans)
             for (auto rs : trans->readSet)
                 if (it->second.find(rs->key) != it->second.end()) {
                     haveConflict = true;
-                    trcheck.clear();
                     break;
-                } else
-                    trcheck[lsn].emplace(rs->key);
-
+                }
             it++;
         } else
             it = rcheck.erase(it);
@@ -31,17 +63,17 @@ void Dbtm::judgeLocalConflict(struct transaction *trans)
             for (auto ws : trans->writeSet)
                 if (it->second.find(ws->key) != it->second.end()) {
                     haveConflict = true;
-                    twcheck.clear();
                     break;
-                } else
-                    twcheck[lsn].emplace(ws->key);
-
+                }
             it++;
         } else
             it = wcheck.erase(it);
     }
 
-    if (!haveConflict) {}
+    if (!haveConflict) {
+        table[trans->txid] = trans;
+        getLsnAndGlobalConflict(trans->txid);
+    }
 }
 
 void Dbtm::getLsnAndGlobalConflict(int txid) {}
@@ -67,11 +99,10 @@ void Dbtm::cacheRWSet(struct transaction *trans)
 {
     string lsn = trans->lsn;
 
-    for (auto read : trans->readSet)
-        rcheck[lsn].emplace(read->key);
-
-    for (auto write : trans->writeSet)
-        wcheck[lsn].emplace(write->key);
+    rcheck[lsn].emplace(trans->trcheck);
+    wcheck[lsn].emplace(trans->twcheck);
 
     sendLog();
 }
+
+void Dbtm::sendLog() {}

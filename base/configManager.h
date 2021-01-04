@@ -12,20 +12,28 @@ class ConfigManager : public Singleton<ConfigManager>
   public:
     void init(const char *);
     std::string logDir() { return logDir_; }
-    std::string address() { return address_; }
-    int port() { return port_; }
+
+    std::string gtmAddress() { return gtmAddress_; }
+    int gtmPort() { return gtmPort_; }
     int threads() { return threads_; }
     std::string transactionsDir() { return transactionsDir_; }
+
+    std::string dbtlAddress() { return dbtlAddress_; }
+    int dbtlPort() { return dbtlPort_; }
 
   private:
     // basis
     std::string logDir_;
 
     // gtm
-    std::string address_;
-    int port_;
+    std::string gtmAddress_;
+    int gtmPort_;
     int threads_;
     std::string transactionsDir_;
+
+    // dbtl
+    std::string dbtlAddress_;
+    int dbtlPort_;
 };
 
 } // namespace grit

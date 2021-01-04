@@ -15,7 +15,7 @@ void DbService::getReadWriteSet(const flat::DbService *data)
         readData *rdata = new readData(rset->key()->str());
         tran->readSet.emplace_back(rdata);
 
-        // rcheck.emplace(rdata->key);
+        tran->trcheck.emplace(rdata->key);
     }
 
     int wsize = data->writeSet()->size();
@@ -27,7 +27,7 @@ void DbService::getReadWriteSet(const flat::DbService *data)
 
         tran->writeSet.emplace_back(wdata);
 
-        // wcheck.emplace(wdata->key);
+        tran->twcheck.emplace(wdata->key);
     }
 
     // TODO: 发送给DBTM处理 考虑用不用线程池 讲道理n方的复杂度，还是用起来比较好

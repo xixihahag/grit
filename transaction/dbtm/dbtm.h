@@ -1,6 +1,8 @@
 #pragma once
 #include "net_generated.h"
 #include "dbservice/dbservice.h"
+// #include "muduo/net/TcpClient.h"
+#include "muduo/net/EventLoop.h"
 #include <string>
 // #include <list>
 #include <unordered_map>
@@ -11,6 +13,9 @@ namespace grit {
 class Dbtm
 {
   public:
+    // 初始化，用于连接LogStore服务器和GTM服务器
+    void init(EventLoop *);
+
     // 用于处理lsn和gtm冲突处理的结果
     void solve(const flat::DbService *);
 
@@ -27,16 +32,24 @@ class Dbtm
     // 发送日志给LogStore
     void sendLog();
 
+    // 连接之后的回调
+    void onDbtlConnection(const muduo::net::TcpConnectionPtr &);
+    void onGtmConnection(const muduo::net::TcpConnectionPtr &);
+
     // 用于快速进行数据冲突验证
     // TODO: 数据验证好像可以用位图来做，参考底层的分布式图数据库存储
     std::unordered_map<std::string, std::unordered_set<std::string> > rcheck,
-        wcheck, trcheck, twcheck;
+        wcheck;
 
     // 用于txid和对应事务的映射
     std::unordered_map<int, struct transaction *> table;
 
     // FIXME: 事务的集合 好像没啥用
-    std::list<transaction *> transactions_;
+    // std::list<transaction *> transactions_;
+
+    // 连接dbtl和gtm
+    // TcpClient *dbtlClient_, *gtmClient_;
+    TcpConnectionPtr dbtlConn_, gtmConn_;
 };
 
 } // namespace grit
