@@ -14,36 +14,28 @@
 
 namespace grit {
 
-// 事务的读集合
-struct writeData
+// 事务的读写数据结构体
+struct Data
 {
-    writeData(std::string k, std::string rec, std::string val)
+    Data(std::string k, std::string lab, std::string attr, std::string val)
         : key(k)
-        , record(rec)
+        , label(lab)
+        , attribute(attr)
         , value(val)
     {}
 
     std::string key;
-    std::string record;
+    std::string label;
+    std::string attribute;
     std::string value;
-};
-
-// 事务的写集合
-struct readData
-{
-    readData(std::string k)
-        : key(k)
-    {}
-
-    std::string key;
 };
 
 // 代表一个事务
 struct transaction
 {
     int txid;
-    std::list<readData *> readSet;
-    std::list<writeData *> writeSet;
+    std::list<Data *> readSet;
+    std::list<Data *> writeSet;
     bool isConflict;
     std::string lsn;
     std::unordered_set<std::string> trcheck, twcheck;

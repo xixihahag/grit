@@ -2,6 +2,8 @@
 #include "net_generated.h"
 #include "dbservice/dbservice.h"
 #include "muduo/net/EventLoop.h"
+#include "rocksdb/db.h"
+#include "rocksdb/options.h"
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
@@ -11,6 +13,8 @@ namespace grit {
 class Dbtm
 {
   public:
+    ~Dbtm();
+
     // 初始化，用于连接LogStore服务器和GTM服务器
     void init(EventLoop *);
 
@@ -30,12 +34,16 @@ class Dbtm
     // 发送日志给LogStore
     void sendLog();
 
+    // 将内存中的数据编程日志落盘
+    void writeToDisk(struct transaction *);
+
     // 连接之后的回调
     void onDbtlConnection(const muduo::net::TcpConnectionPtr &);
     void onGtmConnection(const muduo::net::TcpConnectionPtr &);
 
     // 用于快速进行数据冲突验证
     // TODO: 数据验证好像可以用位图来做，参考底层的分布式图数据库存储
+    // 第一个是lsn
     std::unordered_map<std::string, std::unordered_set<std::string> > rcheck,
         wcheck;
 
@@ -44,6 +52,11 @@ class Dbtm
 
     // 连接dbtl和gtm
     TcpConnectionPtr dbtlConn_, gtmConn_;
+
+    // 连接rocksDB
+    DB *rocksDb_;
+    // 开启本地rocksDB
+    Options rockesDBOptions_;
 };
 
 } // namespace grit

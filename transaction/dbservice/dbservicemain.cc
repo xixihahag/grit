@@ -36,7 +36,7 @@ void onMessage(const TcpConnectionPtr &conn, Buffer *buf, Timestamp)
         db->getReadWriteSet(data);
         break;
     default:
-        // TODO: 扔给DBTM处理
+        // 扔给DBTM处理
         db->threadPool_->enqueue(bind(&Dbtm::solve, db->dbtm_, data));
     }
 }
@@ -67,20 +67,19 @@ int main(int argc, char *argv[])
         // 设置日志位置
         FLAGS_log_dir = ConfigManager::getInstance()->logDir();
 
+        EventLoop loop;
+
         // 此处可以选择用带对端数据库ip的初始化方式，但方便测试使用默认构造即可
         // 初始化dbservice
-        db = new grit::DbService();
+        db = new grit::DbService(&loop);
 
-        // TODO: 起线程池，跑DBTM
-
-        const char *ip = ConfigManager::getInstance()->address().c_str();
-        uint16_t port =
-            static_cast<uint16_t>(ConfigManager::getInstance()->port());
+        const char *ip =
+            ConfigManager::getInstance()->dbserviceAddress().c_str();
+        uint16_t port = static_cast<uint16_t>(
+            ConfigManager::getInstance()->dbservicePort());
 
         InetAddress listenAddr(ip, port);
         int threadCount = ConfigManager::getInstance()->threads();
-
-        EventLoop loop;
 
         TcpServer server(&loop, listenAddr, "dbserwvice");
 

@@ -19,16 +19,15 @@ table GtmAck{
     list:[ipAndPort];
 }
 
-// 此数据结构可以改，看看怎么才能定位到具体数据
-table WriteData{
+// db返回的数据结构（模拟版）；dbservice拦截时进行解析的数据结构
+// 使用 id+属性名 或 标签+属性名 的方式从存储层读取数据
+// 使用 id+属性名+要更改的值 的方式向存储层发送要写入的数据
+table Data{
+    // key --> id
     key:string;
-    record:string;
+    label:string;
+    attribute:string;
     value:string;
-}
-
-// 同上，怎么才能具体定位到想要读的数据
-table ReadData{
-    key:string;
 }
 
 table DbService{
@@ -36,8 +35,8 @@ table DbService{
     txid:int;
     isConflict:bool;
     lsn:int;
-    readSet:[ReadData];
-    writeSet:[WriteData];
+    readSet:[Data];
+    writeSet:[Data];
 }
 
 table LogStore{

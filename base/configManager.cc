@@ -32,6 +32,17 @@ void ConfigManager::init(const char *configDir)
 
     // dbtm
     SetOrDefaultI(dbtmThreadNum_, pt.get<int>("dbtm.threadnum"));
+    SetOrDefaultS(rocksDbPath_, pt.get<string>({"dbtm.rocksdbpath"}));
+
+    // dbservice
+    SetOrDefaultS(dbserviceAddress_, pt.get<string>({"dbservice.address"}));
+    SetOrDefaultI(dbservicePort_, pt.get<int>("dbservice.port"));
+
+    // db
+    SetOrDefaultS(dbAddress_, pt.get<string>({"db.dbaddress"}));
+    SetOrDefaultI(dbPort_, pt.get<int>("db.dbport"));
+    SetOrDefaultS(dbName_, pt.get<string>({"db.dbname"}));
+    SetOrDefaultS(dbPasswd_, pt.get<string>({"db.dbpasswd"}));
 }
 
 } // namespace grit

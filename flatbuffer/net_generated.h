@@ -17,11 +17,8 @@ struct ipAndPortBuilder;
 struct GtmAck;
 struct GtmAckBuilder;
 
-struct WriteData;
-struct WriteDataBuilder;
-
-struct ReadData;
-struct ReadDataBuilder;
+struct Data;
+struct DataBuilder;
 
 struct DbService;
 struct DbServiceBuilder;
@@ -297,18 +294,22 @@ inline flatbuffers::Offset<GtmAck> CreateGtmAckDirect(
       list__);
 }
 
-struct WriteData FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
-  typedef WriteDataBuilder Builder;
+struct Data FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
+  typedef DataBuilder Builder;
   enum FlatBuffersVTableOffset FLATBUFFERS_VTABLE_UNDERLYING_TYPE {
     VT_KEY = 4,
-    VT_RECORD = 6,
-    VT_VALUE = 8
+    VT_LABEL = 6,
+    VT_ATTRIBUTE = 8,
+    VT_VALUE = 10
   };
   const flatbuffers::String *key() const {
     return GetPointer<const flatbuffers::String *>(VT_KEY);
   }
-  const flatbuffers::String *record() const {
-    return GetPointer<const flatbuffers::String *>(VT_RECORD);
+  const flatbuffers::String *label() const {
+    return GetPointer<const flatbuffers::String *>(VT_LABEL);
+  }
+  const flatbuffers::String *attribute() const {
+    return GetPointer<const flatbuffers::String *>(VT_ATTRIBUTE);
   }
   const flatbuffers::String *value() const {
     return GetPointer<const flatbuffers::String *>(VT_VALUE);
@@ -317,116 +318,74 @@ struct WriteData FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
     return VerifyTableStart(verifier) &&
            VerifyOffset(verifier, VT_KEY) &&
            verifier.VerifyString(key()) &&
-           VerifyOffset(verifier, VT_RECORD) &&
-           verifier.VerifyString(record()) &&
+           VerifyOffset(verifier, VT_LABEL) &&
+           verifier.VerifyString(label()) &&
+           VerifyOffset(verifier, VT_ATTRIBUTE) &&
+           verifier.VerifyString(attribute()) &&
            VerifyOffset(verifier, VT_VALUE) &&
            verifier.VerifyString(value()) &&
            verifier.EndTable();
   }
 };
 
-struct WriteDataBuilder {
-  typedef WriteData Table;
+struct DataBuilder {
+  typedef Data Table;
   flatbuffers::FlatBufferBuilder &fbb_;
   flatbuffers::uoffset_t start_;
   void add_key(flatbuffers::Offset<flatbuffers::String> key) {
-    fbb_.AddOffset(WriteData::VT_KEY, key);
+    fbb_.AddOffset(Data::VT_KEY, key);
   }
-  void add_record(flatbuffers::Offset<flatbuffers::String> record) {
-    fbb_.AddOffset(WriteData::VT_RECORD, record);
+  void add_label(flatbuffers::Offset<flatbuffers::String> label) {
+    fbb_.AddOffset(Data::VT_LABEL, label);
+  }
+  void add_attribute(flatbuffers::Offset<flatbuffers::String> attribute) {
+    fbb_.AddOffset(Data::VT_ATTRIBUTE, attribute);
   }
   void add_value(flatbuffers::Offset<flatbuffers::String> value) {
-    fbb_.AddOffset(WriteData::VT_VALUE, value);
+    fbb_.AddOffset(Data::VT_VALUE, value);
   }
-  explicit WriteDataBuilder(flatbuffers::FlatBufferBuilder &_fbb)
+  explicit DataBuilder(flatbuffers::FlatBufferBuilder &_fbb)
         : fbb_(_fbb) {
     start_ = fbb_.StartTable();
   }
-  WriteDataBuilder &operator=(const WriteDataBuilder &);
-  flatbuffers::Offset<WriteData> Finish() {
+  DataBuilder &operator=(const DataBuilder &);
+  flatbuffers::Offset<Data> Finish() {
     const auto end = fbb_.EndTable(start_);
-    auto o = flatbuffers::Offset<WriteData>(end);
+    auto o = flatbuffers::Offset<Data>(end);
     return o;
   }
 };
 
-inline flatbuffers::Offset<WriteData> CreateWriteData(
+inline flatbuffers::Offset<Data> CreateData(
     flatbuffers::FlatBufferBuilder &_fbb,
     flatbuffers::Offset<flatbuffers::String> key = 0,
-    flatbuffers::Offset<flatbuffers::String> record = 0,
+    flatbuffers::Offset<flatbuffers::String> label = 0,
+    flatbuffers::Offset<flatbuffers::String> attribute = 0,
     flatbuffers::Offset<flatbuffers::String> value = 0) {
-  WriteDataBuilder builder_(_fbb);
+  DataBuilder builder_(_fbb);
   builder_.add_value(value);
-  builder_.add_record(record);
+  builder_.add_attribute(attribute);
+  builder_.add_label(label);
   builder_.add_key(key);
   return builder_.Finish();
 }
 
-inline flatbuffers::Offset<WriteData> CreateWriteDataDirect(
+inline flatbuffers::Offset<Data> CreateDataDirect(
     flatbuffers::FlatBufferBuilder &_fbb,
     const char *key = nullptr,
-    const char *record = nullptr,
+    const char *label = nullptr,
+    const char *attribute = nullptr,
     const char *value = nullptr) {
   auto key__ = key ? _fbb.CreateString(key) : 0;
-  auto record__ = record ? _fbb.CreateString(record) : 0;
+  auto label__ = label ? _fbb.CreateString(label) : 0;
+  auto attribute__ = attribute ? _fbb.CreateString(attribute) : 0;
   auto value__ = value ? _fbb.CreateString(value) : 0;
-  return flat::CreateWriteData(
+  return flat::CreateData(
       _fbb,
       key__,
-      record__,
+      label__,
+      attribute__,
       value__);
-}
-
-struct ReadData FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
-  typedef ReadDataBuilder Builder;
-  enum FlatBuffersVTableOffset FLATBUFFERS_VTABLE_UNDERLYING_TYPE {
-    VT_KEY = 4
-  };
-  const flatbuffers::String *key() const {
-    return GetPointer<const flatbuffers::String *>(VT_KEY);
-  }
-  bool Verify(flatbuffers::Verifier &verifier) const {
-    return VerifyTableStart(verifier) &&
-           VerifyOffset(verifier, VT_KEY) &&
-           verifier.VerifyString(key()) &&
-           verifier.EndTable();
-  }
-};
-
-struct ReadDataBuilder {
-  typedef ReadData Table;
-  flatbuffers::FlatBufferBuilder &fbb_;
-  flatbuffers::uoffset_t start_;
-  void add_key(flatbuffers::Offset<flatbuffers::String> key) {
-    fbb_.AddOffset(ReadData::VT_KEY, key);
-  }
-  explicit ReadDataBuilder(flatbuffers::FlatBufferBuilder &_fbb)
-        : fbb_(_fbb) {
-    start_ = fbb_.StartTable();
-  }
-  ReadDataBuilder &operator=(const ReadDataBuilder &);
-  flatbuffers::Offset<ReadData> Finish() {
-    const auto end = fbb_.EndTable(start_);
-    auto o = flatbuffers::Offset<ReadData>(end);
-    return o;
-  }
-};
-
-inline flatbuffers::Offset<ReadData> CreateReadData(
-    flatbuffers::FlatBufferBuilder &_fbb,
-    flatbuffers::Offset<flatbuffers::String> key = 0) {
-  ReadDataBuilder builder_(_fbb);
-  builder_.add_key(key);
-  return builder_.Finish();
-}
-
-inline flatbuffers::Offset<ReadData> CreateReadDataDirect(
-    flatbuffers::FlatBufferBuilder &_fbb,
-    const char *key = nullptr) {
-  auto key__ = key ? _fbb.CreateString(key) : 0;
-  return flat::CreateReadData(
-      _fbb,
-      key__);
 }
 
 struct DbService FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
@@ -451,11 +410,11 @@ struct DbService FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   int32_t lsn() const {
     return GetField<int32_t>(VT_LSN, 0);
   }
-  const flatbuffers::Vector<flatbuffers::Offset<flat::ReadData>> *readSet() const {
-    return GetPointer<const flatbuffers::Vector<flatbuffers::Offset<flat::ReadData>> *>(VT_READSET);
+  const flatbuffers::Vector<flatbuffers::Offset<flat::Data>> *readSet() const {
+    return GetPointer<const flatbuffers::Vector<flatbuffers::Offset<flat::Data>> *>(VT_READSET);
   }
-  const flatbuffers::Vector<flatbuffers::Offset<flat::WriteData>> *writeSet() const {
-    return GetPointer<const flatbuffers::Vector<flatbuffers::Offset<flat::WriteData>> *>(VT_WRITESET);
+  const flatbuffers::Vector<flatbuffers::Offset<flat::Data>> *writeSet() const {
+    return GetPointer<const flatbuffers::Vector<flatbuffers::Offset<flat::Data>> *>(VT_WRITESET);
   }
   bool Verify(flatbuffers::Verifier &verifier) const {
     return VerifyTableStart(verifier) &&
@@ -489,10 +448,10 @@ struct DbServiceBuilder {
   void add_lsn(int32_t lsn) {
     fbb_.AddElement<int32_t>(DbService::VT_LSN, lsn, 0);
   }
-  void add_readSet(flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<flat::ReadData>>> readSet) {
+  void add_readSet(flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<flat::Data>>> readSet) {
     fbb_.AddOffset(DbService::VT_READSET, readSet);
   }
-  void add_writeSet(flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<flat::WriteData>>> writeSet) {
+  void add_writeSet(flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<flat::Data>>> writeSet) {
     fbb_.AddOffset(DbService::VT_WRITESET, writeSet);
   }
   explicit DbServiceBuilder(flatbuffers::FlatBufferBuilder &_fbb)
@@ -513,8 +472,8 @@ inline flatbuffers::Offset<DbService> CreateDbService(
     int32_t txid = 0,
     bool isConflict = false,
     int32_t lsn = 0,
-    flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<flat::ReadData>>> readSet = 0,
-    flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<flat::WriteData>>> writeSet = 0) {
+    flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<flat::Data>>> readSet = 0,
+    flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<flat::Data>>> writeSet = 0) {
   DbServiceBuilder builder_(_fbb);
   builder_.add_writeSet(writeSet);
   builder_.add_readSet(readSet);
@@ -531,10 +490,10 @@ inline flatbuffers::Offset<DbService> CreateDbServiceDirect(
     int32_t txid = 0,
     bool isConflict = false,
     int32_t lsn = 0,
-    const std::vector<flatbuffers::Offset<flat::ReadData>> *readSet = nullptr,
-    const std::vector<flatbuffers::Offset<flat::WriteData>> *writeSet = nullptr) {
-  auto readSet__ = readSet ? _fbb.CreateVector<flatbuffers::Offset<flat::ReadData>>(*readSet) : 0;
-  auto writeSet__ = writeSet ? _fbb.CreateVector<flatbuffers::Offset<flat::WriteData>>(*writeSet) : 0;
+    const std::vector<flatbuffers::Offset<flat::Data>> *readSet = nullptr,
+    const std::vector<flatbuffers::Offset<flat::Data>> *writeSet = nullptr) {
+  auto readSet__ = readSet ? _fbb.CreateVector<flatbuffers::Offset<flat::Data>>(*readSet) : 0;
+  auto writeSet__ = writeSet ? _fbb.CreateVector<flatbuffers::Offset<flat::Data>>(*writeSet) : 0;
   return flat::CreateDbService(
       _fbb,
       type,

@@ -24,18 +24,27 @@ void DbService::getReadWriteSet(const flat::DbService *data)
     for (int i = 0; i < rsize; i++) {
         auto rset = data->readSet()->Get(i);
 
-        readData *rdata = new readData(rset->key()->str());
+        Data *rdata = new Data(
+            rset->key()->str(),
+            rset->label()->str(),
+            rset->label()->str(),
+            rset->attribute()->str());
         tran->readSet.emplace_back(rdata);
 
         tran->trcheck.emplace(rdata->key);
     }
 
+    // dosomethin to change value
+
     int wsize = data->writeSet()->size();
     for (int i = 0; i < wsize; i++) {
         auto wset = data->writeSet()->Get(i);
 
-        writeData *wdata = new writeData(
-            wset->key()->str(), wset->record()->str(), wset->value()->str());
+        Data *wdata = new Data(
+            wset->key()->str(),
+            wset->label()->str(),
+            wset->attribute()->str(),
+            wset->value()->str());
 
         tran->writeSet.emplace_back(wdata);
 
