@@ -8,17 +8,21 @@ void DbService::test() {}
 
 DbService::DbService(muduo::net::EventLoop *loop)
 {
-    dbtm_ = new Dbtm();
+    dbtm_ = new Dbtm(this);
     dbtm_->init(loop);
 
     // 开启线程池
     threadPool_ = new ThreadPool(ConfigManager::getInstance()->dbtmThreadNum());
 }
 
-void DbService::getReadWriteSet(const flat::DbService *data)
+void DbService::getReadWriteSet(
+    const muduo::net::TcpConnectionPtr &conn,
+    const flat::DbService *data)
 {
     transaction *tran = new transaction();
     tran->txid = data->txid();
+
+    table[tran->txid] = conn;
 
     int rsize = data->readSet()->size();
     for (int i = 0; i < rsize; i++) {

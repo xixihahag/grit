@@ -1,7 +1,7 @@
 // flatc -c -b ./net.fbs
 namespace flat;
 
-union Msg{Gtm,GtmAck,DbService,LogStore,LogStoreAck}
+union Msg{Gtm,GtmAck,DbService,LogStore,LogStoreAck,App}
 
 // 发送给gtm的类型
 table Gtm{
@@ -42,11 +42,16 @@ table DbService{
 table LogStore{
     type:int;
     txid:int;
+    data:[Data];
 }
 
 table LogStoreAck{
     lsn:int;
     txid:int;
+}
+
+table App{
+    type:int;
 }
 
 table RootMsg{

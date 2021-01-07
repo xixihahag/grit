@@ -21,28 +21,33 @@ void ConfigManager::init(const char *configDir)
     SetOrDefaultS(logDir_, pt.get<string>("basis.logDir"));
 
     // gtm
+    SetOrDefaultS(gtmListenAddress_, pt.get<string>({"gtm.listenaddress"}));
     SetOrDefaultS(gtmAddress_, pt.get<string>({"gtm.address"}));
     SetOrDefaultI(gtmPort_, pt.get<int>("gtm.port"));
-    SetOrDefaultI(threads_, pt.get<int>("gtm.threads"));
-    SetOrDefaultS(transactionsDir_, pt.get<string>("gtm.transactionsDir"));
-
-    // dbtl
-    SetOrDefaultS(dbtlAddress_, pt.get<string>({"dbtl.address"}));
-    SetOrDefaultI(dbtlPort_, pt.get<int>("dbtl.port"));
-
-    // dbtm
-    SetOrDefaultI(dbtmThreadNum_, pt.get<int>("dbtm.threadnum"));
-    SetOrDefaultS(rocksDbPath_, pt.get<string>({"dbtm.rocksdbpath"}));
+    SetOrDefaultI(gtmThreads_, pt.get<int>("gtm.threads"));
+    SetOrDefaultS(gtmTransactionsDir_, pt.get<string>("gtm.transactionsDir"));
 
     // dbservice
-    SetOrDefaultS(dbserviceAddress_, pt.get<string>({"dbservice.address"}));
-    SetOrDefaultI(dbservicePort_, pt.get<int>("dbservice.port"));
+    SetOrDefaultS(
+        dbsListenAddress_, pt.get<string>({"dbservice.listenaddress"}));
+    SetOrDefaultS(dbsAddress_, pt.get<string>({"dbservice.address"}));
+    SetOrDefaultI(dbsPort_, pt.get<int>("dbservice.port"));
+    SetOrDefaultI(dbsThreads_, pt.get<int>("dbservice.threads"));
 
     // db
     SetOrDefaultS(dbAddress_, pt.get<string>({"db.dbaddress"}));
     SetOrDefaultI(dbPort_, pt.get<int>("db.dbport"));
     SetOrDefaultS(dbName_, pt.get<string>({"db.dbname"}));
     SetOrDefaultS(dbPasswd_, pt.get<string>({"db.dbpasswd"}));
+
+    // dbtm
+    SetOrDefaultI(dbtmThreadNum_, pt.get<int>("dbtm.threadnum"));
+    SetOrDefaultS(dbtmRocksDbPath_, pt.get<string>({"dbtm.rocksdbpath"}));
+
+    // dbtl
+    SetOrDefaultS(dbtlListenAddress_, pt.get<string>({"dbtl.listenaddress"}));
+    SetOrDefaultS(dbtlAddress_, pt.get<string>({"dbtl.address"}));
+    SetOrDefaultI(dbtlPort_, pt.get<int>("dbtl.port"));
 }
 
 } // namespace grit

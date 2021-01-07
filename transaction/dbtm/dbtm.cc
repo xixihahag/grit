@@ -3,7 +3,12 @@
 #include "configManager.h"
 #include "muduo/net/TcpClient.h"
 #include "rocksdb/write_batch.h"
+#include "flatbuffer/net_generated.h"
 #include <glog/logging.h>
+#include <unistd.h>
+#include <fcntl.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 #include <unistd.h>
 
 using namespace grit;
@@ -12,6 +17,8 @@ using namespace flat;
 using namespace muduo;
 using namespace muduo::net;
 using namespace ROCKSDB_NAMESPACE;
+
+Dbtm::Dbtm(DbService *dbs) { dbservice_ = dbs; }
 
 Dbtm::~Dbtm() { delete rocksDb_; }
 
@@ -53,9 +60,15 @@ void Dbtm::init(EventLoop *loop)
     // open DB
     Status s = DB::Open(
         rockesDBOptions_,
-        ConfigManager::getInstance()->rocksDbPath(),
+        ConfigManager::getInstance()->dbtmRocksDbPath(),
         &rocksDb_);
-    if (!s.ok()) LOG(ERROR) << "open rocksDB error";
+    if (!s.ok())
+        LOG(ERROR) << "open rocksDB error";
+    else
+        LOG(INFO) << "open rocksDB success";
+
+    // 开启落盘线程池
+    threadPool_ = new ThreadPool(1);
 }
 
 void Dbtm::judgeLocalConflict(struct transaction *trans)
@@ -131,42 +144,105 @@ void Dbtm::solve(const flat::DbService *data)
     if (!(trans->isConflict) && trans->lsn.size() > 0) cacheRWSet(trans);
 }
 
-void Dbtm::cacheRWSet(struct transaction *trans)
+void Dbtm::cacheRWSet(struct transaction *tran)
 {
-    string lsn = trans->lsn;
+    string lsn = tran->lsn;
 
-    rcheck[lsn].emplace(trans->trcheck);
-    wcheck[lsn].emplace(trans->twcheck);
+    rcheck[lsn].emplace(tran->trcheck);
+    wcheck[lsn].emplace(tran->twcheck);
 
-    sendLog();
+    sendLog(tran);
 }
 
-// FIXME: 多线程写入rocksDB会不会有问题，多线程写入会有问题，多线程读不会
+// 开个线程专门做这事，给个batch做send
+// FIXME: 数据库需要做主备切换么
+// TODO: 要不不用rocksDB，直接用文件存储传输，日志可以做成幂等
+void Dbtm::writeToDiskByRocksDB(struct transaction *tran)
+{
+    // // TODO: 看看这句话应该放在哪
+    // threadPool_->enqueue(bind(&Dbtm::writeToDisk, this, tran));
+
+    // // 以 标签#属性:值@ 的形式定义一条数据进行落盘
+    // WriteBatch batch;
+    // for (auto data : tran->writeSet) {
+    //     string val;
+    //     val += data->attribute;
+    //     val += ':';
+    //     val += data->value;
+    //     val += '@';
+
+    //     batch.Put(data->label, val);
+    // }
+    // Status s = rocksDb_->Write(WriteOptions(), &batch);
+    // if (!s.ok()) LOG(ERROR) << "insert into rocksDB error";
+
+    // // TODO: 通知app事务执行成功
+}
+
 void Dbtm::writeToDisk(struct transaction *tran)
 {
-    // 以 标签#属性:值@ 的形式定义一条数据进行落盘
+    flatbuffers::FlatBufferBuilder builder;
+    vector<flatbuffers::Offset<flat::Data> > data_vec;
 
-    WriteBatch batch;
     for (auto data : tran->writeSet) {
-        string val;
-        val += data->attribute;
-        val += ':';
-        val += data->value;
-        val += '@';
+        auto key = builder.CreateString(data->key);
+        auto label = builder.CreateString(data->label);
+        auto attr = builder.CreateString(data->attribute);
+        auto val = builder.CreateString(data->value);
 
-        batch.Put(data->label, val);
+        auto wData = CreateData(builder, key, label, attr, val);
+        data_vec.push_back(wData);
     }
-    Status s = rocksDb_->Write(WriteOptions(), &batch);
-    if (!s.ok()) LOG(ERROR) << "insert into rocksDB error";
+
+    auto data_data = builder.CreateVector(data_vec);
+    auto logstore = CreateLogStore(builder, kData, tran->txid, data_data);
+    builder.Finish(logstore);
+
+    char *ptr = (char *) builder.GetBufferPointer();
+    uint64_t size = builder.GetSize();
+
+    // 落盘
+    int fd = open(
+        to_string(tran->txid).c_str(), O_CREAT | O_RDONLY, S_IRUSR | S_IWUSR);
+    if (fd == -1) LOG(ERROR) << "open log file error";
+
+    write(fd, ptr, size);
+    close(fd);
+
+    // 通知app事务执行成功
+    flatbuffers::FlatBufferBuilder builder;
+    auto app = CreateApp(builder, kTranSuccess);
+    builder.Finish(app);
+
+    char *ptr = (char *) builder.GetBufferPointer();
+    uint64_t size = builder.GetSize();
+
+    dbservice_->table[tran->txid]->send(ptr, size);
 }
 
-void Dbtm::sendLog()
+void Dbtm::sendLog(struct transaction *tran)
 {
-    // TODO: 传一个文件过去还是传flatbuffer过去？
-    // 讲道理，为了宕机不掉东西，还是得先写到本地，再传输过去，看什么时候写到本地吧
-    // 可以借助rocksDB的日志进行存储，日志格式自己定义就行了
-    // 先落盘，然后传文件过去
+    flatbuffers::FlatBufferBuilder builder;
+    vector<flatbuffers::Offset<flat::Data> > data_vec;
 
-    rocksDb_->Close();
-    DestroyDB(ConfigManager::getInstance()->rocksDbPath(), rockesDBOptions_);
+    for (auto data : tran->writeSet) {
+        auto key = builder.CreateString(data->key);
+        auto label = builder.CreateString(data->label);
+        auto attr = builder.CreateString(data->attribute);
+        auto val = builder.CreateString(data->value);
+
+        auto wData = CreateData(builder, key, label, attr, val);
+        data_vec.push_back(wData);
+    }
+
+    auto data_data = builder.CreateVector(data_vec);
+    auto logstore = CreateLogStore(builder, kData, tran->txid, data_data);
+    builder.Finish(logstore);
+
+    char *ptr = (char *) builder.GetBufferPointer();
+    uint64_t size = builder.GetSize();
+
+    dbtlConn_->send(ptr, size);
 }
+
+void Dbtm::sendLogByDisk(string &fileName) {}

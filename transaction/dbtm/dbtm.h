@@ -4,6 +4,8 @@
 #include "muduo/net/EventLoop.h"
 #include "rocksdb/db.h"
 #include "rocksdb/options.h"
+#include "threadPool.h"
+#include "dbservice/dbservice.h"
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
@@ -13,6 +15,7 @@ namespace grit {
 class Dbtm
 {
   public:
+    Dbtm(DbService *);
     ~Dbtm();
 
     // 初始化，用于连接LogStore服务器和GTM服务器
@@ -32,9 +35,13 @@ class Dbtm
     void cacheRWSet(struct transaction *);
 
     // 发送日志给LogStore
-    void sendLog();
+    void sendLog(struct transaction *);
+    // 通过从磁盘读日志的方式发送，用在服务器宕机重启之后
+    void sendLogByDisk(std::string &);
 
     // 将内存中的数据编程日志落盘
+    // 与存储层一直，通过rocksDB进行落盘，但是有些问题，不适用当前场景
+    void writeToDiskByRocksDB(struct transaction *);
     void writeToDisk(struct transaction *);
 
     // 连接之后的回调
@@ -57,6 +64,11 @@ class Dbtm
     DB *rocksDb_;
     // 开启本地rocksDB
     Options rockesDBOptions_;
+
+    // 落盘线程池-1个线程
+    ThreadPool *threadPool_;
+
+    DbService *dbservice_;
 };
 
 } // namespace grit

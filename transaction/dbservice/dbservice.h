@@ -7,6 +7,7 @@
 #include <string>
 #include <list>
 #include <unordered_set>
+#include <unordered_map>
 #include "muduo/net/EventLoop.h"
 #include "net_generated.h"
 #include "threadPool.h"
@@ -70,7 +71,12 @@ class DbService
     void connectToDatabase();
 
     // 从传输过来的数据中解析读写集
-    void getReadWriteSet(const flat::DbService *);
+    void getReadWriteSet(
+        const muduo::net::TcpConnectionPtr &,
+        const flat::DbService *);
+
+    // 用于记录txid和conn的对应
+    unordered_map<int, muduo::net::TcpConnectionPtr> table;
 
     ThreadPool *threadPool_;
     Dbtm *dbtm_;

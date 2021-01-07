@@ -15,40 +15,49 @@ class ConfigManager : public Singleton<ConfigManager>
     std::string logDir() { return logDir_; }
 
     // gtm
+    std::string gtmListenAddress() { return gtmListenAddress_; }
     std::string gtmAddress() { return gtmAddress_; }
     int gtmPort() { return gtmPort_; }
-    int threads() { return threads_; }
-    std::string transactionsDir() { return transactionsDir_; }
-
-    // dbtl
-    std::string dbtlAddress() { return dbtlAddress_; }
-    int dbtlPort() { return dbtlPort_; }
-
-    // dbtm
-    int dbtmThreadNum() { return dbtmThreadNum_; }
-    std::string rocksDbPath() { return rocksDbPath_; }
+    int gtmThreads() { return gtmThreads_; }
+    std::string gtmTransactionsDir() { return gtmTransactionsDir_; }
 
     // dbservice
-    std::string dbserviceAddress() { return dbserviceAddress_; }
-    int dbservicePort() { return dbservicePort_; }
+    std::string dbsListenAddress() { return dbsListenAddress_; }
+    std::string dbsAddress() { return dbsAddress_; }
+    int dbsPort() { return dbsPort_; }
+    int dbsThreads() { return dbsThreads_; }
+
+    // db
     std::string dbaddress() { return dbAddress_; }
     int abPort() { return dbPort_; }
     std::string dbName() { return dbName_; }
     std::string dbPasswd() { return dbPasswd_; }
+
+    // dbtm
+    int dbtmThreadNum() { return dbtmThreadNum_; }
+    std::string dbtmRocksDbPath() { return dbtmRocksDbPath_; }
+
+    // dbtl
+    std::string dbtlListenAddress() { return dbtlListenAddress_; }
+    std::string dbtlAddress() { return dbtlAddress_; }
+    int dbtlPort() { return dbtlPort_; }
 
   private:
     // basis
     std::string logDir_;
 
     // gtm
+    std::string gtmListenAddress_;
     std::string gtmAddress_;
     int gtmPort_;
-    int threads_;
-    std::string transactionsDir_;
+    int gtmThreads_;
+    std::string gtmTransactionsDir_;
 
     // dbservice
-    std::string dbserviceAddress_;
-    int dbservicePort_;
+    std::string dbsListenAddress_;
+    std::string dbsAddress_;
+    int dbsPort_;
+    int dbsThreads_;
 
     // db
     std::string dbAddress_;
@@ -56,13 +65,14 @@ class ConfigManager : public Singleton<ConfigManager>
     std::string dbName_;
     std::string dbPasswd_;
 
-    // dbtl
-    std::string dbtlAddress_;
-    int dbtlPort_;
-
     // dbtm
     int dbtmThreadNum_;
-    std::string rocksDbPath_;
+    std::string dbtmRocksDbPath_;
+
+    // dbtl
+    std::string dbtlListenAddress_;
+    std::string dbtlAddress_;
+    int dbtlPort_;
 };
 
 } // namespace grit

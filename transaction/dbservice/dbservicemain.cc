@@ -33,7 +33,7 @@ void onMessage(const TcpConnectionPtr &conn, Buffer *buf, Timestamp)
 
     switch (type) {
     case kData:
-        db->getReadWriteSet(data);
+        db->getReadWriteSet(conn, data);
         break;
     default:
         // 扔给DBTM处理
@@ -74,14 +74,14 @@ int main(int argc, char *argv[])
         db = new grit::DbService(&loop);
 
         const char *ip =
-            ConfigManager::getInstance()->dbserviceAddress().c_str();
-        uint16_t port = static_cast<uint16_t>(
-            ConfigManager::getInstance()->dbservicePort());
+            ConfigManager::getInstance()->dbsListenAddress().c_str();
+        uint16_t port =
+            static_cast<uint16_t>(ConfigManager::getInstance()->dbsPort());
 
         InetAddress listenAddr(ip, port);
-        int threadCount = ConfigManager::getInstance()->threads();
+        int threadCount = ConfigManager::getInstance()->dbsThreads();
 
-        TcpServer server(&loop, listenAddr, "dbserwvice");
+        TcpServer server(&loop, listenAddr, "dbservice");
 
         server.setConnectionCallback(onConnection);
         server.setMessageCallback(onMessage);
