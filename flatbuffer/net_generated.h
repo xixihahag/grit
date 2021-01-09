@@ -23,11 +23,11 @@ struct DataBuilder;
 struct DbService;
 struct DbServiceBuilder;
 
-struct LogStore;
-struct LogStoreBuilder;
+struct Dbtl;
+struct DbtlBuilder;
 
-struct LogStoreAck;
-struct LogStoreAckBuilder;
+struct DbtlAck;
+struct DbtlAckBuilder;
 
 struct App;
 struct AppBuilder;
@@ -40,8 +40,8 @@ enum Msg {
   Msg_Gtm = 1,
   Msg_GtmAck = 2,
   Msg_DbService = 3,
-  Msg_LogStore = 4,
-  Msg_LogStoreAck = 5,
+  Msg_Dbtl = 4,
+  Msg_DbtlAck = 5,
   Msg_App = 6,
   Msg_MIN = Msg_NONE,
   Msg_MAX = Msg_App
@@ -53,8 +53,8 @@ inline const Msg (&EnumValuesMsg())[7] {
     Msg_Gtm,
     Msg_GtmAck,
     Msg_DbService,
-    Msg_LogStore,
-    Msg_LogStoreAck,
+    Msg_Dbtl,
+    Msg_DbtlAck,
     Msg_App
   };
   return values;
@@ -66,8 +66,8 @@ inline const char * const *EnumNamesMsg() {
     "Gtm",
     "GtmAck",
     "DbService",
-    "LogStore",
-    "LogStoreAck",
+    "Dbtl",
+    "DbtlAck",
     "App",
     nullptr
   };
@@ -96,12 +96,12 @@ template<> struct MsgTraits<flat::DbService> {
   static const Msg enum_value = Msg_DbService;
 };
 
-template<> struct MsgTraits<flat::LogStore> {
-  static const Msg enum_value = Msg_LogStore;
+template<> struct MsgTraits<flat::Dbtl> {
+  static const Msg enum_value = Msg_Dbtl;
 };
 
-template<> struct MsgTraits<flat::LogStoreAck> {
-  static const Msg enum_value = Msg_LogStoreAck;
+template<> struct MsgTraits<flat::DbtlAck> {
+  static const Msg enum_value = Msg_DbtlAck;
 };
 
 template<> struct MsgTraits<flat::App> {
@@ -514,8 +514,8 @@ inline flatbuffers::Offset<DbService> CreateDbServiceDirect(
       writeSet__);
 }
 
-struct LogStore FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
-  typedef LogStoreBuilder Builder;
+struct Dbtl FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
+  typedef DbtlBuilder Builder;
   enum FlatBuffersVTableOffset FLATBUFFERS_VTABLE_UNDERLYING_TYPE {
     VT_TYPE = 4,
     VT_TXID = 6,
@@ -541,58 +541,58 @@ struct LogStore FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   }
 };
 
-struct LogStoreBuilder {
-  typedef LogStore Table;
+struct DbtlBuilder {
+  typedef Dbtl Table;
   flatbuffers::FlatBufferBuilder &fbb_;
   flatbuffers::uoffset_t start_;
   void add_type(int32_t type) {
-    fbb_.AddElement<int32_t>(LogStore::VT_TYPE, type, 0);
+    fbb_.AddElement<int32_t>(Dbtl::VT_TYPE, type, 0);
   }
   void add_txid(int32_t txid) {
-    fbb_.AddElement<int32_t>(LogStore::VT_TXID, txid, 0);
+    fbb_.AddElement<int32_t>(Dbtl::VT_TXID, txid, 0);
   }
   void add_data(flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<flat::Data>>> data) {
-    fbb_.AddOffset(LogStore::VT_DATA, data);
+    fbb_.AddOffset(Dbtl::VT_DATA, data);
   }
-  explicit LogStoreBuilder(flatbuffers::FlatBufferBuilder &_fbb)
+  explicit DbtlBuilder(flatbuffers::FlatBufferBuilder &_fbb)
         : fbb_(_fbb) {
     start_ = fbb_.StartTable();
   }
-  LogStoreBuilder &operator=(const LogStoreBuilder &);
-  flatbuffers::Offset<LogStore> Finish() {
+  DbtlBuilder &operator=(const DbtlBuilder &);
+  flatbuffers::Offset<Dbtl> Finish() {
     const auto end = fbb_.EndTable(start_);
-    auto o = flatbuffers::Offset<LogStore>(end);
+    auto o = flatbuffers::Offset<Dbtl>(end);
     return o;
   }
 };
 
-inline flatbuffers::Offset<LogStore> CreateLogStore(
+inline flatbuffers::Offset<Dbtl> CreateDbtl(
     flatbuffers::FlatBufferBuilder &_fbb,
     int32_t type = 0,
     int32_t txid = 0,
     flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<flat::Data>>> data = 0) {
-  LogStoreBuilder builder_(_fbb);
+  DbtlBuilder builder_(_fbb);
   builder_.add_data(data);
   builder_.add_txid(txid);
   builder_.add_type(type);
   return builder_.Finish();
 }
 
-inline flatbuffers::Offset<LogStore> CreateLogStoreDirect(
+inline flatbuffers::Offset<Dbtl> CreateDbtlDirect(
     flatbuffers::FlatBufferBuilder &_fbb,
     int32_t type = 0,
     int32_t txid = 0,
     const std::vector<flatbuffers::Offset<flat::Data>> *data = nullptr) {
   auto data__ = data ? _fbb.CreateVector<flatbuffers::Offset<flat::Data>>(*data) : 0;
-  return flat::CreateLogStore(
+  return flat::CreateDbtl(
       _fbb,
       type,
       txid,
       data__);
 }
 
-struct LogStoreAck FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
-  typedef LogStoreAckBuilder Builder;
+struct DbtlAck FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
+  typedef DbtlAckBuilder Builder;
   enum FlatBuffersVTableOffset FLATBUFFERS_VTABLE_UNDERLYING_TYPE {
     VT_LSN = 4,
     VT_TXID = 6
@@ -611,33 +611,33 @@ struct LogStoreAck FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   }
 };
 
-struct LogStoreAckBuilder {
-  typedef LogStoreAck Table;
+struct DbtlAckBuilder {
+  typedef DbtlAck Table;
   flatbuffers::FlatBufferBuilder &fbb_;
   flatbuffers::uoffset_t start_;
   void add_lsn(int32_t lsn) {
-    fbb_.AddElement<int32_t>(LogStoreAck::VT_LSN, lsn, 0);
+    fbb_.AddElement<int32_t>(DbtlAck::VT_LSN, lsn, 0);
   }
   void add_txid(int32_t txid) {
-    fbb_.AddElement<int32_t>(LogStoreAck::VT_TXID, txid, 0);
+    fbb_.AddElement<int32_t>(DbtlAck::VT_TXID, txid, 0);
   }
-  explicit LogStoreAckBuilder(flatbuffers::FlatBufferBuilder &_fbb)
+  explicit DbtlAckBuilder(flatbuffers::FlatBufferBuilder &_fbb)
         : fbb_(_fbb) {
     start_ = fbb_.StartTable();
   }
-  LogStoreAckBuilder &operator=(const LogStoreAckBuilder &);
-  flatbuffers::Offset<LogStoreAck> Finish() {
+  DbtlAckBuilder &operator=(const DbtlAckBuilder &);
+  flatbuffers::Offset<DbtlAck> Finish() {
     const auto end = fbb_.EndTable(start_);
-    auto o = flatbuffers::Offset<LogStoreAck>(end);
+    auto o = flatbuffers::Offset<DbtlAck>(end);
     return o;
   }
 };
 
-inline flatbuffers::Offset<LogStoreAck> CreateLogStoreAck(
+inline flatbuffers::Offset<DbtlAck> CreateDbtlAck(
     flatbuffers::FlatBufferBuilder &_fbb,
     int32_t lsn = 0,
     int32_t txid = 0) {
-  LogStoreAckBuilder builder_(_fbb);
+  DbtlAckBuilder builder_(_fbb);
   builder_.add_txid(txid);
   builder_.add_lsn(lsn);
   return builder_.Finish();
@@ -707,11 +707,11 @@ struct RootMsg FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   const flat::DbService *any_as_DbService() const {
     return any_type() == flat::Msg_DbService ? static_cast<const flat::DbService *>(any()) : nullptr;
   }
-  const flat::LogStore *any_as_LogStore() const {
-    return any_type() == flat::Msg_LogStore ? static_cast<const flat::LogStore *>(any()) : nullptr;
+  const flat::Dbtl *any_as_Dbtl() const {
+    return any_type() == flat::Msg_Dbtl ? static_cast<const flat::Dbtl *>(any()) : nullptr;
   }
-  const flat::LogStoreAck *any_as_LogStoreAck() const {
-    return any_type() == flat::Msg_LogStoreAck ? static_cast<const flat::LogStoreAck *>(any()) : nullptr;
+  const flat::DbtlAck *any_as_DbtlAck() const {
+    return any_type() == flat::Msg_DbtlAck ? static_cast<const flat::DbtlAck *>(any()) : nullptr;
   }
   const flat::App *any_as_App() const {
     return any_type() == flat::Msg_App ? static_cast<const flat::App *>(any()) : nullptr;
@@ -737,12 +737,12 @@ template<> inline const flat::DbService *RootMsg::any_as<flat::DbService>() cons
   return any_as_DbService();
 }
 
-template<> inline const flat::LogStore *RootMsg::any_as<flat::LogStore>() const {
-  return any_as_LogStore();
+template<> inline const flat::Dbtl *RootMsg::any_as<flat::Dbtl>() const {
+  return any_as_Dbtl();
 }
 
-template<> inline const flat::LogStoreAck *RootMsg::any_as<flat::LogStoreAck>() const {
-  return any_as_LogStoreAck();
+template<> inline const flat::DbtlAck *RootMsg::any_as<flat::DbtlAck>() const {
+  return any_as_DbtlAck();
 }
 
 template<> inline const flat::App *RootMsg::any_as<flat::App>() const {
@@ -798,12 +798,12 @@ inline bool VerifyMsg(flatbuffers::Verifier &verifier, const void *obj, Msg type
       auto ptr = reinterpret_cast<const flat::DbService *>(obj);
       return verifier.VerifyTable(ptr);
     }
-    case Msg_LogStore: {
-      auto ptr = reinterpret_cast<const flat::LogStore *>(obj);
+    case Msg_Dbtl: {
+      auto ptr = reinterpret_cast<const flat::Dbtl *>(obj);
       return verifier.VerifyTable(ptr);
     }
-    case Msg_LogStoreAck: {
-      auto ptr = reinterpret_cast<const flat::LogStoreAck *>(obj);
+    case Msg_DbtlAck: {
+      auto ptr = reinterpret_cast<const flat::DbtlAck *>(obj);
       return verifier.VerifyTable(ptr);
     }
     case Msg_App: {

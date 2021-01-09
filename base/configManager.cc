@@ -6,6 +6,7 @@
     if (value != "") variable = value;
 #define SetOrDefaultI(variable, value)                                         \
     if (value != 0) variable = value;
+#define SetOrDefaultB(variable, value) variable = value;
 
 using namespace std;
 using namespace boost::property_tree;
@@ -48,6 +49,7 @@ void ConfigManager::init(const char *configDir)
     SetOrDefaultS(dbtlListenAddress_, pt.get<string>({"dbtl.listenaddress"}));
     SetOrDefaultS(dbtlAddress_, pt.get<string>({"dbtl.address"}));
     SetOrDefaultI(dbtlPort_, pt.get<int>("dbtl.port"));
+    SetOrDefaultB(dbtlUseRocksDb_, pt.get<bool>("dbtl.userocksdb"));
 }
 
 } // namespace grit

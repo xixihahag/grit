@@ -2,14 +2,13 @@
 #include "headerCmd.h"
 #include "configManager.h"
 #include "muduo/net/TcpClient.h"
-#include "rocksdb/write_batch.h"
+// #include "rocksdb/write_batch.h"
 #include "flatbuffer/net_generated.h"
 #include <glog/logging.h>
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <unistd.h>
 
 using namespace grit;
 using namespace std;
@@ -20,7 +19,10 @@ using namespace ROCKSDB_NAMESPACE;
 
 Dbtm::Dbtm(DbService *dbs) { dbservice_ = dbs; }
 
-Dbtm::~Dbtm() { delete rocksDb_; }
+Dbtm::~Dbtm()
+{
+    // delete rocksDb_;
+}
 
 void Dbtm::onDbtlConnection(const muduo::net::TcpConnectionPtr &conn)
 {
@@ -52,20 +54,18 @@ void Dbtm::init(EventLoop *loop)
     gtmClient_->connect();
     gtmClient_->setConnectionCallback(bind(&onGtmConnection, this, _1));
 
-    // Optimize RocksDB. This is the easiest way to get RocksDB to perform well
-    rockesDBOptions_.IncreaseParallelism();
-    rockesDBOptions_.OptimizeLevelStyleCompaction();
-    // create the DB if it's not already present
-    rockesDBOptions_.create_if_missing = true;
-    // open DB
-    Status s = DB::Open(
-        rockesDBOptions_,
-        ConfigManager::getInstance()->dbtmRocksDbPath(),
-        &rocksDb_);
-    if (!s.ok())
-        LOG(ERROR) << "open rocksDB error";
-    else
-        LOG(INFO) << "open rocksDB success";
+    // // 打开rocksDB
+    // // Optimize RocksDB. This is the easiest way to get RocksDB to perform
+    // well rockesDBOptions_.IncreaseParallelism();
+    // rockesDBOptions_.OptimizeLevelStyleCompaction();
+    // // create the DB if it's not already present
+    // rockesDBOptions_.create_if_missing = true;
+    // // open DB
+    // Status s = DB::Open(
+    //     rockesDBOptions_,
+    //     ConfigManager::getInstance()->dbtmRocksDbPath(),
+    //     &rocksDb_);
+    // if (!s.ok()) LOG(ERROR) << "open rocksDB error";
 
     // 开启落盘线程池
     threadPool_ = new ThreadPool(1);
@@ -109,8 +109,8 @@ void Dbtm::judgeLocalConflict(struct transaction *trans)
 void Dbtm::getLsnAndGlobalConflict(int txid)
 {
     flatbuffers::FlatBufferBuilder builder;
-    auto logstore = CreateLogStore(builder, kLsn, txid);
-    builder.Finish(logstore);
+    auto dbtl = CreateDbtl(builder, kLsn, txid);
+    builder.Finish(dbtl);
 
     char *ptr = (char *) builder.GetBufferPointer();
     uint64_t size = builder.GetSize();
@@ -179,6 +179,7 @@ void Dbtm::writeToDiskByRocksDB(struct transaction *tran)
     // // TODO: 通知app事务执行成功
 }
 
+// TODO: 这样落盘很慢，不行找个东西优化下
 void Dbtm::writeToDisk(struct transaction *tran)
 {
     flatbuffers::FlatBufferBuilder builder;
@@ -195,8 +196,8 @@ void Dbtm::writeToDisk(struct transaction *tran)
     }
 
     auto data_data = builder.CreateVector(data_vec);
-    auto logstore = CreateLogStore(builder, kData, tran->txid, data_data);
-    builder.Finish(logstore);
+    auto dbtl = CreateDbtl(builder, kData, tran->txid, data_data);
+    builder.Finish(dbtl);
 
     char *ptr = (char *) builder.GetBufferPointer();
     uint64_t size = builder.GetSize();
@@ -236,8 +237,8 @@ void Dbtm::sendLog(struct transaction *tran)
     }
 
     auto data_data = builder.CreateVector(data_vec);
-    auto logstore = CreateLogStore(builder, kData, tran->txid, data_data);
-    builder.Finish(logstore);
+    auto dbtl = CreateDbtl(builder, kData, tran->txid, data_data);
+    builder.Finish(dbtl);
 
     char *ptr = (char *) builder.GetBufferPointer();
     uint64_t size = builder.GetSize();

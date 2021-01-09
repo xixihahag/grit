@@ -40,7 +40,7 @@ class Dbtm
     void sendLogByDisk(std::string &);
 
     // 将内存中的数据编程日志落盘
-    // 与存储层一直，通过rocksDB进行落盘，但是有些问题，不适用当前场景
+    // 与存储层一致，通过rocksDB进行落盘，但是有些问题，不适用当前场景
     void writeToDiskByRocksDB(struct transaction *);
     void writeToDisk(struct transaction *);
 
@@ -61,9 +61,9 @@ class Dbtm
     TcpConnectionPtr dbtlConn_, gtmConn_;
 
     // 连接rocksDB
-    DB *rocksDb_;
+    // DB *rocksDb_;
     // 开启本地rocksDB
-    Options rockesDBOptions_;
+    // Options rockesDBOptions_;
 
     // 落盘线程池-1个线程
     ThreadPool *threadPool_;
