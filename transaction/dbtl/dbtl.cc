@@ -33,7 +33,9 @@ grit::Dbtl::Dbtl()
     }
 }
 
-void grit::Dbtl::solve(const flat::Dbtl *dbtl)
+void grit::Dbtl::solve(
+    const muduo::net::TcpConnectionPtr &conn,
+    const flat::Dbtl *dbtl)
 {
     auto type = dbtl->type();
 
@@ -45,7 +47,15 @@ void grit::Dbtl::solve(const flat::Dbtl *dbtl)
             writeToDisk(dbtl->txid(), dbtl->data());
     }
 
-    // TODO: 返回给对面 ack
+    // 返回给对面 ack
+    flatbuffers::FlatBufferBuilder builder;
+    auto dbtm = CreateDbtl(builder, kLogAck, dbtl->txid());
+    builder.Finish(dbtm);
+
+    char *ptr = (char *) builder.GetBufferPointer();
+    uint64_t size = builder.GetSize();
+
+    conn->send(ptr, size);
 }
 
 void grit::Dbtl::writeToDisk(

@@ -1,10 +1,12 @@
 // flatc -c -b ./net.fbs
 namespace flat;
 
-union Msg{Gtm,GtmAck,DbService,Dbtl,DbtlAck,App}
+union Msg{GtmMsg,AppMsg,DbServiceMsg,DbtlMsg,DbtlAckMsg,AppMsg}
+
+// TODO: 有空把这个重新梳理一下，发给谁的就用谁的名字
 
 // 发送给gtm的类型
-table Gtm{
+table GtmMsg{
     type:int;
     transType:string;
 }
@@ -13,11 +15,18 @@ table ipAndPort{
     ip:string;
     port:int;
 }
-// gtm回复的类型
-table GtmAck{
+
+table AppMsg{
+    type:int;
     txid:int;
     list:[ipAndPort];
 }
+
+// // gtm回复的类型
+// table GtmAckMsg{
+//     txid:int;
+//     list:[ipAndPort];
+// }
 
 // db返回的数据结构（模拟版）；dbservice拦截时进行解析的数据结构
 // 使用 id+属性名 或 标签+属性名 的方式从存储层读取数据
@@ -30,7 +39,7 @@ table Data{
     value:string;
 }
 
-table DbService{
+table DbServiceMsg{
     type:int;
     txid:int;
     isConflict:bool;
@@ -39,18 +48,18 @@ table DbService{
     writeSet:[Data];
 }
 
-table Dbtl{
+table DbtlMsg{
     type:int;
     txid:int;
     data:[Data];
 }
 
-table DbtlAck{
+table DbtlAckMsg{
     lsn:int;
     txid:int;
 }
 
-table App{
+table AppMsg{
     type:int;
 }
 

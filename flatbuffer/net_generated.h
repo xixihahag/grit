@@ -8,54 +8,54 @@
 
 namespace flat {
 
-struct Gtm;
-struct GtmBuilder;
+struct GtmMsg;
+struct GtmMsgBuilder;
 
 struct ipAndPort;
 struct ipAndPortBuilder;
 
-struct GtmAck;
-struct GtmAckBuilder;
+struct GtmAckMsg;
+struct GtmAckMsgBuilder;
 
 struct Data;
 struct DataBuilder;
 
-struct DbService;
-struct DbServiceBuilder;
+struct DbServiceMsg;
+struct DbServiceMsgBuilder;
 
-struct Dbtl;
-struct DbtlBuilder;
+struct DbtlMsg;
+struct DbtlMsgBuilder;
 
-struct DbtlAck;
-struct DbtlAckBuilder;
+struct DbtlAckMsg;
+struct DbtlAckMsgBuilder;
 
-struct App;
-struct AppBuilder;
+struct AppMsg;
+struct AppMsgBuilder;
 
 struct RootMsg;
 struct RootMsgBuilder;
 
 enum Msg {
   Msg_NONE = 0,
-  Msg_Gtm = 1,
-  Msg_GtmAck = 2,
-  Msg_DbService = 3,
-  Msg_Dbtl = 4,
-  Msg_DbtlAck = 5,
-  Msg_App = 6,
+  Msg_GtmMsg = 1,
+  Msg_GtmAckMsg = 2,
+  Msg_DbServiceMsg = 3,
+  Msg_DbtlMsg = 4,
+  Msg_DbtlAckMsg = 5,
+  Msg_AppMsg = 6,
   Msg_MIN = Msg_NONE,
-  Msg_MAX = Msg_App
+  Msg_MAX = Msg_AppMsg
 };
 
 inline const Msg (&EnumValuesMsg())[7] {
   static const Msg values[] = {
     Msg_NONE,
-    Msg_Gtm,
-    Msg_GtmAck,
-    Msg_DbService,
-    Msg_Dbtl,
-    Msg_DbtlAck,
-    Msg_App
+    Msg_GtmMsg,
+    Msg_GtmAckMsg,
+    Msg_DbServiceMsg,
+    Msg_DbtlMsg,
+    Msg_DbtlAckMsg,
+    Msg_AppMsg
   };
   return values;
 }
@@ -63,19 +63,19 @@ inline const Msg (&EnumValuesMsg())[7] {
 inline const char * const *EnumNamesMsg() {
   static const char * const names[8] = {
     "NONE",
-    "Gtm",
-    "GtmAck",
-    "DbService",
-    "Dbtl",
-    "DbtlAck",
-    "App",
+    "GtmMsg",
+    "GtmAckMsg",
+    "DbServiceMsg",
+    "DbtlMsg",
+    "DbtlAckMsg",
+    "AppMsg",
     nullptr
   };
   return names;
 }
 
 inline const char *EnumNameMsg(Msg e) {
-  if (flatbuffers::IsOutRange(e, Msg_NONE, Msg_App)) return "";
+  if (flatbuffers::IsOutRange(e, Msg_NONE, Msg_AppMsg)) return "";
   const size_t index = static_cast<size_t>(e);
   return EnumNamesMsg()[index];
 }
@@ -84,35 +84,35 @@ template<typename T> struct MsgTraits {
   static const Msg enum_value = Msg_NONE;
 };
 
-template<> struct MsgTraits<flat::Gtm> {
-  static const Msg enum_value = Msg_Gtm;
+template<> struct MsgTraits<flat::GtmMsg> {
+  static const Msg enum_value = Msg_GtmMsg;
 };
 
-template<> struct MsgTraits<flat::GtmAck> {
-  static const Msg enum_value = Msg_GtmAck;
+template<> struct MsgTraits<flat::GtmAckMsg> {
+  static const Msg enum_value = Msg_GtmAckMsg;
 };
 
-template<> struct MsgTraits<flat::DbService> {
-  static const Msg enum_value = Msg_DbService;
+template<> struct MsgTraits<flat::DbServiceMsg> {
+  static const Msg enum_value = Msg_DbServiceMsg;
 };
 
-template<> struct MsgTraits<flat::Dbtl> {
-  static const Msg enum_value = Msg_Dbtl;
+template<> struct MsgTraits<flat::DbtlMsg> {
+  static const Msg enum_value = Msg_DbtlMsg;
 };
 
-template<> struct MsgTraits<flat::DbtlAck> {
-  static const Msg enum_value = Msg_DbtlAck;
+template<> struct MsgTraits<flat::DbtlAckMsg> {
+  static const Msg enum_value = Msg_DbtlAckMsg;
 };
 
-template<> struct MsgTraits<flat::App> {
-  static const Msg enum_value = Msg_App;
+template<> struct MsgTraits<flat::AppMsg> {
+  static const Msg enum_value = Msg_AppMsg;
 };
 
 bool VerifyMsg(flatbuffers::Verifier &verifier, const void *obj, Msg type);
 bool VerifyMsgVector(flatbuffers::Verifier &verifier, const flatbuffers::Vector<flatbuffers::Offset<void>> *values, const flatbuffers::Vector<uint8_t> *types);
 
-struct Gtm FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
-  typedef GtmBuilder Builder;
+struct GtmMsg FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
+  typedef GtmMsgBuilder Builder;
   enum FlatBuffersVTableOffset FLATBUFFERS_VTABLE_UNDERLYING_TYPE {
     VT_TYPE = 4,
     VT_TRANSTYPE = 6
@@ -132,44 +132,44 @@ struct Gtm FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   }
 };
 
-struct GtmBuilder {
-  typedef Gtm Table;
+struct GtmMsgBuilder {
+  typedef GtmMsg Table;
   flatbuffers::FlatBufferBuilder &fbb_;
   flatbuffers::uoffset_t start_;
   void add_type(int32_t type) {
-    fbb_.AddElement<int32_t>(Gtm::VT_TYPE, type, 0);
+    fbb_.AddElement<int32_t>(GtmMsg::VT_TYPE, type, 0);
   }
   void add_transType(flatbuffers::Offset<flatbuffers::String> transType) {
-    fbb_.AddOffset(Gtm::VT_TRANSTYPE, transType);
+    fbb_.AddOffset(GtmMsg::VT_TRANSTYPE, transType);
   }
-  explicit GtmBuilder(flatbuffers::FlatBufferBuilder &_fbb)
+  explicit GtmMsgBuilder(flatbuffers::FlatBufferBuilder &_fbb)
         : fbb_(_fbb) {
     start_ = fbb_.StartTable();
   }
-  GtmBuilder &operator=(const GtmBuilder &);
-  flatbuffers::Offset<Gtm> Finish() {
+  GtmMsgBuilder &operator=(const GtmMsgBuilder &);
+  flatbuffers::Offset<GtmMsg> Finish() {
     const auto end = fbb_.EndTable(start_);
-    auto o = flatbuffers::Offset<Gtm>(end);
+    auto o = flatbuffers::Offset<GtmMsg>(end);
     return o;
   }
 };
 
-inline flatbuffers::Offset<Gtm> CreateGtm(
+inline flatbuffers::Offset<GtmMsg> CreateGtmMsg(
     flatbuffers::FlatBufferBuilder &_fbb,
     int32_t type = 0,
     flatbuffers::Offset<flatbuffers::String> transType = 0) {
-  GtmBuilder builder_(_fbb);
+  GtmMsgBuilder builder_(_fbb);
   builder_.add_transType(transType);
   builder_.add_type(type);
   return builder_.Finish();
 }
 
-inline flatbuffers::Offset<Gtm> CreateGtmDirect(
+inline flatbuffers::Offset<GtmMsg> CreateGtmMsgDirect(
     flatbuffers::FlatBufferBuilder &_fbb,
     int32_t type = 0,
     const char *transType = nullptr) {
   auto transType__ = transType ? _fbb.CreateString(transType) : 0;
-  return flat::CreateGtm(
+  return flat::CreateGtmMsg(
       _fbb,
       type,
       transType__);
@@ -239,8 +239,8 @@ inline flatbuffers::Offset<ipAndPort> CreateipAndPortDirect(
       port);
 }
 
-struct GtmAck FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
-  typedef GtmAckBuilder Builder;
+struct GtmAckMsg FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
+  typedef GtmAckMsgBuilder Builder;
   enum FlatBuffersVTableOffset FLATBUFFERS_VTABLE_UNDERLYING_TYPE {
     VT_TXID = 4,
     VT_LIST = 6
@@ -261,44 +261,44 @@ struct GtmAck FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   }
 };
 
-struct GtmAckBuilder {
-  typedef GtmAck Table;
+struct GtmAckMsgBuilder {
+  typedef GtmAckMsg Table;
   flatbuffers::FlatBufferBuilder &fbb_;
   flatbuffers::uoffset_t start_;
   void add_txid(int32_t txid) {
-    fbb_.AddElement<int32_t>(GtmAck::VT_TXID, txid, 0);
+    fbb_.AddElement<int32_t>(GtmAckMsg::VT_TXID, txid, 0);
   }
   void add_list(flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<flat::ipAndPort>>> list) {
-    fbb_.AddOffset(GtmAck::VT_LIST, list);
+    fbb_.AddOffset(GtmAckMsg::VT_LIST, list);
   }
-  explicit GtmAckBuilder(flatbuffers::FlatBufferBuilder &_fbb)
+  explicit GtmAckMsgBuilder(flatbuffers::FlatBufferBuilder &_fbb)
         : fbb_(_fbb) {
     start_ = fbb_.StartTable();
   }
-  GtmAckBuilder &operator=(const GtmAckBuilder &);
-  flatbuffers::Offset<GtmAck> Finish() {
+  GtmAckMsgBuilder &operator=(const GtmAckMsgBuilder &);
+  flatbuffers::Offset<GtmAckMsg> Finish() {
     const auto end = fbb_.EndTable(start_);
-    auto o = flatbuffers::Offset<GtmAck>(end);
+    auto o = flatbuffers::Offset<GtmAckMsg>(end);
     return o;
   }
 };
 
-inline flatbuffers::Offset<GtmAck> CreateGtmAck(
+inline flatbuffers::Offset<GtmAckMsg> CreateGtmAckMsg(
     flatbuffers::FlatBufferBuilder &_fbb,
     int32_t txid = 0,
     flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<flat::ipAndPort>>> list = 0) {
-  GtmAckBuilder builder_(_fbb);
+  GtmAckMsgBuilder builder_(_fbb);
   builder_.add_list(list);
   builder_.add_txid(txid);
   return builder_.Finish();
 }
 
-inline flatbuffers::Offset<GtmAck> CreateGtmAckDirect(
+inline flatbuffers::Offset<GtmAckMsg> CreateGtmAckMsgDirect(
     flatbuffers::FlatBufferBuilder &_fbb,
     int32_t txid = 0,
     const std::vector<flatbuffers::Offset<flat::ipAndPort>> *list = nullptr) {
   auto list__ = list ? _fbb.CreateVector<flatbuffers::Offset<flat::ipAndPort>>(*list) : 0;
-  return flat::CreateGtmAck(
+  return flat::CreateGtmAckMsg(
       _fbb,
       txid,
       list__);
@@ -398,8 +398,8 @@ inline flatbuffers::Offset<Data> CreateDataDirect(
       value__);
 }
 
-struct DbService FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
-  typedef DbServiceBuilder Builder;
+struct DbServiceMsg FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
+  typedef DbServiceMsgBuilder Builder;
   enum FlatBuffersVTableOffset FLATBUFFERS_VTABLE_UNDERLYING_TYPE {
     VT_TYPE = 4,
     VT_TXID = 6,
@@ -442,41 +442,41 @@ struct DbService FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   }
 };
 
-struct DbServiceBuilder {
-  typedef DbService Table;
+struct DbServiceMsgBuilder {
+  typedef DbServiceMsg Table;
   flatbuffers::FlatBufferBuilder &fbb_;
   flatbuffers::uoffset_t start_;
   void add_type(int32_t type) {
-    fbb_.AddElement<int32_t>(DbService::VT_TYPE, type, 0);
+    fbb_.AddElement<int32_t>(DbServiceMsg::VT_TYPE, type, 0);
   }
   void add_txid(int32_t txid) {
-    fbb_.AddElement<int32_t>(DbService::VT_TXID, txid, 0);
+    fbb_.AddElement<int32_t>(DbServiceMsg::VT_TXID, txid, 0);
   }
   void add_isConflict(bool isConflict) {
-    fbb_.AddElement<uint8_t>(DbService::VT_ISCONFLICT, static_cast<uint8_t>(isConflict), 0);
+    fbb_.AddElement<uint8_t>(DbServiceMsg::VT_ISCONFLICT, static_cast<uint8_t>(isConflict), 0);
   }
   void add_lsn(int32_t lsn) {
-    fbb_.AddElement<int32_t>(DbService::VT_LSN, lsn, 0);
+    fbb_.AddElement<int32_t>(DbServiceMsg::VT_LSN, lsn, 0);
   }
   void add_readSet(flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<flat::Data>>> readSet) {
-    fbb_.AddOffset(DbService::VT_READSET, readSet);
+    fbb_.AddOffset(DbServiceMsg::VT_READSET, readSet);
   }
   void add_writeSet(flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<flat::Data>>> writeSet) {
-    fbb_.AddOffset(DbService::VT_WRITESET, writeSet);
+    fbb_.AddOffset(DbServiceMsg::VT_WRITESET, writeSet);
   }
-  explicit DbServiceBuilder(flatbuffers::FlatBufferBuilder &_fbb)
+  explicit DbServiceMsgBuilder(flatbuffers::FlatBufferBuilder &_fbb)
         : fbb_(_fbb) {
     start_ = fbb_.StartTable();
   }
-  DbServiceBuilder &operator=(const DbServiceBuilder &);
-  flatbuffers::Offset<DbService> Finish() {
+  DbServiceMsgBuilder &operator=(const DbServiceMsgBuilder &);
+  flatbuffers::Offset<DbServiceMsg> Finish() {
     const auto end = fbb_.EndTable(start_);
-    auto o = flatbuffers::Offset<DbService>(end);
+    auto o = flatbuffers::Offset<DbServiceMsg>(end);
     return o;
   }
 };
 
-inline flatbuffers::Offset<DbService> CreateDbService(
+inline flatbuffers::Offset<DbServiceMsg> CreateDbServiceMsg(
     flatbuffers::FlatBufferBuilder &_fbb,
     int32_t type = 0,
     int32_t txid = 0,
@@ -484,7 +484,7 @@ inline flatbuffers::Offset<DbService> CreateDbService(
     int32_t lsn = 0,
     flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<flat::Data>>> readSet = 0,
     flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<flat::Data>>> writeSet = 0) {
-  DbServiceBuilder builder_(_fbb);
+  DbServiceMsgBuilder builder_(_fbb);
   builder_.add_writeSet(writeSet);
   builder_.add_readSet(readSet);
   builder_.add_lsn(lsn);
@@ -494,7 +494,7 @@ inline flatbuffers::Offset<DbService> CreateDbService(
   return builder_.Finish();
 }
 
-inline flatbuffers::Offset<DbService> CreateDbServiceDirect(
+inline flatbuffers::Offset<DbServiceMsg> CreateDbServiceMsgDirect(
     flatbuffers::FlatBufferBuilder &_fbb,
     int32_t type = 0,
     int32_t txid = 0,
@@ -504,7 +504,7 @@ inline flatbuffers::Offset<DbService> CreateDbServiceDirect(
     const std::vector<flatbuffers::Offset<flat::Data>> *writeSet = nullptr) {
   auto readSet__ = readSet ? _fbb.CreateVector<flatbuffers::Offset<flat::Data>>(*readSet) : 0;
   auto writeSet__ = writeSet ? _fbb.CreateVector<flatbuffers::Offset<flat::Data>>(*writeSet) : 0;
-  return flat::CreateDbService(
+  return flat::CreateDbServiceMsg(
       _fbb,
       type,
       txid,
@@ -514,8 +514,8 @@ inline flatbuffers::Offset<DbService> CreateDbServiceDirect(
       writeSet__);
 }
 
-struct Dbtl FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
-  typedef DbtlBuilder Builder;
+struct DbtlMsg FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
+  typedef DbtlMsgBuilder Builder;
   enum FlatBuffersVTableOffset FLATBUFFERS_VTABLE_UNDERLYING_TYPE {
     VT_TYPE = 4,
     VT_TXID = 6,
@@ -541,58 +541,58 @@ struct Dbtl FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   }
 };
 
-struct DbtlBuilder {
-  typedef Dbtl Table;
+struct DbtlMsgBuilder {
+  typedef DbtlMsg Table;
   flatbuffers::FlatBufferBuilder &fbb_;
   flatbuffers::uoffset_t start_;
   void add_type(int32_t type) {
-    fbb_.AddElement<int32_t>(Dbtl::VT_TYPE, type, 0);
+    fbb_.AddElement<int32_t>(DbtlMsg::VT_TYPE, type, 0);
   }
   void add_txid(int32_t txid) {
-    fbb_.AddElement<int32_t>(Dbtl::VT_TXID, txid, 0);
+    fbb_.AddElement<int32_t>(DbtlMsg::VT_TXID, txid, 0);
   }
   void add_data(flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<flat::Data>>> data) {
-    fbb_.AddOffset(Dbtl::VT_DATA, data);
+    fbb_.AddOffset(DbtlMsg::VT_DATA, data);
   }
-  explicit DbtlBuilder(flatbuffers::FlatBufferBuilder &_fbb)
+  explicit DbtlMsgBuilder(flatbuffers::FlatBufferBuilder &_fbb)
         : fbb_(_fbb) {
     start_ = fbb_.StartTable();
   }
-  DbtlBuilder &operator=(const DbtlBuilder &);
-  flatbuffers::Offset<Dbtl> Finish() {
+  DbtlMsgBuilder &operator=(const DbtlMsgBuilder &);
+  flatbuffers::Offset<DbtlMsg> Finish() {
     const auto end = fbb_.EndTable(start_);
-    auto o = flatbuffers::Offset<Dbtl>(end);
+    auto o = flatbuffers::Offset<DbtlMsg>(end);
     return o;
   }
 };
 
-inline flatbuffers::Offset<Dbtl> CreateDbtl(
+inline flatbuffers::Offset<DbtlMsg> CreateDbtlMsg(
     flatbuffers::FlatBufferBuilder &_fbb,
     int32_t type = 0,
     int32_t txid = 0,
     flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<flat::Data>>> data = 0) {
-  DbtlBuilder builder_(_fbb);
+  DbtlMsgBuilder builder_(_fbb);
   builder_.add_data(data);
   builder_.add_txid(txid);
   builder_.add_type(type);
   return builder_.Finish();
 }
 
-inline flatbuffers::Offset<Dbtl> CreateDbtlDirect(
+inline flatbuffers::Offset<DbtlMsg> CreateDbtlMsgDirect(
     flatbuffers::FlatBufferBuilder &_fbb,
     int32_t type = 0,
     int32_t txid = 0,
     const std::vector<flatbuffers::Offset<flat::Data>> *data = nullptr) {
   auto data__ = data ? _fbb.CreateVector<flatbuffers::Offset<flat::Data>>(*data) : 0;
-  return flat::CreateDbtl(
+  return flat::CreateDbtlMsg(
       _fbb,
       type,
       txid,
       data__);
 }
 
-struct DbtlAck FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
-  typedef DbtlAckBuilder Builder;
+struct DbtlAckMsg FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
+  typedef DbtlAckMsgBuilder Builder;
   enum FlatBuffersVTableOffset FLATBUFFERS_VTABLE_UNDERLYING_TYPE {
     VT_LSN = 4,
     VT_TXID = 6
@@ -611,40 +611,40 @@ struct DbtlAck FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   }
 };
 
-struct DbtlAckBuilder {
-  typedef DbtlAck Table;
+struct DbtlAckMsgBuilder {
+  typedef DbtlAckMsg Table;
   flatbuffers::FlatBufferBuilder &fbb_;
   flatbuffers::uoffset_t start_;
   void add_lsn(int32_t lsn) {
-    fbb_.AddElement<int32_t>(DbtlAck::VT_LSN, lsn, 0);
+    fbb_.AddElement<int32_t>(DbtlAckMsg::VT_LSN, lsn, 0);
   }
   void add_txid(int32_t txid) {
-    fbb_.AddElement<int32_t>(DbtlAck::VT_TXID, txid, 0);
+    fbb_.AddElement<int32_t>(DbtlAckMsg::VT_TXID, txid, 0);
   }
-  explicit DbtlAckBuilder(flatbuffers::FlatBufferBuilder &_fbb)
+  explicit DbtlAckMsgBuilder(flatbuffers::FlatBufferBuilder &_fbb)
         : fbb_(_fbb) {
     start_ = fbb_.StartTable();
   }
-  DbtlAckBuilder &operator=(const DbtlAckBuilder &);
-  flatbuffers::Offset<DbtlAck> Finish() {
+  DbtlAckMsgBuilder &operator=(const DbtlAckMsgBuilder &);
+  flatbuffers::Offset<DbtlAckMsg> Finish() {
     const auto end = fbb_.EndTable(start_);
-    auto o = flatbuffers::Offset<DbtlAck>(end);
+    auto o = flatbuffers::Offset<DbtlAckMsg>(end);
     return o;
   }
 };
 
-inline flatbuffers::Offset<DbtlAck> CreateDbtlAck(
+inline flatbuffers::Offset<DbtlAckMsg> CreateDbtlAckMsg(
     flatbuffers::FlatBufferBuilder &_fbb,
     int32_t lsn = 0,
     int32_t txid = 0) {
-  DbtlAckBuilder builder_(_fbb);
+  DbtlAckMsgBuilder builder_(_fbb);
   builder_.add_txid(txid);
   builder_.add_lsn(lsn);
   return builder_.Finish();
 }
 
-struct App FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
-  typedef AppBuilder Builder;
+struct AppMsg FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
+  typedef AppMsgBuilder Builder;
   enum FlatBuffersVTableOffset FLATBUFFERS_VTABLE_UNDERLYING_TYPE {
     VT_TYPE = 4
   };
@@ -658,29 +658,29 @@ struct App FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   }
 };
 
-struct AppBuilder {
-  typedef App Table;
+struct AppMsgBuilder {
+  typedef AppMsg Table;
   flatbuffers::FlatBufferBuilder &fbb_;
   flatbuffers::uoffset_t start_;
   void add_type(int32_t type) {
-    fbb_.AddElement<int32_t>(App::VT_TYPE, type, 0);
+    fbb_.AddElement<int32_t>(AppMsg::VT_TYPE, type, 0);
   }
-  explicit AppBuilder(flatbuffers::FlatBufferBuilder &_fbb)
+  explicit AppMsgBuilder(flatbuffers::FlatBufferBuilder &_fbb)
         : fbb_(_fbb) {
     start_ = fbb_.StartTable();
   }
-  AppBuilder &operator=(const AppBuilder &);
-  flatbuffers::Offset<App> Finish() {
+  AppMsgBuilder &operator=(const AppMsgBuilder &);
+  flatbuffers::Offset<AppMsg> Finish() {
     const auto end = fbb_.EndTable(start_);
-    auto o = flatbuffers::Offset<App>(end);
+    auto o = flatbuffers::Offset<AppMsg>(end);
     return o;
   }
 };
 
-inline flatbuffers::Offset<App> CreateApp(
+inline flatbuffers::Offset<AppMsg> CreateAppMsg(
     flatbuffers::FlatBufferBuilder &_fbb,
     int32_t type = 0) {
-  AppBuilder builder_(_fbb);
+  AppMsgBuilder builder_(_fbb);
   builder_.add_type(type);
   return builder_.Finish();
 }
@@ -698,23 +698,23 @@ struct RootMsg FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
     return GetPointer<const void *>(VT_ANY);
   }
   template<typename T> const T *any_as() const;
-  const flat::Gtm *any_as_Gtm() const {
-    return any_type() == flat::Msg_Gtm ? static_cast<const flat::Gtm *>(any()) : nullptr;
+  const flat::GtmMsg *any_as_GtmMsg() const {
+    return any_type() == flat::Msg_GtmMsg ? static_cast<const flat::GtmMsg *>(any()) : nullptr;
   }
-  const flat::GtmAck *any_as_GtmAck() const {
-    return any_type() == flat::Msg_GtmAck ? static_cast<const flat::GtmAck *>(any()) : nullptr;
+  const flat::GtmAckMsg *any_as_GtmAckMsg() const {
+    return any_type() == flat::Msg_GtmAckMsg ? static_cast<const flat::GtmAckMsg *>(any()) : nullptr;
   }
-  const flat::DbService *any_as_DbService() const {
-    return any_type() == flat::Msg_DbService ? static_cast<const flat::DbService *>(any()) : nullptr;
+  const flat::DbServiceMsg *any_as_DbServiceMsg() const {
+    return any_type() == flat::Msg_DbServiceMsg ? static_cast<const flat::DbServiceMsg *>(any()) : nullptr;
   }
-  const flat::Dbtl *any_as_Dbtl() const {
-    return any_type() == flat::Msg_Dbtl ? static_cast<const flat::Dbtl *>(any()) : nullptr;
+  const flat::DbtlMsg *any_as_DbtlMsg() const {
+    return any_type() == flat::Msg_DbtlMsg ? static_cast<const flat::DbtlMsg *>(any()) : nullptr;
   }
-  const flat::DbtlAck *any_as_DbtlAck() const {
-    return any_type() == flat::Msg_DbtlAck ? static_cast<const flat::DbtlAck *>(any()) : nullptr;
+  const flat::DbtlAckMsg *any_as_DbtlAckMsg() const {
+    return any_type() == flat::Msg_DbtlAckMsg ? static_cast<const flat::DbtlAckMsg *>(any()) : nullptr;
   }
-  const flat::App *any_as_App() const {
-    return any_type() == flat::Msg_App ? static_cast<const flat::App *>(any()) : nullptr;
+  const flat::AppMsg *any_as_AppMsg() const {
+    return any_type() == flat::Msg_AppMsg ? static_cast<const flat::AppMsg *>(any()) : nullptr;
   }
   bool Verify(flatbuffers::Verifier &verifier) const {
     return VerifyTableStart(verifier) &&
@@ -725,28 +725,28 @@ struct RootMsg FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   }
 };
 
-template<> inline const flat::Gtm *RootMsg::any_as<flat::Gtm>() const {
-  return any_as_Gtm();
+template<> inline const flat::GtmMsg *RootMsg::any_as<flat::GtmMsg>() const {
+  return any_as_GtmMsg();
 }
 
-template<> inline const flat::GtmAck *RootMsg::any_as<flat::GtmAck>() const {
-  return any_as_GtmAck();
+template<> inline const flat::GtmAckMsg *RootMsg::any_as<flat::GtmAckMsg>() const {
+  return any_as_GtmAckMsg();
 }
 
-template<> inline const flat::DbService *RootMsg::any_as<flat::DbService>() const {
-  return any_as_DbService();
+template<> inline const flat::DbServiceMsg *RootMsg::any_as<flat::DbServiceMsg>() const {
+  return any_as_DbServiceMsg();
 }
 
-template<> inline const flat::Dbtl *RootMsg::any_as<flat::Dbtl>() const {
-  return any_as_Dbtl();
+template<> inline const flat::DbtlMsg *RootMsg::any_as<flat::DbtlMsg>() const {
+  return any_as_DbtlMsg();
 }
 
-template<> inline const flat::DbtlAck *RootMsg::any_as<flat::DbtlAck>() const {
-  return any_as_DbtlAck();
+template<> inline const flat::DbtlAckMsg *RootMsg::any_as<flat::DbtlAckMsg>() const {
+  return any_as_DbtlAckMsg();
 }
 
-template<> inline const flat::App *RootMsg::any_as<flat::App>() const {
-  return any_as_App();
+template<> inline const flat::AppMsg *RootMsg::any_as<flat::AppMsg>() const {
+  return any_as_AppMsg();
 }
 
 struct RootMsgBuilder {
@@ -786,28 +786,28 @@ inline bool VerifyMsg(flatbuffers::Verifier &verifier, const void *obj, Msg type
     case Msg_NONE: {
       return true;
     }
-    case Msg_Gtm: {
-      auto ptr = reinterpret_cast<const flat::Gtm *>(obj);
+    case Msg_GtmMsg: {
+      auto ptr = reinterpret_cast<const flat::GtmMsg *>(obj);
       return verifier.VerifyTable(ptr);
     }
-    case Msg_GtmAck: {
-      auto ptr = reinterpret_cast<const flat::GtmAck *>(obj);
+    case Msg_GtmAckMsg: {
+      auto ptr = reinterpret_cast<const flat::GtmAckMsg *>(obj);
       return verifier.VerifyTable(ptr);
     }
-    case Msg_DbService: {
-      auto ptr = reinterpret_cast<const flat::DbService *>(obj);
+    case Msg_DbServiceMsg: {
+      auto ptr = reinterpret_cast<const flat::DbServiceMsg *>(obj);
       return verifier.VerifyTable(ptr);
     }
-    case Msg_Dbtl: {
-      auto ptr = reinterpret_cast<const flat::Dbtl *>(obj);
+    case Msg_DbtlMsg: {
+      auto ptr = reinterpret_cast<const flat::DbtlMsg *>(obj);
       return verifier.VerifyTable(ptr);
     }
-    case Msg_DbtlAck: {
-      auto ptr = reinterpret_cast<const flat::DbtlAck *>(obj);
+    case Msg_DbtlAckMsg: {
+      auto ptr = reinterpret_cast<const flat::DbtlAckMsg *>(obj);
       return verifier.VerifyTable(ptr);
     }
-    case Msg_App: {
-      auto ptr = reinterpret_cast<const flat::App *>(obj);
+    case Msg_AppMsg: {
+      auto ptr = reinterpret_cast<const flat::AppMsg *>(obj);
       return verifier.VerifyTable(ptr);
     }
     default: return true;

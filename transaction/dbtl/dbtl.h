@@ -6,6 +6,7 @@
 #include "net_generated.h"
 #include "rocksdb/db.h"
 #include "rocksdb/options.h"
+#include "muduo/net/TcpConnection.h"
 
 namespace grit {
 
@@ -14,7 +15,7 @@ class Dbtl
   public:
     Dbtl();
 
-    void solve(const flat::Dbtl *);
+    void solve(const muduo::net::TcpConnectionPtr &, const flat::Dbtl *);
 
   private:
     void writeToDisk(

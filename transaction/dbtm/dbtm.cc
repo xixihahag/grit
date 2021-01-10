@@ -15,7 +15,7 @@ using namespace std;
 using namespace flat;
 using namespace muduo;
 using namespace muduo::net;
-using namespace ROCKSDB_NAMESPACE;
+// using namespace ROCKSDB_NAMESPACE;
 
 Dbtm::Dbtm(DbService *dbs) { dbservice_ = dbs; }
 
@@ -109,7 +109,7 @@ void Dbtm::judgeLocalConflict(struct transaction *trans)
 void Dbtm::getLsnAndGlobalConflict(int txid)
 {
     flatbuffers::FlatBufferBuilder builder;
-    auto dbtl = CreateDbtl(builder, kLsn, txid);
+    auto dbtl = CreateDbtlMsg(builder, kLsn, txid);
     builder.Finish(dbtl);
 
     char *ptr = (char *) builder.GetBufferPointer();
@@ -118,7 +118,7 @@ void Dbtm::getLsnAndGlobalConflict(int txid)
     dbtlConn_->send(ptr, size);
 
     flatbuffers::FlatBufferBuilder builder1;
-    auto gtm = CreateGtm(builder1, kJudgeConflit, txid);
+    auto gtm = CreateGtmMsg(builder1, kJudgeConflit, txid);
     builder.Finish(gtm);
 
     ptr = (char *) builder1.GetBufferPointer();
@@ -127,7 +127,7 @@ void Dbtm::getLsnAndGlobalConflict(int txid)
     gtmConn_->send(ptr, size);
 }
 
-void Dbtm::solve(const flat::DbService *data)
+void Dbtm::solve(const DbServiceMsg *data)
 {
     auto type = data->type();
     auto txid = data->txid();

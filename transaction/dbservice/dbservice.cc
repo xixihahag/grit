@@ -17,7 +17,7 @@ DbService::DbService(muduo::net::EventLoop *loop)
 
 void DbService::getReadWriteSet(
     const muduo::net::TcpConnectionPtr &conn,
-    const flat::DbService *data)
+    const DbServiceMsg *data)
 {
     transaction *tran = new transaction();
     tran->txid = data->txid();
@@ -25,6 +25,7 @@ void DbService::getReadWriteSet(
     table[tran->txid] = conn;
 
     int rsize = data->readSet()->size();
+
     for (int i = 0; i < rsize; i++) {
         auto rset = data->readSet()->Get(i);
 

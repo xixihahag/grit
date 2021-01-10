@@ -42,7 +42,7 @@ void GTM::judgeConflict()
 
 void GTM::init()
 {
-    string dir = ConfigManager::getInstance()->transactionsDir();
+    string dir = ConfigManager::getInstance()->gtmTransactionsDir();
 
     // 读取文件信息
     ifstream fin(dir.c_str());

@@ -22,7 +22,7 @@ class Dbtm
     void init(EventLoop *);
 
     // 用于处理lsn和gtm冲突处理的结果
-    void solve(const flat::DbService *);
+    void solve(const DbServiceMsg *);
 
     // 用于判断本地是否存在冲突
     void judgeLocalConflict(struct transaction *);
@@ -45,8 +45,8 @@ class Dbtm
     void writeToDisk(struct transaction *);
 
     // 连接之后的回调
-    void onDbtlConnection(const muduo::net::TcpConnectionPtr &);
-    void onGtmConnection(const muduo::net::TcpConnectionPtr &);
+    void onDbtlConnection(const TcpConnectionPtr &);
+    void onGtmConnection(const TcpConnectionPtr &);
 
     // 用于快速进行数据冲突验证
     // TODO: 数据验证好像可以用位图来做，参考底层的分布式图数据库存储
@@ -65,7 +65,7 @@ class Dbtm
     // 开启本地rocksDB
     // Options rockesDBOptions_;
 
-    // 落盘线程池-1个线程
+    // 落盘线程池---1个线程
     ThreadPool *threadPool_;
 
     DbService *dbservice_;
