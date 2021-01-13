@@ -3,6 +3,7 @@
 #include "muduo/net/EventLoop.h"
 #include "net_generated.h"
 #include <unordered_map>
+#include <list>
 
 namespace grit {
 
@@ -13,24 +14,32 @@ class App
     App(EventLoop *);
 
     // 开启一个事务
-    void startTran();
+    void startTran(std::string &);
 
     // 连接需要的dbs
-    void connect2Dbs(
-        int,
+    void connect2ES(
         const flatbuffers::Vector<flatbuffers::Offset<flat::ipAndPort> > *);
+
+    // 添加事务语句进来
+    void add(std::string);
+
+    // 提交事务
+    void commit();
+
+    // 负责传输协议的解析
+    void onMessage(const TcpConnectionPtr &, Buffer *, muduo::Timestamp);
 
   private:
     void onGtmConnection(const muduo::net::TcpConnectionPtr &);
-    void onDbsConnection(const muduo::net::TcpConnectionPtr &);
+    void onESConnection(const muduo::net::TcpConnectionPtr &);
 
     // 维护gtm的连接
     muduo::net::TcpConnectionPtr gtmConn_;
 
     EventLoop *loop_;
 
-    // ip和txid对应表
-    std::unordered_map<std::string, int> table_;
+    int txid_;
+    list<muduo::net::TcpConnectionPtr> connList_;
 };
 
 } // namespace grit

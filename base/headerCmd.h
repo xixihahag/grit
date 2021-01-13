@@ -3,8 +3,16 @@
 // app 向 gtm 索要txid
 const int kGetTxid = 101;
 
-// app 通知 dbs 开启一个事务
-const int kStartTran = 102;
+// gtm 返回给 app 的消息，包括txid和需要的dbs列表
+const int kTxid = 103;
+
+// app 发送给 es
+const int kStartTran = 102; // 开启一个事务
+const int kAdd = 104;
+const int kChange = 105;
+const int kDelete = 106;
+const int kSearch = 107;
+const int kCommit = 108; // 提交一个事务
 
 const int kJudgeConflit = 2;
 

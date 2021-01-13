@@ -21,13 +21,8 @@ class GTM : public Singleton<GTM>
     void init();
 
   private:
+    // 对外提供的txid
     std::atomic<int> txid_;
-
-    // void onConnection(const muduo::net::TcpConnectionPtr &);
-    // void onMessage(
-    //     const muduo::net::TcpConnectionPtr &,
-    //     muduo::net::Buffer *,
-    //     muduo::Timestamp);
 
     // 存储每个事务类型对应着的dbservice的ip和端口
     struct IpandPort
@@ -40,7 +35,11 @@ class GTM : public Singleton<GTM>
         int port_;
     };
 
+    // 事务类型--对应的es的ip和端口
     std::unordered_map<std::string, std::list<struct IpandPort *> > transInfo_;
+
+    // 存储每个事务txid需要几台服务器进行全局冲突判断
+    std::unordered_map<int, int> table_;
 };
 
 } // namespace grit

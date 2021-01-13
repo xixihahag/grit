@@ -1,13 +1,13 @@
 // flatc -c -b ./net.fbs
 namespace flat;
 
-union Msg{GtmMsg,AppMsg,DbServiceMsg,DbtlMsg,DbtlAckMsg,AppMsg}
+union Msg{GtmMsg,AppMsg,DbServiceMsg,DbtlMsg,DbtlAckMsg,ESMsg}
 
 // TODO: 有空把这个重新梳理一下，发给谁的就用谁的名字
 
 // 发送给gtm的类型
 table GtmMsg{
-    type:int;
+    cmd:int;
     transType:string;
 }
 
@@ -17,9 +17,17 @@ table ipAndPort{
 }
 
 table AppMsg{
-    type:int;
+    cmd:int;
     txid:int;
     list:[ipAndPort];
+}
+
+table ESMsg{
+    cmd:int;
+    txid:int;
+    type:int;
+    attr:string;
+    val:string;
 }
 
 // // gtm回复的类型
@@ -40,8 +48,9 @@ table Data{
 }
 
 table DbServiceMsg{
-    type:int;
+    cmd:int;
     txid:int;
+    needGlobalConflict:bool;
     isConflict:bool;
     lsn:int;
     readSet:[Data];
@@ -49,7 +58,7 @@ table DbServiceMsg{
 }
 
 table DbtlMsg{
-    type:int;
+    cmd:int;
     txid:int;
     data:[Data];
 }
@@ -57,10 +66,6 @@ table DbtlMsg{
 table DbtlAckMsg{
     lsn:int;
     txid:int;
-}
-
-table AppMsg{
-    type:int;
 }
 
 table RootMsg{

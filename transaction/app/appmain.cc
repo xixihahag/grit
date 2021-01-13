@@ -1,6 +1,6 @@
 #include <iostream>
 #include <glog/logging.h>
-#include "dbservice/dbservice.h"
+#include "app/app.h"
 #include "configManager.h"
 #include "headerCmd.h"
 #include "muduo/net/TcpServer.h"
@@ -13,8 +13,6 @@ using namespace muduo;
 using namespace muduo::net;
 using namespace flat;
 using namespace grit;
-
-grit::DbService *db;
 
 void onConnection(const TcpConnectionPtr &conn)
 {
@@ -71,28 +69,15 @@ int main(int argc, char *argv[])
 
         // 此处可以选择用带对端数据库ip的初始化方式，但方便测试使用默认构造即可
         // 初始化dbservice
-        db = new grit::DbService(&loop);
+        App *app = new App(&loop);
 
-        const char *ip =
-            ConfigManager::getInstance()->dbsListenAddress().c_str();
-        uint16_t port =
-            static_cast<uint16_t>(ConfigManager::getInstance()->dbsPort());
+        app->startTran("buy");
 
-        InetAddress listenAddr(ip, port);
-        int threadCount = ConfigManager::getInstance()->dbsThreads();
+        app->add("buy apple 1");
 
-        TcpServer server(&loop, listenAddr, "dbservice");
+        app->commit();
 
-        server.setConnectionCallback(onConnection);
-        server.setMessageCallback(onMessage);
-
-        if (threadCount > 1) { server.setThreadNum(threadCount); }
-
-        LOG(INFO) << "init dbserwvice done";
-
-        server.start();
-
-        loop.loop();
+        // loop.loop();
     }
 
     return 0;

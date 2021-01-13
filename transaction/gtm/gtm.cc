@@ -7,6 +7,7 @@
 #include "flatbuffers/flatbuffers.h"
 #include "net_generated.h"
 #include "configManager.h"
+#include "headerCmd.h"
 
 using namespace std;
 using namespace grit;
@@ -18,6 +19,8 @@ void GTM::getTxid(const TcpConnectionPtr &conn, string transType)
     flatbuffers::FlatBufferBuilder builder;
     auto list = transInfo_[transType];
 
+    if (list.size() > 1) table_[txid_.load()] = list.size();
+
     vector<flatbuffers::Offset<ipAndPort> > ipAndPortVec;
     for (auto it = list.begin(); it != list.end(); it++) {
         auto ip = builder.CreateString((*it)->ip_);
@@ -26,8 +29,10 @@ void GTM::getTxid(const TcpConnectionPtr &conn, string transType)
     }
     auto ipAndPort = builder.CreateVector(ipAndPortVec);
 
-    auto gtmAck = CreateGtmAck(builder, txid_.load(), ipAndPort);
+    auto gtmAck = CreateAppMsg(builder, kTxid, txid_.load(), ipAndPort);
     builder.Finish(gtmAck);
+
+    txid_++;
 
     char *ptr = (char *) builder.GetBufferPointer();
     uint64_t size = builder.GetSize();
