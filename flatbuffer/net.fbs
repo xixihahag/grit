@@ -26,15 +26,10 @@ table ESMsg{
     cmd:int;
     txid:int;
     type:int;
+    key:string;
     attr:string;
     val:string;
 }
-
-// // gtm回复的类型
-// table GtmAckMsg{
-//     txid:int;
-//     list:[ipAndPort];
-// }
 
 // db返回的数据结构（模拟版）；dbservice拦截时进行解析的数据结构
 // 使用 id+属性名 或 标签+属性名 的方式从存储层读取数据
@@ -42,7 +37,7 @@ table ESMsg{
 table Data{
     // key --> id
     key:string;
-    label:string;
+    // label:string;
     attribute:string;
     value:string;
 }

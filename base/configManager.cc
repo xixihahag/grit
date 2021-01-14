@@ -50,6 +50,10 @@ void ConfigManager::init(const char *configDir)
     SetOrDefaultS(dbtlAddress_, pt.get<string>({"dbtl.address"}));
     SetOrDefaultI(dbtlPort_, pt.get<int>("dbtl.port"));
     SetOrDefaultB(dbtlUseRocksDb_, pt.get<bool>("dbtl.userocksdb"));
+
+    // es
+    SetOrDefaultS(esListenAddress_, pt.get<string>({"es.listenaddress"}));
+    SetOrDefaultI(esPort_, pt.get<int>("es.port"));
 }
 
 } // namespace grit

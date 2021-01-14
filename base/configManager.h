@@ -43,6 +43,10 @@ class ConfigManager : public Singleton<ConfigManager>
     int dbtlPort() { return dbtlPort_; }
     bool dbtlUseRocksDb() { return dbtlUseRocksDb_; }
 
+    // es
+    std::string esListenAddress() { return esListenAddress_; }
+    int esPort() { return esPort_; }
+
   private:
     // basis
     std::string logDir_;
@@ -75,6 +79,10 @@ class ConfigManager : public Singleton<ConfigManager>
     std::string dbtlAddress_;
     int dbtlPort_;
     bool dbtlUseRocksDb_;
+
+    // es
+    std::string esListenAddress_;
+    int esPort_;
 };
 
 } // namespace grit

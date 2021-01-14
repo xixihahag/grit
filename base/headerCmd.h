@@ -14,6 +14,9 @@ const int kDelete = 106;
 const int kSearch = 107;
 const int kCommit = 108; // 提交一个事务
 
+// es 发送给dbs
+const int kData = 109;
+
 const int kJudgeConflit = 2;
 
 const int kLsn = 3;

@@ -129,11 +129,11 @@ void Dbtm::getLsnAndGlobalConflict(int txid)
 
 void Dbtm::solve(const DbServiceMsg *data)
 {
-    auto type = data->type();
+    auto cmd = data->cmd();
     auto txid = data->txid();
     struct transaction *trans = table[txid];
 
-    switch (type) {
+    switch (cmd) {
     case kJudgeConflit:
         if (!(data->isConflict())) trans->isConflict = false;
         break;
@@ -187,16 +187,16 @@ void Dbtm::writeToDisk(struct transaction *tran)
 
     for (auto data : tran->writeSet) {
         auto key = builder.CreateString(data->key);
-        auto label = builder.CreateString(data->label);
+        // auto label = builder.CreateString(data->label);
         auto attr = builder.CreateString(data->attribute);
         auto val = builder.CreateString(data->value);
 
-        auto wData = CreateData(builder, key, label, attr, val);
+        auto wData = CreateData(builder, key, attr, val);
         data_vec.push_back(wData);
     }
 
     auto data_data = builder.CreateVector(data_vec);
-    auto dbtl = CreateDbtl(builder, kData, tran->txid, data_data);
+    auto dbtl = CreateDbtlMsg(builder, kData, tran->txid, data_data);
     builder.Finish(dbtl);
 
     char *ptr = (char *) builder.GetBufferPointer();
@@ -212,7 +212,7 @@ void Dbtm::writeToDisk(struct transaction *tran)
 
     // 通知app事务执行成功
     flatbuffers::FlatBufferBuilder builder;
-    auto app = CreateApp(builder, kTranSuccess);
+    auto app = CreateAppMsg(builder, kTranSuccess);
     builder.Finish(app);
 
     char *ptr = (char *) builder.GetBufferPointer();
@@ -228,16 +228,16 @@ void Dbtm::sendLog(struct transaction *tran)
 
     for (auto data : tran->writeSet) {
         auto key = builder.CreateString(data->key);
-        auto label = builder.CreateString(data->label);
+        // auto label = builder.CreateString(data->label);
         auto attr = builder.CreateString(data->attribute);
         auto val = builder.CreateString(data->value);
 
-        auto wData = CreateData(builder, key, label, attr, val);
+        auto wData = CreateData(builder, key, attr, val);
         data_vec.push_back(wData);
     }
 
     auto data_data = builder.CreateVector(data_vec);
-    auto dbtl = CreateDbtl(builder, kData, tran->txid, data_data);
+    auto dbtl = CreateDbtlMsg(builder, kData, tran->txid, data_data);
     builder.Finish(dbtl);
 
     char *ptr = (char *) builder.GetBufferPointer();

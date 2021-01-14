@@ -80,8 +80,17 @@ void App::onESConnection(const muduo::net::TcpConnectionPtr &conn)
 }
 
 /*
-    add node attr val
-    add edge node1 node2
+    add node key attr val
+    add edge key attr val
+
+    change node key attr val
+    change edge key attr val
+
+    delete node key
+    delete edge key
+
+    search node key
+    search delete key
 */
 void App::add(string str)
 {
@@ -92,6 +101,7 @@ void App::add(string str)
     while (pos2 < len && str[pos2] != ' ')
         pos2++;
 
+    // add change delete search
     int cmd;
     string type = str.substr(pos1, pos2 - pos1);
     pos1 = ++pos2;
@@ -106,26 +116,45 @@ void App::add(string str)
     else
         LOG(ERROR) << "order error";
 
+    // type : node or edge
     while (pos2 < len && str[pos2] != ' ')
         pos2++;
     int typ = stoi(str.substr(pos1, pos2 - pos1));
     pos1 = ++pos2;
 
+    // key
     while (pos2 < len && str[pos2] != ' ')
         pos2++;
-    auto attr = builder.CreateString(str.substr(pos1, pos2 - pos1));
+    auto key = builder.CreateString(str.substr(pos1, pos2 - pos1));
     pos1 = ++pos2;
 
-    while (pos2 < len && str[pos2] != ' ')
-        pos2++;
-    auto val = builder.CreateString(str.substr(pos1, pos2 - pos1));
+    char *ptr = nullptr;
+    uint64_t size = 0;
 
-    auto es = CreateESMsg(builder, cmd, txid_, typ, attr, val);
-    builder.Finish(es);
+    if (cmd == kAdd || cmd == kChange) {
+        // attr
+        while (pos2 < len && str[pos2] != ' ')
+            pos2++;
+        auto attr = builder.CreateString(str.substr(pos1, pos2 - pos1));
+        pos1 = ++pos2;
 
-    char *ptr = (char *) builder.GetBufferPointer();
-    uint64_t size = builder.GetSize();
+        // val
+        while (pos2 < len && str[pos2] != ' ')
+            pos2++;
+        auto val = builder.CreateString(str.substr(pos1, pos2 - pos1));
 
+        auto es = CreateESMsg(builder, cmd, txid_, typ, key, attr, val);
+        builder.Finish(es);
+
+        ptr = (char *) builder.GetBufferPointer();
+        size = builder.GetSize();
+    } else {
+        auto es = CreateESMsg(builder, cmd, txid_, typ, key);
+        builder.Finish(es);
+
+        ptr = (char *) builder.GetBufferPointer();
+        size = builder.GetSize();
+    }
     // FIXME:
     // 只有一个数据库的情况下可以这么干，多个数据库需要有一个方法来识别发给哪个连接
     connList_.front()->send(ptr, size);

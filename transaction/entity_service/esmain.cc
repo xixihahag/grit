@@ -1,12 +1,12 @@
 #include <iostream>
 #include <glog/logging.h>
-#include "dbservice/dbservice.h"
 #include "configManager.h"
 #include "headerCmd.h"
 #include "muduo/net/TcpServer.h"
 #include "muduo/net/EventLoop.h"
 #include "flatbuffers/flatbuffers.h"
 #include "net_generated.h"
+#include "es.h"
 
 using namespace std;
 using namespace muduo;
@@ -14,7 +14,7 @@ using namespace muduo::net;
 using namespace flat;
 using namespace grit;
 
-grit::DbService *db;
+ES *es;
 
 void onConnection(const TcpConnectionPtr &conn)
 {
@@ -28,18 +28,24 @@ void onConnection(const TcpConnectionPtr &conn)
 void onMessage(const TcpConnectionPtr &conn, Buffer *buf, Timestamp)
 {
     auto msg = GetRootMsg((uint8_t *) buf->retrieveAllAsString().c_str());
-    auto data = static_cast<const DbServiceMsg *>(msg->any());
+    auto data = static_cast<const ESMsg *>(msg->any());
     auto cmd = data->cmd();
 
     switch (cmd) {
-    case kData:
-        db->getReadWriteSet(conn, data);
+    case kAdd:
+    case kDelete:
+    case kChange:
+    case kSearch:
+        // FIXME:
+        // 讲道理这里应该做一些业务上的处理，转换成对应的sql语句，解析sql再转发过去的
+        // 为了演示简单，逻辑完整，这里直接转换成读写集的形式再发送给dbs
+        es->solve(data);
         break;
-    default: // FIXME: 这里改掉
-        // 扔给DBTM处理
-        db->threadPool_->enqueue(bind(&Dbtm::solve, db->dbtm_, data));
+    case kCommit:
+        es->forward(data);
+        break;
     default:
-        LOG(ERROR) << "reveive error cmd";
+        LOG(ERROR) << "receive error cmd";
     }
 }
 
@@ -73,24 +79,24 @@ int main(int argc, char *argv[])
 
         // 此处可以选择用带对端数据库ip的初始化方式，但方便测试使用默认构造即可
         // 初始化dbservice
-        db = new grit::DbService(&loop);
+        es = new ES(&loop);
 
         const char *ip =
-            ConfigManager::getInstance()->dbsListenAddress().c_str();
+            ConfigManager::getInstance()->esListenAddress().c_str();
         uint16_t port =
-            static_cast<uint16_t>(ConfigManager::getInstance()->dbsPort());
+            static_cast<uint16_t>(ConfigManager::getInstance()->esPort());
 
         InetAddress listenAddr(ip, port);
-        int threadCount = ConfigManager::getInstance()->dbsThreads();
+        // int threadCount = ConfigManager::getInstance()->dbsThreads();
 
-        TcpServer server(&loop, listenAddr, "dbservice");
+        TcpServer server(&loop, listenAddr, "es");
 
         server.setConnectionCallback(onConnection);
         server.setMessageCallback(onMessage);
 
-        if (threadCount > 1) { server.setThreadNum(threadCount); }
+        // if (threadCount > 1) { server.setThreadNum(threadCount); }
 
-        LOG(INFO) << "init dbserwvice done";
+        LOG(INFO) << "init es done";
 
         server.start();
 

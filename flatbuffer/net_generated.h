@@ -322,8 +322,9 @@ struct ESMsg FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
     VT_CMD = 4,
     VT_TXID = 6,
     VT_TYPE = 8,
-    VT_ATTR = 10,
-    VT_VAL = 12
+    VT_KEY = 10,
+    VT_ATTR = 12,
+    VT_VAL = 14
   };
   int32_t cmd() const {
     return GetField<int32_t>(VT_CMD, 0);
@@ -333,6 +334,9 @@ struct ESMsg FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   }
   int32_t type() const {
     return GetField<int32_t>(VT_TYPE, 0);
+  }
+  const flatbuffers::String *key() const {
+    return GetPointer<const flatbuffers::String *>(VT_KEY);
   }
   const flatbuffers::String *attr() const {
     return GetPointer<const flatbuffers::String *>(VT_ATTR);
@@ -345,6 +349,8 @@ struct ESMsg FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
            VerifyField<int32_t>(verifier, VT_CMD) &&
            VerifyField<int32_t>(verifier, VT_TXID) &&
            VerifyField<int32_t>(verifier, VT_TYPE) &&
+           VerifyOffset(verifier, VT_KEY) &&
+           verifier.VerifyString(key()) &&
            VerifyOffset(verifier, VT_ATTR) &&
            verifier.VerifyString(attr()) &&
            VerifyOffset(verifier, VT_VAL) &&
@@ -365,6 +371,9 @@ struct ESMsgBuilder {
   }
   void add_type(int32_t type) {
     fbb_.AddElement<int32_t>(ESMsg::VT_TYPE, type, 0);
+  }
+  void add_key(flatbuffers::Offset<flatbuffers::String> key) {
+    fbb_.AddOffset(ESMsg::VT_KEY, key);
   }
   void add_attr(flatbuffers::Offset<flatbuffers::String> attr) {
     fbb_.AddOffset(ESMsg::VT_ATTR, attr);
@@ -389,11 +398,13 @@ inline flatbuffers::Offset<ESMsg> CreateESMsg(
     int32_t cmd = 0,
     int32_t txid = 0,
     int32_t type = 0,
+    flatbuffers::Offset<flatbuffers::String> key = 0,
     flatbuffers::Offset<flatbuffers::String> attr = 0,
     flatbuffers::Offset<flatbuffers::String> val = 0) {
   ESMsgBuilder builder_(_fbb);
   builder_.add_val(val);
   builder_.add_attr(attr);
+  builder_.add_key(key);
   builder_.add_type(type);
   builder_.add_txid(txid);
   builder_.add_cmd(cmd);
@@ -405,8 +416,10 @@ inline flatbuffers::Offset<ESMsg> CreateESMsgDirect(
     int32_t cmd = 0,
     int32_t txid = 0,
     int32_t type = 0,
+    const char *key = nullptr,
     const char *attr = nullptr,
     const char *val = nullptr) {
+  auto key__ = key ? _fbb.CreateString(key) : 0;
   auto attr__ = attr ? _fbb.CreateString(attr) : 0;
   auto val__ = val ? _fbb.CreateString(val) : 0;
   return flat::CreateESMsg(
@@ -414,6 +427,7 @@ inline flatbuffers::Offset<ESMsg> CreateESMsgDirect(
       cmd,
       txid,
       type,
+      key__,
       attr__,
       val__);
 }
@@ -422,15 +436,11 @@ struct Data FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   typedef DataBuilder Builder;
   enum FlatBuffersVTableOffset FLATBUFFERS_VTABLE_UNDERLYING_TYPE {
     VT_KEY = 4,
-    VT_LABEL = 6,
-    VT_ATTRIBUTE = 8,
-    VT_VALUE = 10
+    VT_ATTRIBUTE = 6,
+    VT_VALUE = 8
   };
   const flatbuffers::String *key() const {
     return GetPointer<const flatbuffers::String *>(VT_KEY);
-  }
-  const flatbuffers::String *label() const {
-    return GetPointer<const flatbuffers::String *>(VT_LABEL);
   }
   const flatbuffers::String *attribute() const {
     return GetPointer<const flatbuffers::String *>(VT_ATTRIBUTE);
@@ -442,8 +452,6 @@ struct Data FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
     return VerifyTableStart(verifier) &&
            VerifyOffset(verifier, VT_KEY) &&
            verifier.VerifyString(key()) &&
-           VerifyOffset(verifier, VT_LABEL) &&
-           verifier.VerifyString(label()) &&
            VerifyOffset(verifier, VT_ATTRIBUTE) &&
            verifier.VerifyString(attribute()) &&
            VerifyOffset(verifier, VT_VALUE) &&
@@ -458,9 +466,6 @@ struct DataBuilder {
   flatbuffers::uoffset_t start_;
   void add_key(flatbuffers::Offset<flatbuffers::String> key) {
     fbb_.AddOffset(Data::VT_KEY, key);
-  }
-  void add_label(flatbuffers::Offset<flatbuffers::String> label) {
-    fbb_.AddOffset(Data::VT_LABEL, label);
   }
   void add_attribute(flatbuffers::Offset<flatbuffers::String> attribute) {
     fbb_.AddOffset(Data::VT_ATTRIBUTE, attribute);
@@ -483,13 +488,11 @@ struct DataBuilder {
 inline flatbuffers::Offset<Data> CreateData(
     flatbuffers::FlatBufferBuilder &_fbb,
     flatbuffers::Offset<flatbuffers::String> key = 0,
-    flatbuffers::Offset<flatbuffers::String> label = 0,
     flatbuffers::Offset<flatbuffers::String> attribute = 0,
     flatbuffers::Offset<flatbuffers::String> value = 0) {
   DataBuilder builder_(_fbb);
   builder_.add_value(value);
   builder_.add_attribute(attribute);
-  builder_.add_label(label);
   builder_.add_key(key);
   return builder_.Finish();
 }
@@ -497,17 +500,14 @@ inline flatbuffers::Offset<Data> CreateData(
 inline flatbuffers::Offset<Data> CreateDataDirect(
     flatbuffers::FlatBufferBuilder &_fbb,
     const char *key = nullptr,
-    const char *label = nullptr,
     const char *attribute = nullptr,
     const char *value = nullptr) {
   auto key__ = key ? _fbb.CreateString(key) : 0;
-  auto label__ = label ? _fbb.CreateString(label) : 0;
   auto attribute__ = attribute ? _fbb.CreateString(attribute) : 0;
   auto value__ = value ? _fbb.CreateString(value) : 0;
   return flat::CreateData(
       _fbb,
       key__,
-      label__,
       attribute__,
       value__);
 }
