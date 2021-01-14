@@ -26,11 +26,13 @@ Dbtm::~Dbtm()
 
 void Dbtm::onDbtlConnection(const muduo::net::TcpConnectionPtr &conn)
 {
+    if (conn->connected()) { conn->setTcpNoDelay(true); }
     LOG(INFO) << "connect tbtl success";
     dbtlConn_ = conn;
 }
 void Dbtm::onGtmConnection(const muduo::net::TcpConnectionPtr &conn)
 {
+    if (conn->connected()) { conn->setTcpNoDelay(true); }
     LOG(INFO) << "connect gtm success";
     gtmConn_ = conn;
 }
@@ -53,19 +55,6 @@ void Dbtm::init(EventLoop *loop)
     TcpClient *gtmClient_ = new TcpClient(loop, servAddr, "gtm");
     gtmClient_->connect();
     gtmClient_->setConnectionCallback(bind(&onGtmConnection, this, _1));
-
-    // // 打开rocksDB
-    // // Optimize RocksDB. This is the easiest way to get RocksDB to perform
-    // well rockesDBOptions_.IncreaseParallelism();
-    // rockesDBOptions_.OptimizeLevelStyleCompaction();
-    // // create the DB if it's not already present
-    // rockesDBOptions_.create_if_missing = true;
-    // // open DB
-    // Status s = DB::Open(
-    //     rockesDBOptions_,
-    //     ConfigManager::getInstance()->dbtmRocksDbPath(),
-    //     &rocksDb_);
-    // if (!s.ok()) LOG(ERROR) << "open rocksDB error";
 
     // 开启落盘线程池
     threadPool_ = new ThreadPool(1);

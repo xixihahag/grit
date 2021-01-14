@@ -3,6 +3,7 @@
 
 using namespace std;
 using namespace grit;
+using namespace flat;
 
 void DbService::test() {}
 
@@ -22,7 +23,7 @@ void DbService::getReadWriteSet(
     transaction *tran = new transaction();
     tran->txid = data->txid();
 
-    table[tran->txid] = conn;
+    table_[tran->txid] = conn;
 
     int rsize = data->readSet()->size();
 
@@ -31,15 +32,13 @@ void DbService::getReadWriteSet(
 
         Data *rdata = new Data(
             rset->key()->str(),
-            rset->label()->str(),
-            rset->label()->str(),
-            rset->attribute()->str());
+            "",
+            rset->attribute()->str(),
+            rset->value()->str());
         tran->readSet.emplace_back(rdata);
 
         tran->trcheck.emplace(rdata->key);
     }
-
-    // dosomethin to change value
 
     int wsize = data->writeSet()->size();
     for (int i = 0; i < wsize; i++) {
@@ -47,7 +46,7 @@ void DbService::getReadWriteSet(
 
         Data *wdata = new Data(
             wset->key()->str(),
-            wset->label()->str(),
+            "",
             wset->attribute()->str(),
             wset->value()->str());
 
@@ -55,6 +54,8 @@ void DbService::getReadWriteSet(
 
         tran->twcheck.emplace(wdata->key);
     }
+
+    tran->needGlobalConflct = data->needGlobalConflict();
 
     // 发送给DBTM处理 考虑用不用线程池 讲道理n方的复杂度，还是用起来比较好
     threadPool_->enqueue(bind(&Dbtm::judgeLocalConflict, dbtm_, tran));

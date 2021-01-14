@@ -46,7 +46,7 @@ table DbServiceMsg{
     cmd:int;
     txid:int;
     needGlobalConflict:bool;
-    isConflict:bool;
+    isGlobalConflict:bool;
     lsn:int;
     readSet:[Data];
     writeSet:[Data];

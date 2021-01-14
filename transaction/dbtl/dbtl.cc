@@ -35,11 +35,11 @@ grit::Dbtl::Dbtl()
 
 void grit::Dbtl::solve(
     const muduo::net::TcpConnectionPtr &conn,
-    const flat::Dbtl *dbtl)
+    const flat::DbtlMsg *dbtl)
 {
-    auto type = dbtl->type();
+    auto cmd = dbtl->cmd();
 
-    switch (type) {
+    switch (cmd) {
     case kLog:
         if (ConfigManager::getInstance()->dbtlUseRocksDb())
             writeToDiskByRocksDb(dbtl->txid(), dbtl->data());

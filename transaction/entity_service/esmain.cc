@@ -31,6 +31,8 @@ void onMessage(const TcpConnectionPtr &conn, Buffer *buf, Timestamp)
     auto data = static_cast<const ESMsg *>(msg->any());
     auto cmd = data->cmd();
 
+    es->table_[data->txid()] = conn;
+
     switch (cmd) {
     case kAdd:
     case kDelete:

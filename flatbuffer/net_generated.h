@@ -518,7 +518,7 @@ struct DbServiceMsg FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
     VT_CMD = 4,
     VT_TXID = 6,
     VT_NEEDGLOBALCONFLICT = 8,
-    VT_ISCONFLICT = 10,
+    VT_ISGLOBALCONFLICT = 10,
     VT_LSN = 12,
     VT_READSET = 14,
     VT_WRITESET = 16
@@ -532,8 +532,8 @@ struct DbServiceMsg FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   bool needGlobalConflict() const {
     return GetField<uint8_t>(VT_NEEDGLOBALCONFLICT, 0) != 0;
   }
-  bool isConflict() const {
-    return GetField<uint8_t>(VT_ISCONFLICT, 0) != 0;
+  bool isGlobalConflict() const {
+    return GetField<uint8_t>(VT_ISGLOBALCONFLICT, 0) != 0;
   }
   int32_t lsn() const {
     return GetField<int32_t>(VT_LSN, 0);
@@ -549,7 +549,7 @@ struct DbServiceMsg FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
            VerifyField<int32_t>(verifier, VT_CMD) &&
            VerifyField<int32_t>(verifier, VT_TXID) &&
            VerifyField<uint8_t>(verifier, VT_NEEDGLOBALCONFLICT) &&
-           VerifyField<uint8_t>(verifier, VT_ISCONFLICT) &&
+           VerifyField<uint8_t>(verifier, VT_ISGLOBALCONFLICT) &&
            VerifyField<int32_t>(verifier, VT_LSN) &&
            VerifyOffset(verifier, VT_READSET) &&
            verifier.VerifyVector(readSet()) &&
@@ -574,8 +574,8 @@ struct DbServiceMsgBuilder {
   void add_needGlobalConflict(bool needGlobalConflict) {
     fbb_.AddElement<uint8_t>(DbServiceMsg::VT_NEEDGLOBALCONFLICT, static_cast<uint8_t>(needGlobalConflict), 0);
   }
-  void add_isConflict(bool isConflict) {
-    fbb_.AddElement<uint8_t>(DbServiceMsg::VT_ISCONFLICT, static_cast<uint8_t>(isConflict), 0);
+  void add_isGlobalConflict(bool isGlobalConflict) {
+    fbb_.AddElement<uint8_t>(DbServiceMsg::VT_ISGLOBALCONFLICT, static_cast<uint8_t>(isGlobalConflict), 0);
   }
   void add_lsn(int32_t lsn) {
     fbb_.AddElement<int32_t>(DbServiceMsg::VT_LSN, lsn, 0);
@@ -603,7 +603,7 @@ inline flatbuffers::Offset<DbServiceMsg> CreateDbServiceMsg(
     int32_t cmd = 0,
     int32_t txid = 0,
     bool needGlobalConflict = false,
-    bool isConflict = false,
+    bool isGlobalConflict = false,
     int32_t lsn = 0,
     flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<flat::Data>>> readSet = 0,
     flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<flat::Data>>> writeSet = 0) {
@@ -613,7 +613,7 @@ inline flatbuffers::Offset<DbServiceMsg> CreateDbServiceMsg(
   builder_.add_lsn(lsn);
   builder_.add_txid(txid);
   builder_.add_cmd(cmd);
-  builder_.add_isConflict(isConflict);
+  builder_.add_isGlobalConflict(isGlobalConflict);
   builder_.add_needGlobalConflict(needGlobalConflict);
   return builder_.Finish();
 }
@@ -623,7 +623,7 @@ inline flatbuffers::Offset<DbServiceMsg> CreateDbServiceMsgDirect(
     int32_t cmd = 0,
     int32_t txid = 0,
     bool needGlobalConflict = false,
-    bool isConflict = false,
+    bool isGlobalConflict = false,
     int32_t lsn = 0,
     const std::vector<flatbuffers::Offset<flat::Data>> *readSet = nullptr,
     const std::vector<flatbuffers::Offset<flat::Data>> *writeSet = nullptr) {
@@ -634,7 +634,7 @@ inline flatbuffers::Offset<DbServiceMsg> CreateDbServiceMsgDirect(
       cmd,
       txid,
       needGlobalConflict,
-      isConflict,
+      isGlobalConflict,
       lsn,
       readSet__,
       writeSet__);

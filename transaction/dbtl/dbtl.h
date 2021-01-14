@@ -15,7 +15,7 @@ class Dbtl
   public:
     Dbtl();
 
-    void solve(const muduo::net::TcpConnectionPtr &, const flat::Dbtl *);
+    void solve(const muduo::net::TcpConnectionPtr &, const flat::DbtlMsg *);
 
   private:
     void writeToDisk(
@@ -30,7 +30,8 @@ class Dbtl
     // 开启本地rocksDB
     Options rockesDBOptions_;
 
-    // TODO: lsn应该是这边负责维护的
+    // 第一个是分发出去的lsn，第二个是已经落盘的lsn号
+    atomic<int> lsn_, applyLsn_;
 };
 
 } // namespace grit

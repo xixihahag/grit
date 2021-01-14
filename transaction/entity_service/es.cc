@@ -27,6 +27,7 @@ ES::ES(EventLoop *loop)
 
 void ES::onDbsConnection(const muduo::net::TcpConnectionPtr &conn)
 {
+    if (conn->connected()) { conn->setTcpNoDelay(true); }
     dbsConn_ = conn;
 }
 

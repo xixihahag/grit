@@ -49,13 +49,40 @@ class Dbtm
     void onGtmConnection(const TcpConnectionPtr &);
 
     // 用于快速进行数据冲突验证
-    // TODO: 数据验证好像可以用位图来做，参考底层的分布式图数据库存储
-    // 第一个是lsn
-    std::unordered_map<std::string, std::unordered_set<std::string> > rcheck,
-        wcheck;
+    // FIXME: 数据验证好像可以用位图来做，参考底层的分布式图数据库存储
+    // 得改，要不然时间复杂度太大了，可以考虑做成开链法hash图
+    // 第一个是lsn，第二个是key
+    unordered_map<std::string, std::unordered_set<std::string> > rcheck, wcheck;
+
+    // FIXME: test
+    struct Info
+    {
+        std::string key;
+        int lsn;
+    };
+
+    struct Info_hash
+    {
+        std::size_t operator()(const Info &rhs) const
+        {
+            return std::hash<std::string>()(rhs.key);
+        }
+    };
+
+    struct Info_cmp
+    {
+        bool operator()(const Info &lhs, const Info &rhs) const
+        {
+            return lhs.key == rhs.key;
+        }
+    };
+
+    unordered_set<struct Info, Info_hash, Info_cmp> ust;
+
+    // FIXME: testEND
 
     // 用于txid和对应事务的映射
-    std::unordered_map<int, struct transaction *> table;
+    unordered_map<int, struct transaction *> table;
 
     // 连接dbtl和gtm
     TcpConnectionPtr dbtlConn_, gtmConn_;

@@ -34,10 +34,18 @@ struct Data
 // 代表一个事务
 struct transaction
 {
+    transaction()
+        : needGlobalConflct(false)
+        , localConflict(false)
+        , globalConflict(false)
+    {}
+
     int txid;
     std::list<Data *> readSet;
     std::list<Data *> writeSet;
-    bool isConflict;
+    bool needGlobalConflct;
+    bool localConflict;
+    bool globalConflict;
     std::string lsn;
     std::unordered_set<std::string> trcheck, twcheck;
 };
@@ -74,8 +82,8 @@ class DbService
     void
     getReadWriteSet(const muduo::net::TcpConnectionPtr &, const DbServiceMsg *);
 
-    // 用于记录txid和conn的对应
-    unordered_map<int, muduo::net::TcpConnectionPtr> table;
+    // 用于记录txid和es的conn的对应
+    unordered_map<int, muduo::net::TcpConnectionPtr> table_;
 
     ThreadPool *threadPool_;
     Dbtm *dbtm_;
