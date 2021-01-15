@@ -63,39 +63,62 @@ void Dbtm::init(EventLoop *loop)
 void Dbtm::judgeLocalConflict(struct transaction *trans)
 {
     auto lsn = trans->lsn;
-
     bool haveConflict = false;
-    for (auto it = rcheck.begin(); it != rcheck.end() && !haveConflict;) {
-        if (it->first > lsn) {
-            for (auto rs : trans->readSet)
-                if (it->second.find(rs->key) != it->second.end()) {
-                    haveConflict = true;
-                    break;
-                }
-            it++;
-        } else
-            it = rcheck.erase(it);
+
+    // 检查读写冲突
+    for (auto it : trans->readSet) {
+        wcheck.delLessThan(it->key, trans->lsn);
+        if (wcheck.exist(it->key)) {
+            haveConflict = true;
+            break;
+        }
     }
 
-    for (auto it = wcheck.begin(); it != wcheck.end() && !haveConflict;) {
-        if (it->first > lsn) {
-            for (auto ws : trans->writeSet)
-                if (it->second.find(ws->key) != it->second.end()) {
-                    haveConflict = true;
-                    break;
-                }
-            it++;
-        } else
-            it = wcheck.erase(it);
+    // 检查写写冲突
+    for (auto it : trans->writeSet) {
+        if (haveConflict) break;
+        wcheck.delLessThan(it->key, trans->lsn);
+        if (wcheck.exist(it->key)) {
+            haveConflict = true;
+            break;
+        }
     }
 
     if (!haveConflict) {
-        table[trans->txid] = trans;
-        getLsnAndGlobalConflict(trans->txid);
+        table_[trans->txid] = trans;
+        dbservice_->txidTrans_.erase(trans->txid);
+        if (trans->needGlobalConflct)
+            judgeGlobalConflict(trans->txid);
+        else
+            cacheRWSet(trans);
+    } else {
+        LOG(INFO) << "There are conflicts between transactions (local)";
+        dbservice_->tranFail(trans->txid);
     }
 }
 
-void Dbtm::getLsnAndGlobalConflict(int txid)
+// void Dbtm::getLsnAndGlobalConflict(int txid)
+// {
+//     flatbuffers::FlatBufferBuilder builder;
+//     auto dbtl = CreateDbtlMsg(builder, kLsn, txid);
+//     builder.Finish(dbtl);
+
+//     char *ptr = (char *) builder.GetBufferPointer();
+//     uint64_t size = builder.GetSize();
+
+//     dbtlConn_->send(ptr, size);
+
+//     flatbuffers::FlatBufferBuilder builder1;
+//     auto gtm = CreateGtmMsg(builder1, kJudgeConflit, txid);
+//     builder.Finish(gtm);
+
+//     ptr = (char *) builder1.GetBufferPointer();
+//     size = builder1.GetSize();
+
+//     gtmConn_->send(ptr, size);
+// }
+
+void Dbtm::getLsn(int txid)
 {
     flatbuffers::FlatBufferBuilder builder;
     auto dbtl = CreateDbtlMsg(builder, kLsn, txid);
@@ -105,13 +128,16 @@ void Dbtm::getLsnAndGlobalConflict(int txid)
     uint64_t size = builder.GetSize();
 
     dbtlConn_->send(ptr, size);
+}
 
-    flatbuffers::FlatBufferBuilder builder1;
-    auto gtm = CreateGtmMsg(builder1, kJudgeConflit, txid);
+void Dbtm::judgeGlobalConflict(int txid)
+{
+    flatbuffers::FlatBufferBuilder builder;
+    auto gtm = CreateGtmMsg(builder, kJudgeConflit, txid);
     builder.Finish(gtm);
 
-    ptr = (char *) builder1.GetBufferPointer();
-    size = builder1.GetSize();
+    char *ptr = (char *) builder.GetBufferPointer();
+    uint64_t size = builder.GetSize();
 
     gtmConn_->send(ptr, size);
 }
@@ -119,26 +145,26 @@ void Dbtm::getLsnAndGlobalConflict(int txid)
 void Dbtm::solve(const DbServiceMsg *data)
 {
     auto cmd = data->cmd();
-    auto txid = data->txid();
-    struct transaction *trans = table[txid];
 
     switch (cmd) {
+    // 全局判冲突结果返回
     case kJudgeConflit:
-        if (!(data->isConflict())) trans->isConflict = false;
+        if (!(data->isGlobalConflict()))
+            cacheRWSet(table_[data->txid()]);
+        else {
+            LOG(INFO) << "There are conflicts between transactions (global)";
+            dbservice_->tranFail(data->txid());
+        }
         break;
-    case kLsn:
-        trans->lsn = data->lsn();
     }
-
-    if (!(trans->isConflict) && trans->lsn.size() > 0) cacheRWSet(trans);
 }
 
 void Dbtm::cacheRWSet(struct transaction *tran)
 {
-    string lsn = tran->lsn;
+    int lsn = tran->lsn;
 
-    rcheck[lsn].emplace(tran->trcheck);
-    wcheck[lsn].emplace(tran->twcheck);
+    for (auto it : tran->writeSet)
+        wcheck.insert(it->key, lsn);
 
     sendLog(tran);
 }
@@ -169,6 +195,7 @@ void Dbtm::writeToDiskByRocksDB(struct transaction *tran)
 }
 
 // TODO: 这样落盘很慢，不行找个东西优化下
+// 以dbtl消息的形式将数据落盘，判断一下什么时候落盘，是否落盘
 void Dbtm::writeToDisk(struct transaction *tran)
 {
     flatbuffers::FlatBufferBuilder builder;
@@ -207,7 +234,7 @@ void Dbtm::writeToDisk(struct transaction *tran)
     char *ptr = (char *) builder.GetBufferPointer();
     uint64_t size = builder.GetSize();
 
-    dbservice_->table[tran->txid]->send(ptr, size);
+    dbservice_->table_[tran->txid]->send(ptr, size);
 }
 
 void Dbtm::sendLog(struct transaction *tran)

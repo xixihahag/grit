@@ -321,16 +321,20 @@ struct ESMsg FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   enum FlatBuffersVTableOffset FLATBUFFERS_VTABLE_UNDERLYING_TYPE {
     VT_CMD = 4,
     VT_TXID = 6,
-    VT_TYPE = 8,
-    VT_KEY = 10,
-    VT_ATTR = 12,
-    VT_VAL = 14
+    VT_NEEDGLOBALCONFLICT = 8,
+    VT_TYPE = 10,
+    VT_KEY = 12,
+    VT_ATTR = 14,
+    VT_VAL = 16
   };
   int32_t cmd() const {
     return GetField<int32_t>(VT_CMD, 0);
   }
   int32_t txid() const {
     return GetField<int32_t>(VT_TXID, 0);
+  }
+  bool needGlobalConflict() const {
+    return GetField<uint8_t>(VT_NEEDGLOBALCONFLICT, 0) != 0;
   }
   int32_t type() const {
     return GetField<int32_t>(VT_TYPE, 0);
@@ -348,6 +352,7 @@ struct ESMsg FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
     return VerifyTableStart(verifier) &&
            VerifyField<int32_t>(verifier, VT_CMD) &&
            VerifyField<int32_t>(verifier, VT_TXID) &&
+           VerifyField<uint8_t>(verifier, VT_NEEDGLOBALCONFLICT) &&
            VerifyField<int32_t>(verifier, VT_TYPE) &&
            VerifyOffset(verifier, VT_KEY) &&
            verifier.VerifyString(key()) &&
@@ -368,6 +373,9 @@ struct ESMsgBuilder {
   }
   void add_txid(int32_t txid) {
     fbb_.AddElement<int32_t>(ESMsg::VT_TXID, txid, 0);
+  }
+  void add_needGlobalConflict(bool needGlobalConflict) {
+    fbb_.AddElement<uint8_t>(ESMsg::VT_NEEDGLOBALCONFLICT, static_cast<uint8_t>(needGlobalConflict), 0);
   }
   void add_type(int32_t type) {
     fbb_.AddElement<int32_t>(ESMsg::VT_TYPE, type, 0);
@@ -397,6 +405,7 @@ inline flatbuffers::Offset<ESMsg> CreateESMsg(
     flatbuffers::FlatBufferBuilder &_fbb,
     int32_t cmd = 0,
     int32_t txid = 0,
+    bool needGlobalConflict = false,
     int32_t type = 0,
     flatbuffers::Offset<flatbuffers::String> key = 0,
     flatbuffers::Offset<flatbuffers::String> attr = 0,
@@ -408,6 +417,7 @@ inline flatbuffers::Offset<ESMsg> CreateESMsg(
   builder_.add_type(type);
   builder_.add_txid(txid);
   builder_.add_cmd(cmd);
+  builder_.add_needGlobalConflict(needGlobalConflict);
   return builder_.Finish();
 }
 
@@ -415,6 +425,7 @@ inline flatbuffers::Offset<ESMsg> CreateESMsgDirect(
     flatbuffers::FlatBufferBuilder &_fbb,
     int32_t cmd = 0,
     int32_t txid = 0,
+    bool needGlobalConflict = false,
     int32_t type = 0,
     const char *key = nullptr,
     const char *attr = nullptr,
@@ -426,6 +437,7 @@ inline flatbuffers::Offset<ESMsg> CreateESMsgDirect(
       _fbb,
       cmd,
       txid,
+      needGlobalConflict,
       type,
       key__,
       attr__,

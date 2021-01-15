@@ -9,6 +9,7 @@
 #include <unordered_set>
 #include <unordered_map>
 #include "muduo/net/EventLoop.h"
+#include "muduo/net/TcpConnection.h"
 #include "net_generated.h"
 #include "threadPool.h"
 #include "dbtm/dbtm.h"
@@ -37,7 +38,9 @@ struct transaction
     transaction()
         : needGlobalConflct(false)
         , localConflict(false)
-        , globalConflict(false)
+        // , globalConflict(false)
+        , lsn(-1)
+        , alreadyCommit(false)
     {}
 
     int txid;
@@ -45,9 +48,12 @@ struct transaction
     std::list<Data *> writeSet;
     bool needGlobalConflct;
     bool localConflict;
-    bool globalConflict;
-    std::string lsn;
-    std::unordered_set<std::string> trcheck, twcheck;
+    // bool globalConflict;
+    int lsn;
+    // std::unordered_set<std::string> trcheck, twcheck;
+
+    // 用于处理得到lsn前就已经commit的情况
+    bool alreadyCommit;
 };
 
 class DbService
@@ -79,11 +85,22 @@ class DbService
     void connectToDatabase();
 
     // 从传输过来的数据中解析读写集
-    void
-    getReadWriteSet(const muduo::net::TcpConnectionPtr &, const DbServiceMsg *);
+    void getReadWriteSet(const TcpConnectionPtr &, const DbServiceMsg *);
 
-    // 用于记录txid和es的conn的对应
-    unordered_map<int, muduo::net::TcpConnectionPtr> table_;
+    // // 向es返回事务执行成功，参数为txid
+    // void tranSuccess(int);
+
+    // // 向es返回事务执行失败，参数为txid
+    // void tranFail(int);
+
+    // 用于向上层返回事务结果，第一个参数为事务执行结果，第二个参数为txid
+    void retResult(int, int);
+
+    // 记录txid和es的conn的对应，用于向上层反馈事务执行结果
+    unordered_map<int, TcpConnectionPtr> table_;
+
+    // 记录txid和trans的对应关系
+    unordered_map<int, struct transaction *> txidTrans_;
 
     ThreadPool *threadPool_;
     Dbtm *dbtm_;

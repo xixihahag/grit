@@ -17,6 +17,10 @@ const int kCommit = 108; // 提交一个事务
 // es 发送给dbs
 const int kData = 109;
 
+// 日志发送给dbtl后，由dbtl返回 标志事务执行成功
+const int kTranSuccess = 110;
+const int kTranFail = 111;
+
 const int kJudgeConflit = 2;
 
 const int kLsn = 3;

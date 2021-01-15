@@ -25,6 +25,7 @@ table AppMsg{
 table ESMsg{
     cmd:int;
     txid:int;
+    needGlobalConflict:bool;
     type:int;
     key:string;
     attr:string;

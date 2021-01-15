@@ -6,6 +6,7 @@
 #include "rocksdb/options.h"
 #include "threadPool.h"
 #include "dbservice/dbservice.h"
+#include "base/hash.h"
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
@@ -27,9 +28,18 @@ class Dbtm
     // 用于判断本地是否存在冲突
     void judgeLocalConflict(struct transaction *);
 
+    // 向dbtl获取applyLsn，参数为txid
+    void getLsn(int);
+
+    // 用于txid和对应事务的映射
+    unordered_map<int, struct transaction *> table_;
+
   private:
     // 获取lsn并且判断事务是否存在全局冲突
-    void getLsnAndGlobalConflict(int);
+    // void getLsnAndGlobalConflict(int);
+
+    // 向gtm发送全局判冲突的请求
+    void judgeGlobalConflict(int);
 
     // 缓存当前事务的读写集
     void cacheRWSet(struct transaction *);
@@ -48,41 +58,8 @@ class Dbtm
     void onDbtlConnection(const TcpConnectionPtr &);
     void onGtmConnection(const TcpConnectionPtr &);
 
-    // 用于快速进行数据冲突验证
-    // FIXME: 数据验证好像可以用位图来做，参考底层的分布式图数据库存储
-    // 得改，要不然时间复杂度太大了，可以考虑做成开链法hash图
-    // 第一个是lsn，第二个是key
-    unordered_map<std::string, std::unordered_set<std::string> > rcheck, wcheck;
-
-    // FIXME: test
-    struct Info
-    {
-        std::string key;
-        int lsn;
-    };
-
-    struct Info_hash
-    {
-        std::size_t operator()(const Info &rhs) const
-        {
-            return std::hash<std::string>()(rhs.key);
-        }
-    };
-
-    struct Info_cmp
-    {
-        bool operator()(const Info &lhs, const Info &rhs) const
-        {
-            return lhs.key == rhs.key;
-        }
-    };
-
-    unordered_set<struct Info, Info_hash, Info_cmp> ust;
-
-    // FIXME: testEND
-
-    // 用于txid和对应事务的映射
-    unordered_map<int, struct transaction *> table;
+    // 用于快速进行数据冲突验证，用的自定义开链法hash表
+    Mhash wcheck;
 
     // 连接dbtl和gtm
     TcpConnectionPtr dbtlConn_, gtmConn_;

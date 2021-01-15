@@ -14,7 +14,7 @@ class App
     App(EventLoop *);
 
     // 开启一个事务
-    void startTran(std::string &);
+    void startTran(std::string);
 
     // 连接需要的dbs
     void connect2ES(
@@ -28,6 +28,9 @@ class App
 
     // 负责传输协议的解析
     void onMessage(const TcpConnectionPtr &, Buffer *, muduo::Timestamp);
+
+    // 汇报事务执行结果，(状态，txid)
+    void showResult(int, int);
 
   private:
     void onGtmConnection(const muduo::net::TcpConnectionPtr &);

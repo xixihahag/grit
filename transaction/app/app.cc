@@ -143,13 +143,13 @@ void App::add(string str)
             pos2++;
         auto val = builder.CreateString(str.substr(pos1, pos2 - pos1));
 
-        auto es = CreateESMsg(builder, cmd, txid_, typ, key, attr, val);
+        auto es = CreateESMsg(builder, cmd, txid_, false, typ, key, attr, val);
         builder.Finish(es);
 
         ptr = (char *) builder.GetBufferPointer();
         size = builder.GetSize();
     } else {
-        auto es = CreateESMsg(builder, cmd, txid_, typ, key);
+        auto es = CreateESMsg(builder, cmd, txid_, false, typ, key);
         builder.Finish(es);
 
         ptr = (char *) builder.GetBufferPointer();
@@ -163,7 +163,8 @@ void App::add(string str)
 void App::commit()
 {
     flatbuffers::FlatBufferBuilder builder;
-    auto es = CreateESMsg(builder, kCommit, txid_);
+    auto es = CreateESMsg(
+        builder, kCommit, txid_, connList_.size() == 1 ? false : true);
     builder.Finish(es);
 
     char *ptr = (char *) builder.GetBufferPointer();
@@ -174,7 +175,7 @@ void App::commit()
         it->get()->send(ptr, size);
 }
 
-void App::startTran(std::string &type)
+void App::startTran(std::string type)
 {
     // 向gtm要txid和dbs列表
     flatbuffers::FlatBufferBuilder builder;
@@ -186,4 +187,12 @@ void App::startTran(std::string &type)
     uint64_t size = builder.GetSize();
 
     gtmConn_->send(ptr, size);
+}
+
+void App::showResult(int status, int txid)
+{
+    if (status == kTranSuccess)
+        LOG(INFO) << "[" << txid << "]transaction executed successfully";
+    else
+        LOG(INFO) << "[" << txid << "]transaction execution failed";
 }

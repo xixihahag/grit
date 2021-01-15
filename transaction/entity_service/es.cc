@@ -35,7 +35,8 @@ void ES::forward(const ESMsg *data)
 {
     flatbuffers::FlatBufferBuilder builder;
 
-    auto dbs = CreateDbServiceMsg(builder, kCommit, data->txid());
+    auto dbs = CreateDbServiceMsg(
+        builder, kCommit, data->txid(), data->needGlobalConflict());
     builder.Finish(dbs);
 
     char *ptr = (char *) builder.GetBufferPointer();
@@ -76,4 +77,17 @@ void ES::solve(const ESMsg *msg)
     uint64_t size = builder.GetSize();
 
     dbsConn_->send(ptr, size);
+}
+
+void ES::retResult(int status, int txid)
+{
+    flatbuffers::FlatBufferBuilder builder;
+
+    auto app = CreateAppMsg(builder, status, txid);
+    builder.Finish(app);
+
+    char *ptr = (char *) builder.GetBufferPointer();
+    uint64_t size = builder.GetSize();
+
+    table_[txid]->send(ptr, size);
 }

@@ -1,9 +1,11 @@
 #include "dbservice.h"
 #include "configManager.h"
+#include "headerCmd.h"
 
 using namespace std;
 using namespace grit;
 using namespace flat;
+using namespace muduo::net;
 
 void DbService::test() {}
 
@@ -17,10 +19,16 @@ DbService::DbService(muduo::net::EventLoop *loop)
 }
 
 void DbService::getReadWriteSet(
-    const muduo::net::TcpConnectionPtr &conn,
+    const TcpConnectionPtr &conn,
     const DbServiceMsg *data)
 {
-    transaction *tran = new transaction();
+    transaction *tran;
+    if (txidTrans_.find(data->txid()) == txidTrans_.end()) {
+        tran = new transaction();
+        txidTrans_[data->txid()] = tran;
+    } else
+        tran = txidTrans_[data->txid()];
+
     tran->txid = data->txid();
 
     table_[tran->txid] = conn;
@@ -37,7 +45,7 @@ void DbService::getReadWriteSet(
             rset->value()->str());
         tran->readSet.emplace_back(rdata);
 
-        tran->trcheck.emplace(rdata->key);
+        // tran->trcheck.emplace(rdata->key);
     }
 
     int wsize = data->writeSet()->size();
@@ -52,11 +60,25 @@ void DbService::getReadWriteSet(
 
         tran->writeSet.emplace_back(wdata);
 
-        tran->twcheck.emplace(wdata->key);
+        // tran->twcheck.emplace(wdata->key);
     }
+}
 
-    tran->needGlobalConflct = data->needGlobalConflict();
+void DbService::retResult(int status, int txid)
+{
+    flatbuffers::FlatBufferBuilder builder;
 
-    // 发送给DBTM处理 考虑用不用线程池 讲道理n方的复杂度，还是用起来比较好
-    threadPool_->enqueue(bind(&Dbtm::judgeLocalConflict, dbtm_, tran));
+    auto es = CreateESMsg(builder, status, txid);
+    builder.Finish(es);
+
+    char *ptr = (char *) builder.GetBufferPointer();
+    uint64_t size = builder.GetSize();
+
+    table_[txid]->send(ptr, size);
+
+    // 把本地映射去掉，回收空间
+    auto tran = dbtm_->table_[txid];
+    dbtm_->table_.erase(txid);
+
+    delete tran;
 }

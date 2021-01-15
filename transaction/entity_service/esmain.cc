@@ -46,6 +46,10 @@ void onMessage(const TcpConnectionPtr &conn, Buffer *buf, Timestamp)
     case kCommit:
         es->forward(data);
         break;
+    case kTranSuccess:
+    case kTranFail:
+
+        break;
     default:
         LOG(ERROR) << "receive error cmd";
     }

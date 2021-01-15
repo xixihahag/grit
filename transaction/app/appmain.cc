@@ -14,6 +14,8 @@ using namespace muduo::net;
 using namespace flat;
 using namespace grit;
 
+App *app;
+
 void onConnection(const TcpConnectionPtr &conn)
 {
     if (conn->connected()) { conn->setTcpNoDelay(true); }
@@ -26,16 +28,15 @@ void onConnection(const TcpConnectionPtr &conn)
 void onMessage(const TcpConnectionPtr &conn, Buffer *buf, Timestamp)
 {
     auto msg = GetRootMsg((uint8_t *) buf->retrieveAllAsString().c_str());
-    auto data = static_cast<const DbServiceMsg *>(msg->any());
-    auto type = data->type();
+    auto data = static_cast<const AppMsg *>(msg->any());
+    auto cmd = data->cmd();
 
-    switch (type) {
-    case kData:
-        db->getReadWriteSet(conn, data);
-        break;
+    switch (cmd) {
+    case kTranSuccess:
+    case kTranFail:
+        app->showResult(cmd, data->txid());
     default:
-        // 扔给DBTM处理
-        db->threadPool_->enqueue(bind(&Dbtm::solve, db->dbtm_, data));
+        LOG(ERROR) << "receive error cmd";
     }
 }
 
@@ -69,7 +70,7 @@ int main(int argc, char *argv[])
 
         // 此处可以选择用带对端数据库ip的初始化方式，但方便测试使用默认构造即可
         // 初始化dbservice
-        App *app = new App(&loop);
+        app = new App(&loop);
 
         app->startTran("buy");
 
