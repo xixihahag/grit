@@ -7,8 +7,6 @@ using namespace grit;
 using namespace flat;
 using namespace muduo::net;
 
-void DbService::test() {}
-
 DbService::DbService(muduo::net::EventLoop *loop)
 {
     dbtm_ = new Dbtm(this);
@@ -26,13 +24,13 @@ void DbService::getReadWriteSet(
     if (txidTrans_.find(data->txid()) == txidTrans_.end()) {
         tran = new transaction();
         txidTrans_[data->txid()] = tran;
+        tran->txid = data->txid();
     } else
         tran = txidTrans_[data->txid()];
 
-    tran->txid = data->txid();
-
     table_[tran->txid] = conn;
 
+    // 讲道理这个参数应该是恒为1
     int rsize = data->readSet()->size();
 
     for (int i = 0; i < rsize; i++) {
@@ -44,8 +42,6 @@ void DbService::getReadWriteSet(
             rset->attribute()->str(),
             rset->value()->str());
         tran->readSet.emplace_back(rdata);
-
-        // tran->trcheck.emplace(rdata->key);
     }
 
     int wsize = data->writeSet()->size();
@@ -59,8 +55,6 @@ void DbService::getReadWriteSet(
             wset->value()->str());
 
         tran->writeSet.emplace_back(wdata);
-
-        // tran->twcheck.emplace(wdata->key);
     }
 }
 

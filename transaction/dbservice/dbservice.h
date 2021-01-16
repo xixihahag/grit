@@ -37,9 +37,7 @@ struct transaction
 {
     transaction()
         : needGlobalConflct(false)
-        , localConflict(false)
-        // , globalConflict(false)
-        , lsn(-1)
+        , lsn(-1) // 三种状态，-1代表还未发送获取lsn请求，0代表已经发送请求但是还未收到结果，>0表示收到lsn结果
         , alreadyCommit(false)
     {}
 
@@ -47,10 +45,7 @@ struct transaction
     std::list<Data *> readSet;
     std::list<Data *> writeSet;
     bool needGlobalConflct;
-    bool localConflict;
-    // bool globalConflict;
     int lsn;
-    // std::unordered_set<std::string> trcheck, twcheck;
 
     // 用于处理得到lsn前就已经commit的情况
     bool alreadyCommit;
@@ -79,19 +74,11 @@ class DbService
         , passwd_(passwd)
     {}
 
-    void test();
-
     // 连接远端的数据库
     void connectToDatabase();
 
     // 从传输过来的数据中解析读写集
     void getReadWriteSet(const TcpConnectionPtr &, const DbServiceMsg *);
-
-    // // 向es返回事务执行成功，参数为txid
-    // void tranSuccess(int);
-
-    // // 向es返回事务执行失败，参数为txid
-    // void tranFail(int);
 
     // 用于向上层返回事务结果，第一个参数为事务执行结果，第二个参数为txid
     void retResult(int, int);

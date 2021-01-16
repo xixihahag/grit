@@ -29,6 +29,9 @@ struct DbServiceMsgBuilder;
 struct DbtlMsg;
 struct DbtlMsgBuilder;
 
+struct DbtmMsg;
+struct DbtmMsgBuilder;
+
 struct DbtlAckMsg;
 struct DbtlAckMsgBuilder;
 
@@ -43,11 +46,12 @@ enum Msg {
   Msg_DbtlMsg = 4,
   Msg_DbtlAckMsg = 5,
   Msg_ESMsg = 6,
+  Msg_DbtmMsg = 7,
   Msg_MIN = Msg_NONE,
-  Msg_MAX = Msg_ESMsg
+  Msg_MAX = Msg_DbtmMsg
 };
 
-inline const Msg (&EnumValuesMsg())[7] {
+inline const Msg (&EnumValuesMsg())[8] {
   static const Msg values[] = {
     Msg_NONE,
     Msg_GtmMsg,
@@ -55,13 +59,14 @@ inline const Msg (&EnumValuesMsg())[7] {
     Msg_DbServiceMsg,
     Msg_DbtlMsg,
     Msg_DbtlAckMsg,
-    Msg_ESMsg
+    Msg_ESMsg,
+    Msg_DbtmMsg
   };
   return values;
 }
 
 inline const char * const *EnumNamesMsg() {
-  static const char * const names[8] = {
+  static const char * const names[9] = {
     "NONE",
     "GtmMsg",
     "AppMsg",
@@ -69,13 +74,14 @@ inline const char * const *EnumNamesMsg() {
     "DbtlMsg",
     "DbtlAckMsg",
     "ESMsg",
+    "DbtmMsg",
     nullptr
   };
   return names;
 }
 
 inline const char *EnumNameMsg(Msg e) {
-  if (flatbuffers::IsOutRange(e, Msg_NONE, Msg_ESMsg)) return "";
+  if (flatbuffers::IsOutRange(e, Msg_NONE, Msg_DbtmMsg)) return "";
   const size_t index = static_cast<size_t>(e);
   return EnumNamesMsg()[index];
 }
@@ -106,6 +112,10 @@ template<> struct MsgTraits<flat::DbtlAckMsg> {
 
 template<> struct MsgTraits<flat::ESMsg> {
   static const Msg enum_value = Msg_ESMsg;
+};
+
+template<> struct MsgTraits<flat::DbtmMsg> {
+  static const Msg enum_value = Msg_DbtmMsg;
 };
 
 bool VerifyMsg(flatbuffers::Verifier &verifier, const void *obj, Msg type);
@@ -729,6 +739,68 @@ inline flatbuffers::Offset<DbtlMsg> CreateDbtlMsgDirect(
       data__);
 }
 
+struct DbtmMsg FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
+  typedef DbtmMsgBuilder Builder;
+  enum FlatBuffersVTableOffset FLATBUFFERS_VTABLE_UNDERLYING_TYPE {
+    VT_CMD = 4,
+    VT_TXID = 6,
+    VT_LSN = 8
+  };
+  int32_t cmd() const {
+    return GetField<int32_t>(VT_CMD, 0);
+  }
+  int32_t txid() const {
+    return GetField<int32_t>(VT_TXID, 0);
+  }
+  int32_t lsn() const {
+    return GetField<int32_t>(VT_LSN, 0);
+  }
+  bool Verify(flatbuffers::Verifier &verifier) const {
+    return VerifyTableStart(verifier) &&
+           VerifyField<int32_t>(verifier, VT_CMD) &&
+           VerifyField<int32_t>(verifier, VT_TXID) &&
+           VerifyField<int32_t>(verifier, VT_LSN) &&
+           verifier.EndTable();
+  }
+};
+
+struct DbtmMsgBuilder {
+  typedef DbtmMsg Table;
+  flatbuffers::FlatBufferBuilder &fbb_;
+  flatbuffers::uoffset_t start_;
+  void add_cmd(int32_t cmd) {
+    fbb_.AddElement<int32_t>(DbtmMsg::VT_CMD, cmd, 0);
+  }
+  void add_txid(int32_t txid) {
+    fbb_.AddElement<int32_t>(DbtmMsg::VT_TXID, txid, 0);
+  }
+  void add_lsn(int32_t lsn) {
+    fbb_.AddElement<int32_t>(DbtmMsg::VT_LSN, lsn, 0);
+  }
+  explicit DbtmMsgBuilder(flatbuffers::FlatBufferBuilder &_fbb)
+        : fbb_(_fbb) {
+    start_ = fbb_.StartTable();
+  }
+  DbtmMsgBuilder &operator=(const DbtmMsgBuilder &);
+  flatbuffers::Offset<DbtmMsg> Finish() {
+    const auto end = fbb_.EndTable(start_);
+    auto o = flatbuffers::Offset<DbtmMsg>(end);
+    return o;
+  }
+};
+
+inline flatbuffers::Offset<DbtmMsg> CreateDbtmMsg(
+    flatbuffers::FlatBufferBuilder &_fbb,
+    int32_t cmd = 0,
+    int32_t txid = 0,
+    int32_t lsn = 0) {
+  DbtmMsgBuilder builder_(_fbb);
+  builder_.add_lsn(lsn);
+  builder_.add_txid(txid);
+  builder_.add_cmd(cmd);
+  return builder_.Finish();
+}
+
 struct DbtlAckMsg FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   typedef DbtlAckMsgBuilder Builder;
   enum FlatBuffersVTableOffset FLATBUFFERS_VTABLE_UNDERLYING_TYPE {
@@ -812,6 +884,9 @@ struct RootMsg FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   const flat::ESMsg *any_as_ESMsg() const {
     return any_type() == flat::Msg_ESMsg ? static_cast<const flat::ESMsg *>(any()) : nullptr;
   }
+  const flat::DbtmMsg *any_as_DbtmMsg() const {
+    return any_type() == flat::Msg_DbtmMsg ? static_cast<const flat::DbtmMsg *>(any()) : nullptr;
+  }
   bool Verify(flatbuffers::Verifier &verifier) const {
     return VerifyTableStart(verifier) &&
            VerifyField<uint8_t>(verifier, VT_ANY_TYPE) &&
@@ -843,6 +918,10 @@ template<> inline const flat::DbtlAckMsg *RootMsg::any_as<flat::DbtlAckMsg>() co
 
 template<> inline const flat::ESMsg *RootMsg::any_as<flat::ESMsg>() const {
   return any_as_ESMsg();
+}
+
+template<> inline const flat::DbtmMsg *RootMsg::any_as<flat::DbtmMsg>() const {
+  return any_as_DbtmMsg();
 }
 
 struct RootMsgBuilder {
@@ -904,6 +983,10 @@ inline bool VerifyMsg(flatbuffers::Verifier &verifier, const void *obj, Msg type
     }
     case Msg_ESMsg: {
       auto ptr = reinterpret_cast<const flat::ESMsg *>(obj);
+      return verifier.VerifyTable(ptr);
+    }
+    case Msg_DbtmMsg: {
+      auto ptr = reinterpret_cast<const flat::DbtmMsg *>(obj);
       return verifier.VerifyTable(ptr);
     }
     default: return true;

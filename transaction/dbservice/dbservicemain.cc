@@ -31,8 +31,6 @@ void onMessage(const TcpConnectionPtr &conn, Buffer *buf, Timestamp)
     auto data = static_cast<const DbServiceMsg *>(msg->any());
     auto cmd = data->cmd();
 
-    // TODO: 日志发送给dbtl成功后需要告诉app已经成功执行事务
-
     switch (cmd) {
     case kData:
         db->getReadWriteSet(conn, data);
@@ -55,6 +53,11 @@ void onMessage(const TcpConnectionPtr &conn, Buffer *buf, Timestamp)
         else
             db->txidTrans_[data->txid()]->alreadyCommit = true;
         break;
+    }
+
+    auto data = static_cast<const DbtmMsg *>(msg->any());
+    auto cmd = data->cmd();
+    switch (cmd) {
     case kJudgeConflit:
         // 全局判冲突结果返回 扔给DBTM处理
         db->threadPool_->enqueue(bind(&Dbtm::solve, db->dbtm_, data));

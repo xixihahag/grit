@@ -1,7 +1,7 @@
 // flatc -c -b ./net.fbs
 namespace flat;
 
-union Msg{GtmMsg,AppMsg,DbServiceMsg,DbtlMsg,DbtlAckMsg,ESMsg}
+union Msg{GtmMsg,AppMsg,DbServiceMsg,DbtlMsg,DbtlAckMsg,ESMsg,DbtmMsg}
 
 // TODO: 有空把这个重新梳理一下，发给谁的就用谁的名字
 
@@ -57,6 +57,12 @@ table DbtlMsg{
     cmd:int;
     txid:int;
     data:[Data];
+}
+
+table DbtmMsg{
+    cmd:int;
+    txid:int;
+    lsn:int;
 }
 
 table DbtlAckMsg{

@@ -7,6 +7,7 @@
 #include "threadPool.h"
 #include "dbservice/dbservice.h"
 #include "base/hash.h"
+#include "base/mydb.h"
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
@@ -35,9 +36,6 @@ class Dbtm
     unordered_map<int, struct transaction *> table_;
 
   private:
-    // 获取lsn并且判断事务是否存在全局冲突
-    // void getLsnAndGlobalConflict(int);
-
     // 向gtm发送全局判冲突的请求
     void judgeGlobalConflict(int);
 
@@ -52,11 +50,22 @@ class Dbtm
     // 将内存中的数据编程日志落盘
     // 与存储层一致，通过rocksDB进行落盘，但是有些问题，不适用当前场景
     void writeToDiskByRocksDB(struct transaction *);
-    void writeToDisk(struct transaction *);
+    // 直接用文件系统的api进行落盘，落盘并且写入sql
+    void writeToDiskAndSql(struct transaction *);
 
     // 连接之后的回调
     void onDbtlConnection(const TcpConnectionPtr &);
     void onGtmConnection(const TcpConnectionPtr &);
+
+    // 初始化mysql表
+    void initMySql();
+
+    // 写死相关sql语句
+    void sqlExec(std::string &);
+    void sqlInsert(int, int, std::string);
+    void sqlDelete(int);
+    void sqlUpdateNeedLocalConflict(int, bool);
+    void sqlUpdateNeedGlobalConflict(int, bool);
 
     // 用于快速进行数据冲突验证，用的自定义开链法hash表
     Mhash wcheck;
@@ -73,6 +82,9 @@ class Dbtm
     ThreadPool *threadPool_;
 
     DbService *dbservice_;
+
+    // 用于连接本地mysql
+    MyDb db_;
 };
 
 } // namespace grit

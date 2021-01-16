@@ -36,6 +36,11 @@ class ConfigManager : public Singleton<ConfigManager>
     // dbtm
     int dbtmThreadNum() { return dbtmThreadNum_; }
     std::string dbtmRocksDbPath() { return dbtmRocksDbPath_; }
+    std::string dbtmUser() { return dbtmUser_; }
+    std::string dbtmPasswd() { return dbtmPasswd_; }
+    std::string dbtmDbName() { return dbtmDbName_; }
+    int dbtmDbPort() { return dbtmDbPort_; }
+    std::string dbtmLogPath() { return dbtmLogPath_; }
 
     // dbtl
     std::string dbtlListenAddress() { return dbtlListenAddress_; }
@@ -73,6 +78,11 @@ class ConfigManager : public Singleton<ConfigManager>
     // dbtm
     int dbtmThreadNum_;
     std::string dbtmRocksDbPath_;
+    std::string dbtmUser_;
+    std::string dbtmPasswd_;
+    std::string dbtmDbName_;
+    int dbtmDbPort_;
+    std::string dbtmLogPath_;
 
     // dbtl
     std::string dbtlListenAddress_;

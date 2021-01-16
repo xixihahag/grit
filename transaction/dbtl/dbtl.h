@@ -7,9 +7,7 @@
 #include "rocksdb/db.h"
 #include "rocksdb/options.h"
 #include "muduo/net/TcpConnection.h"
-
 namespace grit {
-
 class Dbtl
 {
   public:
@@ -20,10 +18,15 @@ class Dbtl
   private:
     void writeToDisk(
         int txid,
-        const flatbuffers::Vector<flatbuffers::Offset<flat::Data> > *);
+        const flatbuffers::Vector<flatbuffers::Offset<flat::Data> > *,
+        const muduo::net::TcpConnectionPtr &);
     void writeToDiskByRocksDb(
         int txid,
-        const flatbuffers::Vector<flatbuffers::Offset<flat::Data> > *);
+        const flatbuffers::Vector<flatbuffers::Offset<flat::Data> > *,
+        const muduo::net::TcpConnectionPtr &);
+
+    // 给上层返回结果
+    void retResult(int, int, int, const muduo::net::TcpConnectionPtr &);
 
     // 连接rocksDB
     DB *rocksDb_;

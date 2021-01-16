@@ -12,6 +12,7 @@
 using namespace std;
 using namespace grit;
 using namespace flat;
+using namespace muduo::net;
 using namespace ROCKSDB_NAMESPACE;
 
 grit::Dbtl::Dbtl()
@@ -42,37 +43,35 @@ void grit::Dbtl::solve(
     switch (cmd) {
     case kLog:
         if (ConfigManager::getInstance()->dbtlUseRocksDb())
-            writeToDiskByRocksDb(dbtl->txid(), dbtl->data());
+            writeToDiskByRocksDb(dbtl->txid(), dbtl->data(), conn);
         else
-            writeToDisk(dbtl->txid(), dbtl->data());
+            writeToDisk(dbtl->txid(), dbtl->data(), conn);
+        break;
+    case kLsn:
+        retResult(kLsn, dbtl->txid(), applyLsn_++, conn);
+    default:
+        LOG(ERROR) << "receive error cmd";
     }
 
-    // 返回给对面 ack
-    flatbuffers::FlatBufferBuilder builder;
-    auto dbtm = CreateDbtl(builder, kLogAck, dbtl->txid());
-    builder.Finish(dbtm);
-
-    char *ptr = (char *) builder.GetBufferPointer();
-    uint64_t size = builder.GetSize();
-
-    conn->send(ptr, size);
+    // TODO: 要不要做成分布式备份的形式
 }
 
 void grit::Dbtl::writeToDisk(
     int txid,
-    const flatbuffers::Vector<flatbuffers::Offset<flat::Data> > *data)
+    const flatbuffers::Vector<flatbuffers::Offset<flat::Data> > *data,
+    const TcpConnectionPtr &conn)
 {
     int fd =
         open(to_string(txid).c_str(), O_CREAT | O_RDONLY, S_IRUSR | S_IWUSR);
     if (fd == -1) LOG(ERROR) << "open log file error";
 
-    // 以 标签#属性:值 的形式进行存储
+    // 以 id#属性:值 的形式进行存储
     int size = data->size();
     for (int i = 0; i < size; i++) {
         auto log = data->Get(i);
 
         string val;
-        val += log->label()->str();
+        val += log->key()->str();
         val += '#';
         val += log->attribute()->str();
         val += ':';
@@ -83,13 +82,16 @@ void grit::Dbtl::writeToDisk(
     }
 
     close(fd);
+
+    retResult(kTranSuccess, txid, -1, conn);
 }
 
 void grit::Dbtl::writeToDiskByRocksDb(
     int txid,
-    const flatbuffers::Vector<flatbuffers::Offset<flat::Data> > *data)
+    const flatbuffers::Vector<flatbuffers::Offset<flat::Data> > *data,
+    const TcpConnectionPtr &conn)
 {
-    // 以 标签#属性:值@ 的形式定义一条数据进行落盘
+    // 以 id#属性:值@ 的形式定义一条数据进行落盘
     WriteBatch batch;
 
     int size = data->size();
@@ -102,8 +104,27 @@ void grit::Dbtl::writeToDiskByRocksDb(
         val += log->value()->str();
         val += '@';
 
-        batch.Put(log->label()->str(), val);
+        batch.Put(log->key()->str(), val);
     }
     Status s = rocksDb_->Write(WriteOptions(), &batch);
     if (!s.ok()) LOG(ERROR) << "insert into rocksDB error";
+
+    retResult(kTranSuccess, txid, -1, conn);
+}
+
+void Dbtl::retResult(int cmd, int txid, int lsn, const TcpConnectionPtr &conn)
+{
+    // 返回给上层 ack
+    flatbuffers::FlatBufferBuilder builder;
+    flatbuffers::Offset<flat::DbtmMsg> dbtm;
+    if (lsn == -1)
+        dbtm = CreateDbtmMsg(builder, cmd, txid);
+    else
+        dbtm = CreateDbtmMsg(builder, cmd, txid, lsn);
+    builder.Finish(dbtm);
+
+    char *ptr = (char *) builder.GetBufferPointer();
+    uint64_t size = builder.GetSize();
+
+    conn->send(ptr, size);
 }

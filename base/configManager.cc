@@ -44,6 +44,11 @@ void ConfigManager::init(const char *configDir)
     // dbtm
     SetOrDefaultI(dbtmThreadNum_, pt.get<int>("dbtm.threadnum"));
     SetOrDefaultS(dbtmRocksDbPath_, pt.get<string>({"dbtm.rocksdbpath"}));
+    SetOrDefaultS(dbtmUser_, pt.get<string>({"dbtm.user"}));
+    SetOrDefaultS(dbtmPasswd_, pt.get<string>({"dbtm.passwd"}));
+    SetOrDefaultS(dbtmDbName_, pt.get<string>({"dbtm.dbname"}));
+    SetOrDefaultI(dbtmDbPort_, pt.get<int>("dbtm.dbport"));
+    SetOrDefaultS(dbtmLogPath_, pt.get<string>({"dbtm.logpath"}));
 
     // dbtl
     SetOrDefaultS(dbtlListenAddress_, pt.get<string>({"dbtl.listenaddress"}));
