@@ -15,7 +15,7 @@ using namespace flat;
 using namespace muduo::net;
 using namespace ROCKSDB_NAMESPACE;
 
-grit::Dbtl::Dbtl()
+grit::Dbtl::Dbtl(EventLoop *loop)
 {
     if (ConfigManager::getInstance()->dbtlUseRocksDb()) {
         // 打开rocksDB
@@ -32,6 +32,13 @@ grit::Dbtl::Dbtl()
             &rocksDb_);
         if (!s.ok()) LOG(ERROR) << "open rocksDB error";
     }
+
+    // 新建日志分发器
+    logPlayer_ = new LogPlayer();
+    logPlayer_->init(loop);
+
+    // TODO: 待定增加线程数量
+    pool_ = new ThreadPool(1);
 }
 
 void grit::Dbtl::solve(
@@ -79,9 +86,16 @@ void grit::Dbtl::writeToDisk(
         val += '@';
 
         write(fd, val.c_str(), val.size());
+        auto loginfo = new struct LogInfo(
+            log->key()->str(), log->attribute()->str(), log->value()->str());
+
+        logTable_[txid].emplace_back(loginfo);
     }
 
     close(fd);
+
+    // TODO: 将日志发送给LogPlayer进行日志的分发
+    pool_->enqueue(bind(&LogPlayer::playLog, logPlayer_, txid));
 
     retResult(kTranSuccess, txid, -1, conn);
 }
@@ -114,7 +128,7 @@ void grit::Dbtl::writeToDiskByRocksDb(
 
 void Dbtl::retResult(int cmd, int txid, int lsn, const TcpConnectionPtr &conn)
 {
-    // 返回给上层 ack
+    // 返回给上层结果
     flatbuffers::FlatBufferBuilder builder;
     flatbuffers::Offset<flat::DbtmMsg> dbtm;
     if (lsn == -1)

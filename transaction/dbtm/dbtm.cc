@@ -66,7 +66,6 @@ void Dbtm::init(EventLoop *loop)
     string dbName = ConfigManager::getInstance()->dbtmDbName();
     int port = ConfigManager::getInstance()->dbtmDbPort();
 
-    //连接数据库
     bool conn = db_.initDB(host, user, passwd, dbName, port);
     if (!conn) LOG(ERROR) << "connect mysql failed";
     initMySql();

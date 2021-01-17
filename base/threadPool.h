@@ -29,7 +29,6 @@ class ThreadPool
                         task = move(this->tasks.front());
                         this->tasks.pop();
                     }
-                    // FIXME: 考虑怎么传一个参数进去
                     task();
                 }
             });
