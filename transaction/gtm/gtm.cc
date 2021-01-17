@@ -19,7 +19,8 @@ void GTM::getTxid(const TcpConnectionPtr &conn, string transType)
     flatbuffers::FlatBufferBuilder builder;
     auto list = transInfo_[transType];
 
-    if (list.size() > 1) table_[txid_.load()] = list.size();
+    if (list.size() > 1)
+        table_[txid_.load()] = new struct txidInfo(list.size());
 
     vector<flatbuffers::Offset<ipAndPort> > ipAndPortVec;
     for (auto it = list.begin(); it != list.end(); it++) {
@@ -40,9 +41,29 @@ void GTM::getTxid(const TcpConnectionPtr &conn, string transType)
     conn->send(ptr, size);
 }
 
-void GTM::judgeConflict()
+void GTM::judgeConflict(
+    const muduo::net::TcpConnectionPtr &conn,
+    const GtmMsg *data)
 {
-    // TODO: 待定
+    int txid = data->txid();
+    auto info = table_[txid];
+    info->connList_.emplace_back(conn);
+    info->isConflict |= data->isLocalConflict();
+
+    if (--info->serverNum == 0) {
+        for (auto conn : info->connList_) {
+            flatbuffers::FlatBufferBuilder builder;
+            CreateDbtmMsg(builder, kJudgeConflit, txid, info->isConflict);
+
+            char *ptr = (char *) builder.GetBufferPointer();
+            uint64_t size = builder.GetSize();
+
+            conn->send(ptr, size);
+        }
+
+        table_.erase(txid);
+        delete info;
+    }
 }
 
 void GTM::init()

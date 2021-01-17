@@ -27,15 +27,15 @@ void onMessage(const TcpConnectionPtr &conn, Buffer *buf, Timestamp)
 {
     // 通过flatbuffers判断过来的请求是啥
     auto msg = GetRootMsg((uint8_t *) buf->retrieveAllAsString().c_str());
-    auto gtm = static_cast<const Gtm *>(msg->any());
-    auto type = gtm->type();
+    auto gtm = static_cast<const GtmMsg *>(msg->any());
+    auto cmd = gtm->cmd();
 
-    switch (type) {
+    switch (cmd) {
     case kGetTxid:
         GTM::getInstance()->getTxid(conn, gtm->transType()->str());
         break;
     case kJudgeConflit:
-        GTM::getInstance()->judgeConflict();
+        GTM::getInstance()->judgeConflict(conn, gtm);
     }
 }
 

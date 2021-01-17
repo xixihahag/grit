@@ -125,10 +125,18 @@ struct GtmMsg FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   typedef GtmMsgBuilder Builder;
   enum FlatBuffersVTableOffset FLATBUFFERS_VTABLE_UNDERLYING_TYPE {
     VT_CMD = 4,
-    VT_TRANSTYPE = 6
+    VT_TXID = 6,
+    VT_ISLOCALCONFLICT = 8,
+    VT_TRANSTYPE = 10
   };
   int32_t cmd() const {
     return GetField<int32_t>(VT_CMD, 0);
+  }
+  int32_t txid() const {
+    return GetField<int32_t>(VT_TXID, 0);
+  }
+  bool isLocalConflict() const {
+    return GetField<uint8_t>(VT_ISLOCALCONFLICT, 0) != 0;
   }
   const flatbuffers::String *transType() const {
     return GetPointer<const flatbuffers::String *>(VT_TRANSTYPE);
@@ -136,6 +144,8 @@ struct GtmMsg FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   bool Verify(flatbuffers::Verifier &verifier) const {
     return VerifyTableStart(verifier) &&
            VerifyField<int32_t>(verifier, VT_CMD) &&
+           VerifyField<int32_t>(verifier, VT_TXID) &&
+           VerifyField<uint8_t>(verifier, VT_ISLOCALCONFLICT) &&
            VerifyOffset(verifier, VT_TRANSTYPE) &&
            verifier.VerifyString(transType()) &&
            verifier.EndTable();
@@ -148,6 +158,12 @@ struct GtmMsgBuilder {
   flatbuffers::uoffset_t start_;
   void add_cmd(int32_t cmd) {
     fbb_.AddElement<int32_t>(GtmMsg::VT_CMD, cmd, 0);
+  }
+  void add_txid(int32_t txid) {
+    fbb_.AddElement<int32_t>(GtmMsg::VT_TXID, txid, 0);
+  }
+  void add_isLocalConflict(bool isLocalConflict) {
+    fbb_.AddElement<uint8_t>(GtmMsg::VT_ISLOCALCONFLICT, static_cast<uint8_t>(isLocalConflict), 0);
   }
   void add_transType(flatbuffers::Offset<flatbuffers::String> transType) {
     fbb_.AddOffset(GtmMsg::VT_TRANSTYPE, transType);
@@ -167,21 +183,29 @@ struct GtmMsgBuilder {
 inline flatbuffers::Offset<GtmMsg> CreateGtmMsg(
     flatbuffers::FlatBufferBuilder &_fbb,
     int32_t cmd = 0,
+    int32_t txid = 0,
+    bool isLocalConflict = false,
     flatbuffers::Offset<flatbuffers::String> transType = 0) {
   GtmMsgBuilder builder_(_fbb);
   builder_.add_transType(transType);
+  builder_.add_txid(txid);
   builder_.add_cmd(cmd);
+  builder_.add_isLocalConflict(isLocalConflict);
   return builder_.Finish();
 }
 
 inline flatbuffers::Offset<GtmMsg> CreateGtmMsgDirect(
     flatbuffers::FlatBufferBuilder &_fbb,
     int32_t cmd = 0,
+    int32_t txid = 0,
+    bool isLocalConflict = false,
     const char *transType = nullptr) {
   auto transType__ = transType ? _fbb.CreateString(transType) : 0;
   return flat::CreateGtmMsg(
       _fbb,
       cmd,
+      txid,
+      isLocalConflict,
       transType__);
 }
 
@@ -540,10 +564,8 @@ struct DbServiceMsg FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
     VT_CMD = 4,
     VT_TXID = 6,
     VT_NEEDGLOBALCONFLICT = 8,
-    VT_ISGLOBALCONFLICT = 10,
-    VT_LSN = 12,
-    VT_READSET = 14,
-    VT_WRITESET = 16
+    VT_READSET = 10,
+    VT_WRITESET = 12
   };
   int32_t cmd() const {
     return GetField<int32_t>(VT_CMD, 0);
@@ -553,12 +575,6 @@ struct DbServiceMsg FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   }
   bool needGlobalConflict() const {
     return GetField<uint8_t>(VT_NEEDGLOBALCONFLICT, 0) != 0;
-  }
-  bool isGlobalConflict() const {
-    return GetField<uint8_t>(VT_ISGLOBALCONFLICT, 0) != 0;
-  }
-  int32_t lsn() const {
-    return GetField<int32_t>(VT_LSN, 0);
   }
   const flatbuffers::Vector<flatbuffers::Offset<flat::Data>> *readSet() const {
     return GetPointer<const flatbuffers::Vector<flatbuffers::Offset<flat::Data>> *>(VT_READSET);
@@ -571,8 +587,6 @@ struct DbServiceMsg FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
            VerifyField<int32_t>(verifier, VT_CMD) &&
            VerifyField<int32_t>(verifier, VT_TXID) &&
            VerifyField<uint8_t>(verifier, VT_NEEDGLOBALCONFLICT) &&
-           VerifyField<uint8_t>(verifier, VT_ISGLOBALCONFLICT) &&
-           VerifyField<int32_t>(verifier, VT_LSN) &&
            VerifyOffset(verifier, VT_READSET) &&
            verifier.VerifyVector(readSet()) &&
            verifier.VerifyVectorOfTables(readSet()) &&
@@ -595,12 +609,6 @@ struct DbServiceMsgBuilder {
   }
   void add_needGlobalConflict(bool needGlobalConflict) {
     fbb_.AddElement<uint8_t>(DbServiceMsg::VT_NEEDGLOBALCONFLICT, static_cast<uint8_t>(needGlobalConflict), 0);
-  }
-  void add_isGlobalConflict(bool isGlobalConflict) {
-    fbb_.AddElement<uint8_t>(DbServiceMsg::VT_ISGLOBALCONFLICT, static_cast<uint8_t>(isGlobalConflict), 0);
-  }
-  void add_lsn(int32_t lsn) {
-    fbb_.AddElement<int32_t>(DbServiceMsg::VT_LSN, lsn, 0);
   }
   void add_readSet(flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<flat::Data>>> readSet) {
     fbb_.AddOffset(DbServiceMsg::VT_READSET, readSet);
@@ -625,17 +633,13 @@ inline flatbuffers::Offset<DbServiceMsg> CreateDbServiceMsg(
     int32_t cmd = 0,
     int32_t txid = 0,
     bool needGlobalConflict = false,
-    bool isGlobalConflict = false,
-    int32_t lsn = 0,
     flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<flat::Data>>> readSet = 0,
     flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<flat::Data>>> writeSet = 0) {
   DbServiceMsgBuilder builder_(_fbb);
   builder_.add_writeSet(writeSet);
   builder_.add_readSet(readSet);
-  builder_.add_lsn(lsn);
   builder_.add_txid(txid);
   builder_.add_cmd(cmd);
-  builder_.add_isGlobalConflict(isGlobalConflict);
   builder_.add_needGlobalConflict(needGlobalConflict);
   return builder_.Finish();
 }
@@ -645,8 +649,6 @@ inline flatbuffers::Offset<DbServiceMsg> CreateDbServiceMsgDirect(
     int32_t cmd = 0,
     int32_t txid = 0,
     bool needGlobalConflict = false,
-    bool isGlobalConflict = false,
-    int32_t lsn = 0,
     const std::vector<flatbuffers::Offset<flat::Data>> *readSet = nullptr,
     const std::vector<flatbuffers::Offset<flat::Data>> *writeSet = nullptr) {
   auto readSet__ = readSet ? _fbb.CreateVector<flatbuffers::Offset<flat::Data>>(*readSet) : 0;
@@ -656,8 +658,6 @@ inline flatbuffers::Offset<DbServiceMsg> CreateDbServiceMsgDirect(
       cmd,
       txid,
       needGlobalConflict,
-      isGlobalConflict,
-      lsn,
       readSet__,
       writeSet__);
 }
@@ -744,13 +744,17 @@ struct DbtmMsg FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   enum FlatBuffersVTableOffset FLATBUFFERS_VTABLE_UNDERLYING_TYPE {
     VT_CMD = 4,
     VT_TXID = 6,
-    VT_LSN = 8
+    VT_ISGLOBALCONFLICT = 8,
+    VT_LSN = 10
   };
   int32_t cmd() const {
     return GetField<int32_t>(VT_CMD, 0);
   }
   int32_t txid() const {
     return GetField<int32_t>(VT_TXID, 0);
+  }
+  bool isGlobalConflict() const {
+    return GetField<uint8_t>(VT_ISGLOBALCONFLICT, 0) != 0;
   }
   int32_t lsn() const {
     return GetField<int32_t>(VT_LSN, 0);
@@ -759,6 +763,7 @@ struct DbtmMsg FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
     return VerifyTableStart(verifier) &&
            VerifyField<int32_t>(verifier, VT_CMD) &&
            VerifyField<int32_t>(verifier, VT_TXID) &&
+           VerifyField<uint8_t>(verifier, VT_ISGLOBALCONFLICT) &&
            VerifyField<int32_t>(verifier, VT_LSN) &&
            verifier.EndTable();
   }
@@ -773,6 +778,9 @@ struct DbtmMsgBuilder {
   }
   void add_txid(int32_t txid) {
     fbb_.AddElement<int32_t>(DbtmMsg::VT_TXID, txid, 0);
+  }
+  void add_isGlobalConflict(bool isGlobalConflict) {
+    fbb_.AddElement<uint8_t>(DbtmMsg::VT_ISGLOBALCONFLICT, static_cast<uint8_t>(isGlobalConflict), 0);
   }
   void add_lsn(int32_t lsn) {
     fbb_.AddElement<int32_t>(DbtmMsg::VT_LSN, lsn, 0);
@@ -793,11 +801,13 @@ inline flatbuffers::Offset<DbtmMsg> CreateDbtmMsg(
     flatbuffers::FlatBufferBuilder &_fbb,
     int32_t cmd = 0,
     int32_t txid = 0,
+    bool isGlobalConflict = false,
     int32_t lsn = 0) {
   DbtmMsgBuilder builder_(_fbb);
   builder_.add_lsn(lsn);
   builder_.add_txid(txid);
   builder_.add_cmd(cmd);
+  builder_.add_isGlobalConflict(isGlobalConflict);
   return builder_.Finish();
 }
 

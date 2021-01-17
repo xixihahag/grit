@@ -125,6 +125,17 @@ void Dbtm::judgeLocalConflict(struct transaction *trans)
     } else {
         LOG(INFO) << "There are conflicts between transactions (local)";
         dbservice_->retResult(kTranFail, trans->txid);
+
+        if (trans->needGlobalConflct) {
+            // 给GTM发送冲突结果
+            flatbuffers::FlatBufferBuilder builder;
+            auto gtm = CreateGtmMsg(builder, kJudgeConflit, trans->txid, true);
+
+            char *ptr = (char *) builder.GetBufferPointer();
+            uint64_t size = builder.GetSize();
+
+            gtmConn_->send(ptr, size);
+        }
     }
 }
 
@@ -152,7 +163,7 @@ void Dbtm::judgeGlobalConflict(int txid)
     gtmConn_->send(ptr, size);
 }
 
-void Dbtm::solve(const DbServiceMsg *data)
+void Dbtm::solve(const DbtmMsg *data)
 {
     auto cmd = data->cmd();
 

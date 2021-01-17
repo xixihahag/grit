@@ -55,24 +55,24 @@ void onMessage(const TcpConnectionPtr &conn, Buffer *buf, Timestamp)
         break;
     }
 
-    auto data = static_cast<const DbtmMsg *>(msg->any());
-    auto cmd = data->cmd();
+    auto dbtmdata = static_cast<const DbtmMsg *>(msg->any());
+    auto cmd = dbtmdata->cmd();
     switch (cmd) {
     case kJudgeConflit:
         // 全局判冲突结果返回 扔给DBTM处理
-        db->threadPool_->enqueue(bind(&Dbtm::solve, db->dbtm_, data));
+        db->threadPool_->enqueue(bind(&Dbtm::solve, db->dbtm_, dbtmdata));
         break;
     case kLsn:
-        db->txidTrans_[data->txid()]->lsn = data->lsn();
-        if (db->txidTrans_[data->txid()]->alreadyCommit)
+        db->txidTrans_[dbtmdata->txid()]->lsn = dbtmdata->lsn();
+        if (db->txidTrans_[dbtmdata->txid()]->alreadyCommit)
             db->threadPool_->enqueue(bind(
                 &Dbtm::judgeLocalConflict,
                 db->dbtm_,
-                db->txidTrans_[data->txid()]));
+                db->txidTrans_[dbtmdata->txid()]));
         break;
     case kTranSuccess:
     case kTranFail:
-        db->retResult(cmd, data->txid());
+        db->retResult(cmd, dbtmdata->txid());
         break;
     default:
         LOG(ERROR) << "reveive error cmd";

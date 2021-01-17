@@ -24,7 +24,7 @@ class Dbtm
     void init(EventLoop *);
 
     // 用于处理lsn和gtm冲突处理的结果
-    void solve(const DbServiceMsg *);
+    void solve(const DbtmMsg *);
 
     // 用于判断本地是否存在冲突
     void judgeLocalConflict(struct transaction *);
