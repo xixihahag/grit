@@ -38,6 +38,9 @@ struct DbtmMsgBuilder;
 struct DbtlAckMsg;
 struct DbtlAckMsgBuilder;
 
+struct LogPlayerMsg;
+struct LogPlayerMsgBuilder;
+
 struct RootMsg;
 struct RootMsgBuilder;
 
@@ -51,11 +54,12 @@ enum Msg {
   Msg_ESMsg = 6,
   Msg_DbtmMsg = 7,
   Msg_DbMsg = 8,
+  Msg_LogPlayerMsg = 9,
   Msg_MIN = Msg_NONE,
-  Msg_MAX = Msg_DbMsg
+  Msg_MAX = Msg_LogPlayerMsg
 };
 
-inline const Msg (&EnumValuesMsg())[9] {
+inline const Msg (&EnumValuesMsg())[10] {
   static const Msg values[] = {
     Msg_NONE,
     Msg_GtmMsg,
@@ -65,13 +69,14 @@ inline const Msg (&EnumValuesMsg())[9] {
     Msg_DbtlAckMsg,
     Msg_ESMsg,
     Msg_DbtmMsg,
-    Msg_DbMsg
+    Msg_DbMsg,
+    Msg_LogPlayerMsg
   };
   return values;
 }
 
 inline const char * const *EnumNamesMsg() {
-  static const char * const names[10] = {
+  static const char * const names[11] = {
     "NONE",
     "GtmMsg",
     "AppMsg",
@@ -81,13 +86,14 @@ inline const char * const *EnumNamesMsg() {
     "ESMsg",
     "DbtmMsg",
     "DbMsg",
+    "LogPlayerMsg",
     nullptr
   };
   return names;
 }
 
 inline const char *EnumNameMsg(Msg e) {
-  if (flatbuffers::IsOutRange(e, Msg_NONE, Msg_DbMsg)) return "";
+  if (flatbuffers::IsOutRange(e, Msg_NONE, Msg_LogPlayerMsg)) return "";
   const size_t index = static_cast<size_t>(e);
   return EnumNamesMsg()[index];
 }
@@ -126,6 +132,10 @@ template<> struct MsgTraits<flat::DbtmMsg> {
 
 template<> struct MsgTraits<flat::DbMsg> {
   static const Msg enum_value = Msg_DbMsg;
+};
+
+template<> struct MsgTraits<flat::LogPlayerMsg> {
+  static const Msg enum_value = Msg_LogPlayerMsg;
 };
 
 bool VerifyMsg(flatbuffers::Verifier &verifier, const void *obj, Msg type);
@@ -938,6 +948,68 @@ inline flatbuffers::Offset<DbtlAckMsg> CreateDbtlAckMsg(
   return builder_.Finish();
 }
 
+struct LogPlayerMsg FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
+  typedef LogPlayerMsgBuilder Builder;
+  enum FlatBuffersVTableOffset FLATBUFFERS_VTABLE_UNDERLYING_TYPE {
+    VT_CMD = 4,
+    VT_TXID = 6,
+    VT_ID = 8
+  };
+  int32_t cmd() const {
+    return GetField<int32_t>(VT_CMD, 0);
+  }
+  int32_t txid() const {
+    return GetField<int32_t>(VT_TXID, 0);
+  }
+  int32_t id() const {
+    return GetField<int32_t>(VT_ID, 0);
+  }
+  bool Verify(flatbuffers::Verifier &verifier) const {
+    return VerifyTableStart(verifier) &&
+           VerifyField<int32_t>(verifier, VT_CMD) &&
+           VerifyField<int32_t>(verifier, VT_TXID) &&
+           VerifyField<int32_t>(verifier, VT_ID) &&
+           verifier.EndTable();
+  }
+};
+
+struct LogPlayerMsgBuilder {
+  typedef LogPlayerMsg Table;
+  flatbuffers::FlatBufferBuilder &fbb_;
+  flatbuffers::uoffset_t start_;
+  void add_cmd(int32_t cmd) {
+    fbb_.AddElement<int32_t>(LogPlayerMsg::VT_CMD, cmd, 0);
+  }
+  void add_txid(int32_t txid) {
+    fbb_.AddElement<int32_t>(LogPlayerMsg::VT_TXID, txid, 0);
+  }
+  void add_id(int32_t id) {
+    fbb_.AddElement<int32_t>(LogPlayerMsg::VT_ID, id, 0);
+  }
+  explicit LogPlayerMsgBuilder(flatbuffers::FlatBufferBuilder &_fbb)
+        : fbb_(_fbb) {
+    start_ = fbb_.StartTable();
+  }
+  LogPlayerMsgBuilder &operator=(const LogPlayerMsgBuilder &);
+  flatbuffers::Offset<LogPlayerMsg> Finish() {
+    const auto end = fbb_.EndTable(start_);
+    auto o = flatbuffers::Offset<LogPlayerMsg>(end);
+    return o;
+  }
+};
+
+inline flatbuffers::Offset<LogPlayerMsg> CreateLogPlayerMsg(
+    flatbuffers::FlatBufferBuilder &_fbb,
+    int32_t cmd = 0,
+    int32_t txid = 0,
+    int32_t id = 0) {
+  LogPlayerMsgBuilder builder_(_fbb);
+  builder_.add_id(id);
+  builder_.add_txid(txid);
+  builder_.add_cmd(cmd);
+  return builder_.Finish();
+}
+
 struct RootMsg FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   typedef RootMsgBuilder Builder;
   enum FlatBuffersVTableOffset FLATBUFFERS_VTABLE_UNDERLYING_TYPE {
@@ -974,6 +1046,9 @@ struct RootMsg FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   }
   const flat::DbMsg *any_as_DbMsg() const {
     return any_type() == flat::Msg_DbMsg ? static_cast<const flat::DbMsg *>(any()) : nullptr;
+  }
+  const flat::LogPlayerMsg *any_as_LogPlayerMsg() const {
+    return any_type() == flat::Msg_LogPlayerMsg ? static_cast<const flat::LogPlayerMsg *>(any()) : nullptr;
   }
   bool Verify(flatbuffers::Verifier &verifier) const {
     return VerifyTableStart(verifier) &&
@@ -1014,6 +1089,10 @@ template<> inline const flat::DbtmMsg *RootMsg::any_as<flat::DbtmMsg>() const {
 
 template<> inline const flat::DbMsg *RootMsg::any_as<flat::DbMsg>() const {
   return any_as_DbMsg();
+}
+
+template<> inline const flat::LogPlayerMsg *RootMsg::any_as<flat::LogPlayerMsg>() const {
+  return any_as_LogPlayerMsg();
 }
 
 struct RootMsgBuilder {
@@ -1083,6 +1162,10 @@ inline bool VerifyMsg(flatbuffers::Verifier &verifier, const void *obj, Msg type
     }
     case Msg_DbMsg: {
       auto ptr = reinterpret_cast<const flat::DbMsg *>(obj);
+      return verifier.VerifyTable(ptr);
+    }
+    case Msg_LogPlayerMsg: {
+      auto ptr = reinterpret_cast<const flat::LogPlayerMsg *>(obj);
       return verifier.VerifyTable(ptr);
     }
     default: return true;

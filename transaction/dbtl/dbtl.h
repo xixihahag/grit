@@ -9,6 +9,8 @@
 #include "muduo/net/TcpConnection.h"
 #include "base/threadPool.h"
 #include "logplayer.h"
+#include "muduo/net/EventLoop.h"
+#include "base/threadPool.h"
 #include <unordered_map>
 #include <list>
 namespace grit {
@@ -29,9 +31,12 @@ class Dbtl
     friend class LogPlayer;
 
   public:
-    Dbtl(EventLoop *);
+    Dbtl(muduo::net::EventLoop *);
 
     void solve(const muduo::net::TcpConnectionPtr &, const flat::DbtlMsg *);
+
+    // 日志分发器
+    LogPlayer *logPlayer_;
 
   private:
     void writeToDisk(
@@ -58,11 +63,8 @@ class Dbtl
     // txid-->LogInfo*
     unordered_map<int, list<struct LogInfo *> > logTable_;
 
-    // 用来进行日志的分发工作
-    ThreadPool *pool_;
-
-    // 日志分发器
-    LogPlayer *logPlayer_;
+    // 落盘线程池
+    ThreadPool *threadpool_;
 };
 
 } // namespace grit

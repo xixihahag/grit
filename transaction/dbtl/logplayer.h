@@ -2,6 +2,8 @@
 #include "muduo/net/TcpConnection.h"
 #include "dbtl.h"
 #include <list>
+#include <vector>
+#include <unordered_map>
 
 namespace grit {
 
@@ -15,16 +17,19 @@ class LogPlayer
     void playLog(int);
 
     // TODO: 用于接收db关于事务是否执行成功的回应
-    void solve();
+    void solve(const LogPlayerMsg *);
 
   private:
     void onDbConnection(const muduo::net::TcpConnectionPtr &);
 
-    std::list<muduo::net::TcpConnectionPtr> dbConnList_;
+    // 保存所有db的连接
+    std::vector<muduo::net::TcpConnectionPtr> dbConnVec_;
 
     Dbtl *dbtl_;
 
-    // TODO: 怎么存储谁应答了，谁没应答哇
+    // 存储谁应答了，谁没应答
+    // txid --> dbConnList对应的下表，存储的是没应答的下标
+    unordered_map<int, list<int> > answerTable_;
 };
 
 } // namespace grit

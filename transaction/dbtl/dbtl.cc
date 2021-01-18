@@ -15,7 +15,7 @@ using namespace flat;
 using namespace muduo::net;
 using namespace ROCKSDB_NAMESPACE;
 
-grit::Dbtl::Dbtl(EventLoop *loop)
+Dbtl::Dbtl(EventLoop *loop)
 {
     if (ConfigManager::getInstance()->dbtlUseRocksDb()) {
         // 打开rocksDB
@@ -35,13 +35,13 @@ grit::Dbtl::Dbtl(EventLoop *loop)
 
     // 新建日志分发器
     logPlayer_ = new LogPlayer();
-    logPlayer_->init(loop);
+    logPlayer_->init(this, loop);
 
     // TODO: 待定增加线程数量
-    pool_ = new ThreadPool(1);
+    threadpool_ = new ThreadPool(1);
 }
 
-void grit::Dbtl::solve(
+void Dbtl::solve(
     const muduo::net::TcpConnectionPtr &conn,
     const flat::DbtlMsg *dbtl)
 {
@@ -50,12 +50,15 @@ void grit::Dbtl::solve(
     switch (cmd) {
     case kLog:
         if (ConfigManager::getInstance()->dbtlUseRocksDb())
-            writeToDiskByRocksDb(dbtl->txid(), dbtl->data(), conn);
+            threadpool_->enqueue(bind(
+                &writeToDiskByRocksDb, this, dbtl->txid(), dbtl->data(), conn));
         else
-            writeToDisk(dbtl->txid(), dbtl->data(), conn);
+            threadpool_->enqueue(
+                bind(&writeToDisk, this, dbtl->txid(), dbtl->data(), conn));
         break;
     case kLsn:
         retResult(kLsn, dbtl->txid(), applyLsn_++, conn);
+        break;
     default:
         LOG(ERROR) << "receive error cmd";
     }
@@ -63,7 +66,7 @@ void grit::Dbtl::solve(
     // TODO: 要不要做成分布式备份的形式
 }
 
-void grit::Dbtl::writeToDisk(
+void Dbtl::writeToDisk(
     int txid,
     const flatbuffers::Vector<flatbuffers::Offset<flat::Data> > *data,
     const TcpConnectionPtr &conn)
@@ -94,13 +97,13 @@ void grit::Dbtl::writeToDisk(
 
     close(fd);
 
-    // TODO: 将日志发送给LogPlayer进行日志的分发
-    pool_->enqueue(bind(&LogPlayer::playLog, logPlayer_, txid));
+    // 将日志发送给LogPlayer进行日志的分发
+    logPlayer_->playLog(txid);
 
     retResult(kTranSuccess, txid, -1, conn);
 }
 
-void grit::Dbtl::writeToDiskByRocksDb(
+void Dbtl::writeToDiskByRocksDb(
     int txid,
     const flatbuffers::Vector<flatbuffers::Offset<flat::Data> > *data,
     const TcpConnectionPtr &conn)

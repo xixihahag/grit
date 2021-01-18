@@ -21,7 +21,12 @@ const int kData = 109;
 const int kTranSuccess = 110;
 const int kTranFail = 111;
 
-const int kJudgeConflit = 2;
+// dbtm 向 app 请求全局判冲突
+const int kJudgeConflit = 112;
+
+// db 向 logplayer 发送执行事务是否成功的信号
+const int kExecTranSucc = 113;
+const int kExecTranFail = 114;
 
 const int kLsn = 3;
 const int kData = 4;
