@@ -20,62 +20,68 @@ void onConnection(const TcpConnectionPtr &conn)
 {
     if (conn->connected()) { conn->setTcpNoDelay(true); }
 
-    LOG(INFO) << "EchoServer - " << conn->peerAddress().toIpPort() << " -> "
+    LOG(INFO) << conn->peerAddress().toIpPort() << " -> "
               << conn->localAddress().toIpPort() << " is "
               << (conn->connected() ? "UP" : "DOWN");
 }
 
 void onMessage(const TcpConnectionPtr &conn, Buffer *buf, Timestamp)
 {
-    auto msg = GetRootMsg((uint8_t *) buf->retrieveAllAsString().c_str());
-    auto data = static_cast<const DbServiceMsg *>(msg->any());
-    auto cmd = data->cmd();
+    string str(buf->retrieveAllAsString());
+    auto msg = GetRootMsg((uint8_t *) str.c_str());
 
-    switch (cmd) {
-    case kData:
-        db->getReadWriteSet(conn, data);
-        if (db->txidTrans_[data->txid()]->lsn == -1) {
-            db->txidTrans_[data->txid()]->lsn = 0;
-            db->threadPool_->enqueue(
-                bind(&Dbtm::getLsn, db->dbtm_, data->txid()));
+    if (msg->any_type() == Msg_DbServiceMsg) {
+        auto data = static_cast<const DbServiceMsg *>(msg->any());
+        auto cmd = data->cmd();
+
+        switch (cmd) {
+        case kData:
+            db->getReadWriteSet(conn, data);
+            if (db->txidTrans_[data->txid()]->lsn == -1) {
+                db->txidTrans_[data->txid()]->lsn = 0;
+                db->threadPool_->enqueue(
+                    bind(&Dbtm::getLsn, db->dbtm_, data->txid()));
+            }
+            break;
+        case kCommit:
+            //先检查局部冲突，然后判断是否检查全局冲突
+            db->txidTrans_[data->txid()]->needGlobalConflct =
+                data->needGlobalConflict();
+            // 如果已经得到对应的lsn则进行冲突判断，否则置信号等lsn回来
+            if (db->txidTrans_[data->txid()]->lsn > 0)
+                db->threadPool_->enqueue(bind(
+                    &Dbtm::judgeLocalConflict,
+                    db->dbtm_,
+                    db->txidTrans_[data->txid()]));
+            else
+                db->txidTrans_[data->txid()]->alreadyCommit = true;
+            break;
+        default:
+            LOG(ERROR) << "reveive error cmd";
         }
-        break;
-    case kCommit:
-        //先检查局部冲突，然后判断是否检查全局冲突
-        db->txidTrans_[data->txid()]->needGlobalConflct =
-            data->needGlobalConflict();
-        // 如果已经得到对应的lsn则进行冲突判断，否则置信号等lsn回来
-        if (db->txidTrans_[data->txid()]->lsn > 0)
-            db->threadPool_->enqueue(bind(
-                &Dbtm::judgeLocalConflict,
-                db->dbtm_,
-                db->txidTrans_[data->txid()]));
-        else
-            db->txidTrans_[data->txid()]->alreadyCommit = true;
-        break;
-    }
-
-    auto dbtmdata = static_cast<const DbtmMsg *>(msg->any());
-    auto cmd = dbtmdata->cmd();
-    switch (cmd) {
-    case kJudgeConflit:
-        // 全局判冲突结果返回 扔给DBTM处理
-        db->threadPool_->enqueue(bind(&Dbtm::solve, db->dbtm_, dbtmdata));
-        break;
-    case kLsn:
-        db->txidTrans_[dbtmdata->txid()]->lsn = dbtmdata->lsn();
-        if (db->txidTrans_[dbtmdata->txid()]->alreadyCommit)
-            db->threadPool_->enqueue(bind(
-                &Dbtm::judgeLocalConflict,
-                db->dbtm_,
-                db->txidTrans_[dbtmdata->txid()]));
-        break;
-    case kTranSuccess:
-    case kTranFail:
-        db->retResult(cmd, dbtmdata->txid());
-        break;
-    default:
-        LOG(ERROR) << "reveive error cmd";
+    } else if (msg->any_type() == Msg_DbtmMsg) {
+        auto dbtmdata = static_cast<const DbtmMsg *>(msg->any());
+        auto cmd = dbtmdata->cmd();
+        switch (cmd) {
+        case kJudgeConflit:
+            // 全局判冲突结果返回 扔给DBTM处理
+            db->threadPool_->enqueue(bind(&Dbtm::solve, db->dbtm_, dbtmdata));
+            break;
+        case kLsn:
+            db->txidTrans_[dbtmdata->txid()]->lsn = dbtmdata->lsn();
+            if (db->txidTrans_[dbtmdata->txid()]->alreadyCommit)
+                db->threadPool_->enqueue(bind(
+                    &Dbtm::judgeLocalConflict,
+                    db->dbtm_,
+                    db->txidTrans_[dbtmdata->txid()]));
+            break;
+        case kTranSuccess:
+        case kTranFail:
+            db->retResult(cmd, dbtmdata->txid());
+            break;
+        default:
+            LOG(ERROR) << "reveive error cmd";
+        }
     }
 }
 

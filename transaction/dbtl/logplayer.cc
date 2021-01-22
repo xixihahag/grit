@@ -60,6 +60,8 @@ void LogPlayer::playLog(int txid)
 
     auto data_data = builder.CreateVector(data_vec);
     auto db = CreateDbMsg(builder, txid, data_data);
+    auto msg = CreateRootMsg(builder, Msg_DbMsg, db.Union());
+    builder.Finish(msg);
 
     char *ptr = (char *) builder.GetBufferPointer();
     uint64_t size = builder.GetSize();

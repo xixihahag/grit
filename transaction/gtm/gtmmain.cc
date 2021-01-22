@@ -26,7 +26,8 @@ void onConnection(const TcpConnectionPtr &conn)
 void onMessage(const TcpConnectionPtr &conn, Buffer *buf, Timestamp)
 {
     // 通过flatbuffers判断过来的请求是啥
-    auto msg = GetRootMsg((uint8_t *) buf->retrieveAllAsString().c_str());
+    string str(buf->retrieveAllAsString());
+    auto msg = GetRootMsg((uint8_t *) str.c_str());
     auto gtm = static_cast<const GtmMsg *>(msg->any());
     auto cmd = gtm->cmd();
 

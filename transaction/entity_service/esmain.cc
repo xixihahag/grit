@@ -27,7 +27,8 @@ void onConnection(const TcpConnectionPtr &conn)
 
 void onMessage(const TcpConnectionPtr &conn, Buffer *buf, Timestamp)
 {
-    auto msg = GetRootMsg((uint8_t *) buf->retrieveAllAsString().c_str());
+    string str(buf->retrieveAllAsString());
+    auto msg = GetRootMsg((uint8_t *) str.c_str());
     auto data = static_cast<const ESMsg *>(msg->any());
     auto cmd = data->cmd();
 
@@ -48,7 +49,6 @@ void onMessage(const TcpConnectionPtr &conn, Buffer *buf, Timestamp)
         break;
     case kTranSuccess:
     case kTranFail:
-
         break;
     default:
         LOG(ERROR) << "receive error cmd";

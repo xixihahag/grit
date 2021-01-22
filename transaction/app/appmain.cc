@@ -20,7 +20,7 @@ void onConnection(const TcpConnectionPtr &conn)
 {
     if (conn->connected()) { conn->setTcpNoDelay(true); }
 
-    LOG(INFO) << "EchoServer - " << conn->peerAddress().toIpPort() << " -> "
+    LOG(INFO) << conn->peerAddress().toIpPort() << " -> "
               << conn->localAddress().toIpPort() << " is "
               << (conn->connected() ? "UP" : "DOWN");
 }

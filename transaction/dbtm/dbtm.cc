@@ -142,7 +142,8 @@ void Dbtm::getLsn(int txid)
 {
     flatbuffers::FlatBufferBuilder builder;
     auto dbtl = CreateDbtlMsg(builder, kLsn, txid);
-    builder.Finish(dbtl);
+    auto msg = CreateRootMsg(builder, Msg_DbtlMsg, dbtl.Union());
+    builder.Finish(msg);
 
     char *ptr = (char *) builder.GetBufferPointer();
     uint64_t size = builder.GetSize();
@@ -154,7 +155,8 @@ void Dbtm::judgeGlobalConflict(int txid)
 {
     flatbuffers::FlatBufferBuilder builder;
     auto gtm = CreateGtmMsg(builder, kJudgeConflit, txid);
-    builder.Finish(gtm);
+    auto msg = CreateRootMsg(builder, Msg_GtmMsg, gtm.Union());
+    builder.Finish(msg);
 
     char *ptr = (char *) builder.GetBufferPointer();
     uint64_t size = builder.GetSize();
@@ -235,7 +237,8 @@ void Dbtm::writeToDiskAndSql(struct transaction *tran)
 
     auto data_data = builder.CreateVector(data_vec);
     auto dbtl = CreateDbtlMsg(builder, kData, tran->txid, data_data);
-    builder.Finish(dbtl);
+    auto msg = CreateRootMsg(builder, Msg_DbtlMsg, dbtl.Union());
+    builder.Finish(msg);
 
     char *ptr = (char *) builder.GetBufferPointer();
     uint64_t size = builder.GetSize();
@@ -269,7 +272,8 @@ void Dbtm::sendLog(struct transaction *tran)
 
     auto data_data = builder.CreateVector(data_vec);
     auto dbtl = CreateDbtlMsg(builder, kData, tran->txid, data_data);
-    builder.Finish(dbtl);
+    auto msg = CreateRootMsg(builder, Msg_DbtlMsg, dbtl.Union());
+    builder.Finish(msg);
 
     char *ptr = (char *) builder.GetBufferPointer();
     uint64_t size = builder.GetSize();

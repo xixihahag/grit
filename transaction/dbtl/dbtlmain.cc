@@ -20,35 +20,41 @@ void onConnection(const TcpConnectionPtr &conn)
 {
     if (conn->connected()) { conn->setTcpNoDelay(true); }
 
-    LOG(INFO) << "EchoServer - " << conn->peerAddress().toIpPort() << " -> "
+    LOG(INFO) << conn->peerAddress().toIpPort() << " -> "
               << conn->localAddress().toIpPort() << " is "
               << (conn->connected() ? "UP" : "DOWN");
 }
 
 void onMessage(const TcpConnectionPtr &conn, Buffer *buf, Timestamp)
 {
-    auto msg = GetRootMsg((uint8_t *) buf->retrieveAllAsString().c_str());
-    auto data = static_cast<const DbtlMsg *>(msg->any());
+    string str(buf->retrieveAllAsString());
+    auto msg = GetRootMsg((uint8_t *) str.c_str());
 
-    // 全部转发到dbtl处理
-    auto cmd = data->cmd();
+    if (msg->any_type() == Msg_DbtlMsg) {
+        auto data = static_cast<const DbtlMsg *>(msg->any());
 
-    switch (cmd) {
-    case kLog:
-    case kLsn:
-        dbtl->solve(conn, data);
-        break;
-    }
+        // 全部转发到dbtl处理
+        auto cmd = data->cmd();
 
-    auto lp = static_cast<const LogPlayerMsg *>(msg->any());
-    auto cmd = lp->cmd();
-    switch (cmd) {
-    case kExecTranSucc:
-    case kExecTranFail:
-        dbtl->logPlayer_->solve(lp);
-        break;
-    default:
-        LOG(ERROR) << "receive error cmd";
+        switch (cmd) {
+        case kLog:
+        case kLsn:
+            dbtl->solve(conn, data);
+            break;
+        default:
+            LOG(ERROR) << "receive error cmd";
+        }
+    } else if (msg->any_type() == Msg_LogPlayerMsg) {
+        auto lp = static_cast<const LogPlayerMsg *>(msg->any());
+        auto cmd = lp->cmd();
+        switch (cmd) {
+        case kExecTranSucc:
+        case kExecTranFail:
+            dbtl->logPlayer_->solve(lp);
+            break;
+        default:
+            LOG(ERROR) << "receive error cmd";
+        }
     }
 }
 

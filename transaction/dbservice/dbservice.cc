@@ -63,7 +63,8 @@ void DbService::retResult(int status, int txid)
     flatbuffers::FlatBufferBuilder builder;
 
     auto es = CreateESMsg(builder, status, txid);
-    builder.Finish(es);
+    auto msg = CreateRootMsg(builder, Msg_ESMsg, es.Union());
+    builder.Finish(msg);
 
     char *ptr = (char *) builder.GetBufferPointer();
     uint64_t size = builder.GetSize();

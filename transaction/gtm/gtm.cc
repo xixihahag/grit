@@ -30,8 +30,9 @@ void GTM::getTxid(const TcpConnectionPtr &conn, string transType)
     }
     auto ipAndPort = builder.CreateVector(ipAndPortVec);
 
-    auto gtmAck = CreateAppMsg(builder, kTxid, txid_.load(), ipAndPort);
-    builder.Finish(gtmAck);
+    auto app = CreateAppMsg(builder, kTxid, txid_.load(), ipAndPort);
+    auto msg = CreateRootMsg(builder, Msg_AppMsg, app.Union());
+    builder.Finish(msg);
 
     txid_++;
 
@@ -53,7 +54,10 @@ void GTM::judgeConflict(
     if (--info->serverNum == 0) {
         for (auto conn : info->connList_) {
             flatbuffers::FlatBufferBuilder builder;
-            CreateDbtmMsg(builder, kJudgeConflit, txid, info->isConflict);
+            auto dbtm =
+                CreateDbtmMsg(builder, kJudgeConflit, txid, info->isConflict);
+            auto msg = CreateRootMsg(builder, Msg_DbtmMsg, dbtm.Union());
+            builder.Finish(msg);
 
             char *ptr = (char *) builder.GetBufferPointer();
             uint64_t size = builder.GetSize();

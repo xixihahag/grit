@@ -138,7 +138,9 @@ void Dbtl::retResult(int cmd, int txid, int lsn, const TcpConnectionPtr &conn)
         dbtm = CreateDbtmMsg(builder, cmd, txid);
     else
         dbtm = CreateDbtmMsg(builder, cmd, txid, lsn);
-    builder.Finish(dbtm);
+
+    auto msg = CreateRootMsg(builder, Msg_DbtmMsg, dbtm.Union());
+    builder.Finish(msg);
 
     char *ptr = (char *) builder.GetBufferPointer();
     uint64_t size = builder.GetSize();

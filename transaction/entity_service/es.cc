@@ -37,7 +37,9 @@ void ES::forward(const ESMsg *data)
 
     auto dbs = CreateDbServiceMsg(
         builder, kCommit, data->txid(), data->needGlobalConflict());
-    builder.Finish(dbs);
+
+    auto msg = CreateRootMsg(builder, Msg_DbServiceMsg, dbs.Union());
+    builder.Finish(msg);
 
     char *ptr = (char *) builder.GetBufferPointer();
     uint64_t size = builder.GetSize();
@@ -62,17 +64,18 @@ void ES::solve(const ESMsg *msg)
         data_vec.push_back(data);
         auto data_data = builder.CreateVector(data_vec);
         dbs = CreateDbServiceMsg(
-            builder, kData, msg->txid(), false, false, 0, 0, data_data);
+            builder, kData, msg->txid(), false, 0, data_data);
 
     } else {
         data = CreateData(builder, key);
         data_vec.push_back(data);
         auto data_data = builder.CreateVector(data_vec);
         dbs = CreateDbServiceMsg(
-            builder, kData, msg->txid(), false, false, 0, data_data, 0);
+            builder, kData, msg->txid(), false, data_data, 0);
     }
 
-    builder.Finish(dbs);
+    auto m_msg = CreateRootMsg(builder, Msg_DbServiceMsg, dbs.Union());
+    builder.Finish(m_msg);
     char *ptr = (char *) builder.GetBufferPointer();
     uint64_t size = builder.GetSize();
 
@@ -84,7 +87,8 @@ void ES::retResult(int status, int txid)
     flatbuffers::FlatBufferBuilder builder;
 
     auto app = CreateAppMsg(builder, status, txid);
-    builder.Finish(app);
+    auto msg = CreateRootMsg(builder, Msg_AppMsg, app.Union());
+    builder.Finish(msg);
 
     char *ptr = (char *) builder.GetBufferPointer();
     uint64_t size = builder.GetSize();

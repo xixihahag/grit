@@ -18,7 +18,7 @@ App ::App(EventLoop *loop)
         static_cast<uint16_t>(ConfigManager::getInstance()->gtmPort());
     InetAddress servAddr(ip, port);
     TcpClient *gtmClient_ = new TcpClient(loop, servAddr, "gtm");
-    gtmClient_->connect();
+
     gtmClient_->setConnectionCallback(
         bind(&onGtmConnection, this, std::placeholders::_1));
     gtmClient_->setMessageCallback(bind(
@@ -27,6 +27,8 @@ App ::App(EventLoop *loop)
         std::placeholders::_1,
         std::placeholders::_2,
         std::placeholders::_3));
+
+    gtmClient_->connect();
 }
 
 void App::onMessage(
@@ -34,7 +36,8 @@ void App::onMessage(
     Buffer *buf,
     muduo ::Timestamp)
 {
-    auto msg = GetRootMsg((uint8_t *) buf->retrieveAllAsString().c_str());
+    string str(buf->retrieveAllAsString());
+    auto msg = GetRootMsg((uint8_t *) str.c_str());
     auto data = static_cast<const AppMsg *>(msg->any());
     auto cmd = data->cmd();
 
@@ -51,6 +54,7 @@ void App::onMessage(
 
 void App::onGtmConnection(const muduo::net::TcpConnectionPtr &conn)
 {
+    if (conn->connected()) { conn->setTcpNoDelay(true); }
     gtmConn_ = conn;
 }
 
@@ -144,13 +148,16 @@ void App::add(string str)
         auto val = builder.CreateString(str.substr(pos1, pos2 - pos1));
 
         auto es = CreateESMsg(builder, cmd, txid_, false, typ, key, attr, val);
-        builder.Finish(es);
+        auto msg = CreateRootMsg(builder, Msg_ESMsg, es.Union());
+        builder.Finish(msg);
 
         ptr = (char *) builder.GetBufferPointer();
         size = builder.GetSize();
     } else {
         auto es = CreateESMsg(builder, cmd, txid_, false, typ, key);
-        builder.Finish(es);
+        auto msg = CreateRootMsg(builder, Msg_ESMsg, es.Union());
+
+        builder.Finish(msg);
 
         ptr = (char *) builder.GetBufferPointer();
         size = builder.GetSize();
@@ -165,7 +172,8 @@ void App::commit()
     flatbuffers::FlatBufferBuilder builder;
     auto es = CreateESMsg(
         builder, kCommit, txid_, connList_.size() == 1 ? false : true);
-    builder.Finish(es);
+    auto msg = CreateRootMsg(builder, Msg_ESMsg, es.Union());
+    builder.Finish(msg);
 
     char *ptr = (char *) builder.GetBufferPointer();
     uint64_t size = builder.GetSize();
@@ -179,9 +187,14 @@ void App::startTran(std::string type)
 {
     // 向gtm要txid和dbs列表
     flatbuffers::FlatBufferBuilder builder;
+    auto gtmBuilder = GtmMsgBuilder(builder);
+    gtmBuilder.add_cmd(kGetTxid);
     auto trantype = builder.CreateString(type);
-    auto gtm = CreateGtmMsg(builder, kGetTxid, trantype);
-    builder.Finish(gtm);
+    gtmBuilder.add_transType(trantype);
+    auto orc = gtmBuilder.Finish();
+
+    auto msg = CreateRootMsg(builder, Msg_GtmMsg, orc.Union());
+    builder.Finish(msg);
 
     char *ptr = (char *) builder.GetBufferPointer();
     uint64_t size = builder.GetSize();
