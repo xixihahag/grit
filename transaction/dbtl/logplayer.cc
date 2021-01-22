@@ -23,6 +23,10 @@ void LogPlayer::init(Dbtl *dbtl, EventLoop *loop)
     dbClient_->connect();
     dbClient_->setConnectionCallback(
         bind(&onDbConnection, this, std::placeholders::_1));
+
+    // 初始化时间轮
+    timeWheel_ = new TimeWheel(60 * 100);
+    timeWheel_->init();
 }
 
 void LogPlayer::onDbConnection(const muduo::net::TcpConnectionPtr &conn)
@@ -33,10 +37,14 @@ void LogPlayer::onDbConnection(const muduo::net::TcpConnectionPtr &conn)
 
 void LogPlayer::playLog(int txid)
 {
-    // 将服务器下表添加进未应答队列里面
-    if (answerTable_.find(txid) == answerTable_.end())
-        for (int i = 0; i < dbConnVec_.size(); i++)
+    // 将服务器下标添加进未应答队列里面
+    if (answerTable_.find(txid) == answerTable_.end()) {
+        retryTable_[txid].resize(dbConnVec_.size());
+        for (int i = 0; i < dbConnVec_.size(); i++) {
             answerTable_[txid].emplace_back(i);
+            retryTable_[txid][i] = 0;
+        }
+    }
 
     flatbuffers::FlatBufferBuilder builder;
     vector<flatbuffers::Offset<Data> > data_vec;
@@ -69,9 +77,18 @@ void LogPlayer::solve(const LogPlayerMsg *data)
         answerTable_[data->txid()].remove(data->id());
         break;
     case kExecTranFail:
-        // TODO: 可以设置重试次数限制，或者设置定时器，多久之后重试
         // 针对每一个txid的每一个conn，设置定时器，设置重试次数，设置重试间隔时间
-        playLog(data->txid());
+        int time = ++retryTable_[data->txid()][data->id()];
+        if (time > ConfigManager::getInstance()->lpMaxRetryTime())
+            // 讲道理是不可能发生错误的，除非一整套分布式存储系统全部宕机
+            LOG(WARNING) << "Maximum retry limit reached";
+        else
+            timeWheel_->addTimer(
+                pow(2, time) * 1000,
+                bind(playLog, this, data->txid()),
+                nullptr);
+
+        // playLog(data->txid());
         break;
     default:
         LOG(ERROR) << "receive error cmd";

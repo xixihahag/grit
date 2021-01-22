@@ -59,6 +59,9 @@ void ConfigManager::init(const char *configDir)
     // es
     SetOrDefaultS(esListenAddress_, pt.get<string>({"es.listenaddress"}));
     SetOrDefaultI(esPort_, pt.get<int>("es.port"));
+
+    // lp
+    SetOrDefaultI(lpMaxRetryTime_, pt.get<int>("logplayer.maxretrytime"));
 }
 
 } // namespace grit

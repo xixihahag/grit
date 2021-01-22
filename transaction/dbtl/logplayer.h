@@ -1,9 +1,11 @@
 #pragma once
 #include "muduo/net/TcpConnection.h"
 #include "dbtl.h"
+#include "base/timeWheel.h"
 #include <list>
 #include <vector>
 #include <unordered_map>
+#include <vector>
 
 namespace grit {
 
@@ -16,7 +18,7 @@ class LogPlayer
     // 用于进行日志的分发
     void playLog(int);
 
-    // TODO: 用于接收db关于事务是否执行成功的回应
+    // 用于接收db关于事务是否执行成功的回应
     void solve(const LogPlayerMsg *);
 
   private:
@@ -30,6 +32,12 @@ class LogPlayer
     // 存储谁应答了，谁没应答
     // txid --> dbConnList对应的下表，存储的是没应答的下标
     unordered_map<int, list<int> > answerTable_;
+
+    // txid->pos->retryTime 重试次数表
+    unordered_map<int, vector<int> > retryTable_;
+
+    // 开启时间轮
+    TimeWheel *timeWheel_;
 };
 
 } // namespace grit

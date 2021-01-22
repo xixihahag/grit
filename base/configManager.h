@@ -52,6 +52,9 @@ class ConfigManager : public Singleton<ConfigManager>
     std::string esListenAddress() { return esListenAddress_; }
     int esPort() { return esPort_; }
 
+    // lp
+    int lpMaxRetryTime() { return lpMaxRetryTime_; }
+
   private:
     // basis
     std::string logDir_;
@@ -93,6 +96,9 @@ class ConfigManager : public Singleton<ConfigManager>
     // es
     std::string esListenAddress_;
     int esPort_;
+
+    // logplayer
+    int lpMaxRetryTime_;
 };
 
 } // namespace grit
