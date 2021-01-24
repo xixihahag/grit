@@ -24,14 +24,12 @@ const int kTranFail = 111;
 // dbtm 向 app 请求全局判冲突
 const int kJudgeConflit = 112;
 
+// dbtm 向 logplayer 请求lsn
+const int kLsn = 113;
+
 // db 向 logplayer 发送执行事务是否成功的信号
-const int kExecTranSucc = 113;
-const int kExecTranFail = 114;
+const int kExecTranSucc = 114;
+const int kExecTranFail = 115;
 
-const int kLsn = 3;
-const int kData = 4;
-
-const int kTranSuccess = 5;
-const int kLog = 6;
-const int kLogAck = 7;
-const int kTransAck = 8;
+// dbtm 向 dbtl 发送日志消息
+const int kLog = 116;

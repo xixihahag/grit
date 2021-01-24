@@ -5,7 +5,6 @@
 #include <vector>
 #include "gtm.h"
 #include "flatbuffers/flatbuffers.h"
-#include "net_generated.h"
 #include "configManager.h"
 #include "headerCmd.h"
 

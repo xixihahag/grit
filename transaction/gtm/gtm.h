@@ -7,6 +7,7 @@
 #include "muduo/net/TcpServer.h"
 #include "muduo/net/EventLoop.h"
 #include "singleton.h"
+#include "net_generated.h"
 namespace grit {
 class GTM : public Singleton<GTM>
 {
@@ -15,7 +16,8 @@ class GTM : public Singleton<GTM>
     void getTxid(const muduo::net::TcpConnectionPtr &, std::string);
 
     // 判断是否存在全局冲突
-    void judgeConflict(const muduo::net::TcpConnectionPtr &, const GtmMsg *);
+    void
+    judgeConflict(const muduo::net::TcpConnectionPtr &, const flat::GtmMsg *);
 
     // 读取文件，缓存每个事务涉及的DB在哪
     void init();
@@ -42,8 +44,8 @@ class GTM : public Singleton<GTM>
             , isConflict(false)
         {}
         int serverNum; // 事务对应几个服务器
-        list<muduo::net::TcpConnectionPtr> connList_; // 服务器列表
-        bool isConflict;                              // 是否冲突
+        std::list<muduo::net::TcpConnectionPtr> connList_; // 服务器列表
+        bool isConflict;                                   // 是否冲突
     };
 
     // 事务类型--对应的es的ip和端口

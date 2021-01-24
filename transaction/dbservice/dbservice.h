@@ -12,9 +12,11 @@
 #include "muduo/net/TcpConnection.h"
 #include "net_generated.h"
 #include "threadPool.h"
-#include "dbtm/dbtm.h"
+#include "dbtm.h"
 
 namespace grit {
+
+class Dbtm;
 
 // 事务的读写数据结构体
 struct Data
@@ -78,13 +80,15 @@ class DbService
     void connectToDatabase();
 
     // 从传输过来的数据中解析读写集
-    void getReadWriteSet(const TcpConnectionPtr &, const DbServiceMsg *);
+    void getReadWriteSet(
+        const muduo::net::TcpConnectionPtr &,
+        const flat::DbServiceMsg *);
 
     // 用于向上层返回事务结果，第一个参数为事务执行结果，第二个参数为txid
     void retResult(int, int);
 
     // 记录txid和es的conn的对应，用于向上层反馈事务执行结果
-    unordered_map<int, TcpConnectionPtr> table_;
+    unordered_map<int, muduo::net::TcpConnectionPtr> table_;
 
     // 记录txid和trans的对应关系
     unordered_map<int, struct transaction *> txidTrans_;

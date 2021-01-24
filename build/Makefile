@@ -111,6 +111,71 @@ depend:
 .PHONY : depend
 
 #=============================================================================
+# Target rules for targets named base
+
+# Build rule for target.
+base: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 base
+.PHONY : base
+
+# fast build rule for target.
+base/fast:
+	$(MAKE) -f CMakeFiles/base.dir/build.make CMakeFiles/base.dir/build
+.PHONY : base/fast
+
+#=============================================================================
+# Target rules for targets named app
+
+# Build rule for target.
+app: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 app
+.PHONY : app
+
+# fast build rule for target.
+app/fast:
+	$(MAKE) -f transaction/app/CMakeFiles/app.dir/build.make transaction/app/CMakeFiles/app.dir/build
+.PHONY : app/fast
+
+#=============================================================================
+# Target rules for targets named dbs
+
+# Build rule for target.
+dbs: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 dbs
+.PHONY : dbs
+
+# fast build rule for target.
+dbs/fast:
+	$(MAKE) -f transaction/dbservice/CMakeFiles/dbs.dir/build.make transaction/dbservice/CMakeFiles/dbs.dir/build
+.PHONY : dbs/fast
+
+#=============================================================================
+# Target rules for targets named dbtl
+
+# Build rule for target.
+dbtl: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 dbtl
+.PHONY : dbtl
+
+# fast build rule for target.
+dbtl/fast:
+	$(MAKE) -f transaction/dbtl/CMakeFiles/dbtl.dir/build.make transaction/dbtl/CMakeFiles/dbtl.dir/build
+.PHONY : dbtl/fast
+
+#=============================================================================
+# Target rules for targets named es
+
+# Build rule for target.
+es: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 es
+.PHONY : es
+
+# fast build rule for target.
+es/fast:
+	$(MAKE) -f transaction/entity_service/CMakeFiles/es.dir/build.make transaction/entity_service/CMakeFiles/es.dir/build
+.PHONY : es/fast
+
+#=============================================================================
 # Target rules for targets named gtm
 
 # Build rule for target.
@@ -123,6 +188,60 @@ gtm/fast:
 	$(MAKE) -f transaction/gtm/CMakeFiles/gtm.dir/build.make transaction/gtm/CMakeFiles/gtm.dir/build
 .PHONY : gtm/fast
 
+base/configManager.o: base/configManager.cc.o
+
+.PHONY : base/configManager.o
+
+# target to build an object file
+base/configManager.cc.o:
+	$(MAKE) -f CMakeFiles/base.dir/build.make CMakeFiles/base.dir/base/configManager.cc.o
+.PHONY : base/configManager.cc.o
+
+base/configManager.i: base/configManager.cc.i
+
+.PHONY : base/configManager.i
+
+# target to preprocess a source file
+base/configManager.cc.i:
+	$(MAKE) -f CMakeFiles/base.dir/build.make CMakeFiles/base.dir/base/configManager.cc.i
+.PHONY : base/configManager.cc.i
+
+base/configManager.s: base/configManager.cc.s
+
+.PHONY : base/configManager.s
+
+# target to generate assembly for a file
+base/configManager.cc.s:
+	$(MAKE) -f CMakeFiles/base.dir/build.make CMakeFiles/base.dir/base/configManager.cc.s
+.PHONY : base/configManager.cc.s
+
+base/mydb.o: base/mydb.cc.o
+
+.PHONY : base/mydb.o
+
+# target to build an object file
+base/mydb.cc.o:
+	$(MAKE) -f CMakeFiles/base.dir/build.make CMakeFiles/base.dir/base/mydb.cc.o
+.PHONY : base/mydb.cc.o
+
+base/mydb.i: base/mydb.cc.i
+
+.PHONY : base/mydb.i
+
+# target to preprocess a source file
+base/mydb.cc.i:
+	$(MAKE) -f CMakeFiles/base.dir/build.make CMakeFiles/base.dir/base/mydb.cc.i
+.PHONY : base/mydb.cc.i
+
+base/mydb.s: base/mydb.cc.s
+
+.PHONY : base/mydb.s
+
+# target to generate assembly for a file
+base/mydb.cc.s:
+	$(MAKE) -f CMakeFiles/base.dir/build.make CMakeFiles/base.dir/base/mydb.cc.s
+.PHONY : base/mydb.cc.s
+
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -130,8 +249,19 @@ help:
 	@echo "... clean"
 	@echo "... depend"
 	@echo "... rebuild_cache"
+	@echo "... base"
 	@echo "... edit_cache"
+	@echo "... app"
+	@echo "... dbs"
+	@echo "... dbtl"
+	@echo "... es"
 	@echo "... gtm"
+	@echo "... base/configManager.o"
+	@echo "... base/configManager.i"
+	@echo "... base/configManager.s"
+	@echo "... base/mydb.o"
+	@echo "... base/mydb.i"
+	@echo "... base/mydb.s"
 .PHONY : help
 
 

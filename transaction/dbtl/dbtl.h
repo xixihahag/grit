@@ -7,13 +7,14 @@
 #include "rocksdb/db.h"
 #include "rocksdb/options.h"
 #include "muduo/net/TcpConnection.h"
-#include "base/threadPool.h"
+#include "threadPool.h"
 #include "logplayer.h"
 #include "muduo/net/EventLoop.h"
-#include "base/threadPool.h"
 #include <unordered_map>
 #include <list>
 namespace grit {
+
+class LogPlayer;
 
 struct LogInfo
 {
@@ -52,9 +53,9 @@ class Dbtl
     void retResult(int, int, int, const muduo::net::TcpConnectionPtr &);
 
     // 连接rocksDB
-    DB *rocksDb_;
+    rocksdb::DB *rocksDb_;
     // 开启本地rocksDB
-    Options rockesDBOptions_;
+    rocksdb::Options rockesDBOptions_;
 
     // 第一个是分发出去的lsn，第二个是已经落盘的lsn号
     // TODO: applyLsn还没更新

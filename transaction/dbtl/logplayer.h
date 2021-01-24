@@ -1,7 +1,7 @@
 #pragma once
 #include "muduo/net/TcpConnection.h"
 #include "dbtl.h"
-#include "base/timeWheel.h"
+#include "timeWheel.h"
 #include <list>
 #include <vector>
 #include <unordered_map>
@@ -9,17 +9,19 @@
 
 namespace grit {
 
+class Dbtl;
+
 class LogPlayer
 {
   public:
     // 用于连接底层存储服务器
-    void init(Dbtl *, EventLoop *);
+    void init(Dbtl *, muduo::net::EventLoop *);
 
     // 用于进行日志的分发
     void playLog(int);
 
     // 用于接收db关于事务是否执行成功的回应
-    void solve(const LogPlayerMsg *);
+    void solve(const flat::LogPlayerMsg *);
 
   private:
     void onDbConnection(const muduo::net::TcpConnectionPtr &);

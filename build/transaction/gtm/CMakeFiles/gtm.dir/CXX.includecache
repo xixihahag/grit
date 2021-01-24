@@ -21,10 +21,10 @@ gtm.h
 /home/gyz/grit/transaction/gtm/gtm.h
 flatbuffers/flatbuffers.h
 /home/gyz/grit/transaction/gtm/flatbuffers/flatbuffers.h
-net_generated.h
-/home/gyz/grit/transaction/gtm/net_generated.h
 configManager.h
 /home/gyz/grit/transaction/gtm/configManager.h
+headerCmd.h
+/home/gyz/grit/transaction/gtm/headerCmd.h
 
 /home/gyz/grit/transaction/gtm/gtm.h
 atomic
@@ -41,4 +41,26 @@ muduo/net/EventLoop.h
 /home/gyz/grit/transaction/gtm/muduo/net/EventLoop.h
 singleton.h
 /home/gyz/grit/transaction/gtm/singleton.h
+net_generated.h
+/home/gyz/grit/transaction/gtm/net_generated.h
+
+/home/gyz/grit/transaction/gtm/gtmmain.cc
+iostream
+-
+glog/logging.h
+-
+gtm/gtm.h
+/home/gyz/grit/transaction/gtm/gtm/gtm.h
+configManager.h
+/home/gyz/grit/transaction/gtm/configManager.h
+headerCmd.h
+/home/gyz/grit/transaction/gtm/headerCmd.h
+muduo/net/TcpServer.h
+/home/gyz/grit/transaction/gtm/muduo/net/TcpServer.h
+flatbuffers/flatbuffers.h
+/home/gyz/grit/transaction/gtm/flatbuffers/flatbuffers.h
+muduo/net/EventLoop.h
+/home/gyz/grit/transaction/gtm/muduo/net/EventLoop.h
+net_generated.h
+/home/gyz/grit/transaction/gtm/net_generated.h
 

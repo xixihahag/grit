@@ -125,33 +125,6 @@ gtm/fast:
 	cd /home/gyz/grit/build && $(MAKE) -f transaction/gtm/CMakeFiles/gtm.dir/build.make transaction/gtm/CMakeFiles/gtm.dir/build
 .PHONY : gtm/fast
 
-__/__/base/configManager.o: __/__/base/configManager.cc.o
-
-.PHONY : __/__/base/configManager.o
-
-# target to build an object file
-__/__/base/configManager.cc.o:
-	cd /home/gyz/grit/build && $(MAKE) -f transaction/gtm/CMakeFiles/gtm.dir/build.make transaction/gtm/CMakeFiles/gtm.dir/__/__/base/configManager.cc.o
-.PHONY : __/__/base/configManager.cc.o
-
-__/__/base/configManager.i: __/__/base/configManager.cc.i
-
-.PHONY : __/__/base/configManager.i
-
-# target to preprocess a source file
-__/__/base/configManager.cc.i:
-	cd /home/gyz/grit/build && $(MAKE) -f transaction/gtm/CMakeFiles/gtm.dir/build.make transaction/gtm/CMakeFiles/gtm.dir/__/__/base/configManager.cc.i
-.PHONY : __/__/base/configManager.cc.i
-
-__/__/base/configManager.s: __/__/base/configManager.cc.s
-
-.PHONY : __/__/base/configManager.s
-
-# target to generate assembly for a file
-__/__/base/configManager.cc.s:
-	cd /home/gyz/grit/build && $(MAKE) -f transaction/gtm/CMakeFiles/gtm.dir/build.make transaction/gtm/CMakeFiles/gtm.dir/__/__/base/configManager.cc.s
-.PHONY : __/__/base/configManager.cc.s
-
 gtm.o: gtm.cc.o
 
 .PHONY : gtm.o
@@ -215,9 +188,6 @@ help:
 	@echo "... rebuild_cache"
 	@echo "... gtm"
 	@echo "... edit_cache"
-	@echo "... __/__/base/configManager.o"
-	@echo "... __/__/base/configManager.i"
-	@echo "... __/__/base/configManager.s"
 	@echo "... gtm.o"
 	@echo "... gtm.i"
 	@echo "... gtm.s"

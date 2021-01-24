@@ -4,7 +4,6 @@ set(CMAKE_DEPENDS_LANGUAGES
   )
 # The set of files for implicit dependencies of each language:
 set(CMAKE_DEPENDS_CHECK_CXX
-  "/home/gyz/grit/base/configManager.cc" "/home/gyz/grit/build/transaction/gtm/CMakeFiles/gtm.dir/__/__/base/configManager.cc.o"
   "/home/gyz/grit/transaction/gtm/gtm.cc" "/home/gyz/grit/build/transaction/gtm/CMakeFiles/gtm.dir/gtm.cc.o"
   "/home/gyz/grit/transaction/gtm/gtmmain.cc" "/home/gyz/grit/build/transaction/gtm/CMakeFiles/gtm.dir/gtmmain.cc.o"
   )
@@ -20,6 +19,7 @@ set(CMAKE_CXX_TARGET_INCLUDE_PATH
 
 # Targets to which this target links.
 set(CMAKE_TARGET_LINKED_INFO_FILES
+  "/home/gyz/grit/build/CMakeFiles/base.dir/DependInfo.cmake"
   )
 
 # Fortran module output directory.

@@ -22,7 +22,7 @@ ES::ES(EventLoop *loop)
     TcpClient *dbsClient_ = new TcpClient(loop, servAddr, "dbs");
     dbsClient_->connect();
     dbsClient_->setConnectionCallback(
-        bind(&onDbsConnection, this, std::placeholders::_1));
+        bind(&ES::onDbsConnection, this, std::placeholders::_1));
 }
 
 void ES::onDbsConnection(const muduo::net::TcpConnectionPtr &conn)

@@ -20,9 +20,9 @@ App ::App(EventLoop *loop)
     TcpClient *gtmClient_ = new TcpClient(loop, servAddr, "gtm");
 
     gtmClient_->setConnectionCallback(
-        bind(&onGtmConnection, this, std::placeholders::_1));
+        bind(&App::onGtmConnection, this, std::placeholders::_1));
     gtmClient_->setMessageCallback(bind(
-        &onMessage,
+        &App::onMessage,
         this,
         std::placeholders::_1,
         std::placeholders::_2,
@@ -74,7 +74,7 @@ void App::connect2ES(
         esClient_->connect();
 
         esClient_->setConnectionCallback(
-            bind(&onESConnection, this, std::placeholders::_1));
+            bind(&App::onESConnection, this, std::placeholders::_1));
     }
 }
 
@@ -205,7 +205,7 @@ void App::startTran(std::string type)
 void App::showResult(int status, int txid)
 {
     if (status == kTranSuccess)
-        LOG(INFO) << "[" << txid << "]transaction executed successfully";
+        LOG(INFO) << "[" << txid << "] transaction executed successfully";
     else
-        LOG(INFO) << "[" << txid << "]transaction execution failed";
+        LOG(INFO) << "[" << txid << "] transaction execution failed";
 }

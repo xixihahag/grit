@@ -201,6 +201,33 @@ CMAKE_STRIP:FILEPATH=/usr/bin/strip
 CMAKE_VERBOSE_MAKEFILE:BOOL=FALSE
 
 //Value Computed by CMake
+app_BINARY_DIR:STATIC=/home/gyz/grit/build/transaction/app
+
+//Value Computed by CMake
+app_SOURCE_DIR:STATIC=/home/gyz/grit/transaction/app
+
+//Dependencies for the target
+base_LIB_DEPENDS:STATIC=general;mysqlclient;
+
+//Value Computed by CMake
+dbs_BINARY_DIR:STATIC=/home/gyz/grit/build/transaction/dbservice
+
+//Value Computed by CMake
+dbs_SOURCE_DIR:STATIC=/home/gyz/grit/transaction/dbservice
+
+//Value Computed by CMake
+dbtl_BINARY_DIR:STATIC=/home/gyz/grit/build/transaction/dbtl
+
+//Value Computed by CMake
+dbtl_SOURCE_DIR:STATIC=/home/gyz/grit/transaction/dbtl
+
+//Value Computed by CMake
+es_BINARY_DIR:STATIC=/home/gyz/grit/build/transaction/entity_service
+
+//Value Computed by CMake
+es_SOURCE_DIR:STATIC=/home/gyz/grit/transaction/entity_service
+
+//Value Computed by CMake
 grit_BINARY_DIR:STATIC=/home/gyz/grit/build
 
 //Value Computed by CMake
@@ -321,7 +348,7 @@ CMAKE_MODULE_LINKER_FLAGS_RELWITHDEBINFO-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: CMAKE_NM
 CMAKE_NM-ADVANCED:INTERNAL=1
 //number of local generators
-CMAKE_NUMBER_OF_MAKEFILES:INTERNAL=4
+CMAKE_NUMBER_OF_MAKEFILES:INTERNAL=8
 //ADVANCED property for variable: CMAKE_OBJCOPY
 CMAKE_OBJCOPY-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: CMAKE_OBJDUMP

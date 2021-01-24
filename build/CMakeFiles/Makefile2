@@ -53,12 +53,14 @@ CMAKE_BINARY_DIR = /home/gyz/grit/build
 # Directory level rules for the build root directory
 
 # The main recursive "all" target.
+all: CMakeFiles/base.dir/all
 all: flatbuffer/all
 all: transaction/all
 
 .PHONY : all
 
 # The main recursive "clean" target.
+clean: CMakeFiles/base.dir/clean
 clean: flatbuffer/clean
 clean: transaction/clean
 
@@ -69,6 +71,33 @@ preinstall: flatbuffer/preinstall
 preinstall: transaction/preinstall
 
 .PHONY : preinstall
+
+#=============================================================================
+# Target rules for target CMakeFiles/base.dir
+
+# All Build rule for target.
+CMakeFiles/base.dir/all:
+	$(MAKE) -f CMakeFiles/base.dir/build.make CMakeFiles/base.dir/depend
+	$(MAKE) -f CMakeFiles/base.dir/build.make CMakeFiles/base.dir/build
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/gyz/grit/build/CMakeFiles --progress-num=4,5,6 "Built target base"
+.PHONY : CMakeFiles/base.dir/all
+
+# Build rule for subdir invocation for target.
+CMakeFiles/base.dir/rule: cmake_check_build_system
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/gyz/grit/build/CMakeFiles 3
+	$(MAKE) -f CMakeFiles/Makefile2 CMakeFiles/base.dir/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/gyz/grit/build/CMakeFiles 0
+.PHONY : CMakeFiles/base.dir/rule
+
+# Convenience name for target.
+base: CMakeFiles/base.dir/rule
+
+.PHONY : base
+
+# clean rule for target.
+CMakeFiles/base.dir/clean:
+	$(MAKE) -f CMakeFiles/base.dir/build.make CMakeFiles/base.dir/clean
+.PHONY : CMakeFiles/base.dir/clean
 
 #=============================================================================
 # Directory level rules for directory flatbuffer
@@ -92,19 +121,211 @@ flatbuffer/preinstall:
 # Directory level rules for directory transaction
 
 # Recursive "all" directory target.
+transaction/all: transaction/app/all
+transaction/all: transaction/dbservice/all
+transaction/all: transaction/dbtl/all
+transaction/all: transaction/entity_service/all
 transaction/all: transaction/gtm/all
 
 .PHONY : transaction/all
 
 # Recursive "clean" directory target.
+transaction/clean: transaction/app/clean
+transaction/clean: transaction/dbservice/clean
+transaction/clean: transaction/dbtl/clean
+transaction/clean: transaction/entity_service/clean
 transaction/clean: transaction/gtm/clean
 
 .PHONY : transaction/clean
 
 # Recursive "preinstall" directory target.
+transaction/preinstall: transaction/app/preinstall
+transaction/preinstall: transaction/dbservice/preinstall
+transaction/preinstall: transaction/dbtl/preinstall
+transaction/preinstall: transaction/entity_service/preinstall
 transaction/preinstall: transaction/gtm/preinstall
 
 .PHONY : transaction/preinstall
+
+#=============================================================================
+# Directory level rules for directory transaction/app
+
+# Recursive "all" directory target.
+transaction/app/all: transaction/app/CMakeFiles/app.dir/all
+
+.PHONY : transaction/app/all
+
+# Recursive "clean" directory target.
+transaction/app/clean: transaction/app/CMakeFiles/app.dir/clean
+
+.PHONY : transaction/app/clean
+
+# Recursive "preinstall" directory target.
+transaction/app/preinstall:
+
+.PHONY : transaction/app/preinstall
+
+#=============================================================================
+# Target rules for target transaction/app/CMakeFiles/app.dir
+
+# All Build rule for target.
+transaction/app/CMakeFiles/app.dir/all: CMakeFiles/base.dir/all
+	$(MAKE) -f transaction/app/CMakeFiles/app.dir/build.make transaction/app/CMakeFiles/app.dir/depend
+	$(MAKE) -f transaction/app/CMakeFiles/app.dir/build.make transaction/app/CMakeFiles/app.dir/build
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/gyz/grit/build/CMakeFiles --progress-num=1,2,3 "Built target app"
+.PHONY : transaction/app/CMakeFiles/app.dir/all
+
+# Build rule for subdir invocation for target.
+transaction/app/CMakeFiles/app.dir/rule: cmake_check_build_system
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/gyz/grit/build/CMakeFiles 6
+	$(MAKE) -f CMakeFiles/Makefile2 transaction/app/CMakeFiles/app.dir/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/gyz/grit/build/CMakeFiles 0
+.PHONY : transaction/app/CMakeFiles/app.dir/rule
+
+# Convenience name for target.
+app: transaction/app/CMakeFiles/app.dir/rule
+
+.PHONY : app
+
+# clean rule for target.
+transaction/app/CMakeFiles/app.dir/clean:
+	$(MAKE) -f transaction/app/CMakeFiles/app.dir/build.make transaction/app/CMakeFiles/app.dir/clean
+.PHONY : transaction/app/CMakeFiles/app.dir/clean
+
+#=============================================================================
+# Directory level rules for directory transaction/dbservice
+
+# Recursive "all" directory target.
+transaction/dbservice/all: transaction/dbservice/CMakeFiles/dbs.dir/all
+
+.PHONY : transaction/dbservice/all
+
+# Recursive "clean" directory target.
+transaction/dbservice/clean: transaction/dbservice/CMakeFiles/dbs.dir/clean
+
+.PHONY : transaction/dbservice/clean
+
+# Recursive "preinstall" directory target.
+transaction/dbservice/preinstall:
+
+.PHONY : transaction/dbservice/preinstall
+
+#=============================================================================
+# Target rules for target transaction/dbservice/CMakeFiles/dbs.dir
+
+# All Build rule for target.
+transaction/dbservice/CMakeFiles/dbs.dir/all: CMakeFiles/base.dir/all
+	$(MAKE) -f transaction/dbservice/CMakeFiles/dbs.dir/build.make transaction/dbservice/CMakeFiles/dbs.dir/depend
+	$(MAKE) -f transaction/dbservice/CMakeFiles/dbs.dir/build.make transaction/dbservice/CMakeFiles/dbs.dir/build
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/gyz/grit/build/CMakeFiles --progress-num=7,8,9,10 "Built target dbs"
+.PHONY : transaction/dbservice/CMakeFiles/dbs.dir/all
+
+# Build rule for subdir invocation for target.
+transaction/dbservice/CMakeFiles/dbs.dir/rule: cmake_check_build_system
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/gyz/grit/build/CMakeFiles 7
+	$(MAKE) -f CMakeFiles/Makefile2 transaction/dbservice/CMakeFiles/dbs.dir/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/gyz/grit/build/CMakeFiles 0
+.PHONY : transaction/dbservice/CMakeFiles/dbs.dir/rule
+
+# Convenience name for target.
+dbs: transaction/dbservice/CMakeFiles/dbs.dir/rule
+
+.PHONY : dbs
+
+# clean rule for target.
+transaction/dbservice/CMakeFiles/dbs.dir/clean:
+	$(MAKE) -f transaction/dbservice/CMakeFiles/dbs.dir/build.make transaction/dbservice/CMakeFiles/dbs.dir/clean
+.PHONY : transaction/dbservice/CMakeFiles/dbs.dir/clean
+
+#=============================================================================
+# Directory level rules for directory transaction/dbtl
+
+# Recursive "all" directory target.
+transaction/dbtl/all: transaction/dbtl/CMakeFiles/dbtl.dir/all
+
+.PHONY : transaction/dbtl/all
+
+# Recursive "clean" directory target.
+transaction/dbtl/clean: transaction/dbtl/CMakeFiles/dbtl.dir/clean
+
+.PHONY : transaction/dbtl/clean
+
+# Recursive "preinstall" directory target.
+transaction/dbtl/preinstall:
+
+.PHONY : transaction/dbtl/preinstall
+
+#=============================================================================
+# Target rules for target transaction/dbtl/CMakeFiles/dbtl.dir
+
+# All Build rule for target.
+transaction/dbtl/CMakeFiles/dbtl.dir/all: CMakeFiles/base.dir/all
+	$(MAKE) -f transaction/dbtl/CMakeFiles/dbtl.dir/build.make transaction/dbtl/CMakeFiles/dbtl.dir/depend
+	$(MAKE) -f transaction/dbtl/CMakeFiles/dbtl.dir/build.make transaction/dbtl/CMakeFiles/dbtl.dir/build
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/gyz/grit/build/CMakeFiles --progress-num=11,12,13,14 "Built target dbtl"
+.PHONY : transaction/dbtl/CMakeFiles/dbtl.dir/all
+
+# Build rule for subdir invocation for target.
+transaction/dbtl/CMakeFiles/dbtl.dir/rule: cmake_check_build_system
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/gyz/grit/build/CMakeFiles 7
+	$(MAKE) -f CMakeFiles/Makefile2 transaction/dbtl/CMakeFiles/dbtl.dir/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/gyz/grit/build/CMakeFiles 0
+.PHONY : transaction/dbtl/CMakeFiles/dbtl.dir/rule
+
+# Convenience name for target.
+dbtl: transaction/dbtl/CMakeFiles/dbtl.dir/rule
+
+.PHONY : dbtl
+
+# clean rule for target.
+transaction/dbtl/CMakeFiles/dbtl.dir/clean:
+	$(MAKE) -f transaction/dbtl/CMakeFiles/dbtl.dir/build.make transaction/dbtl/CMakeFiles/dbtl.dir/clean
+.PHONY : transaction/dbtl/CMakeFiles/dbtl.dir/clean
+
+#=============================================================================
+# Directory level rules for directory transaction/entity_service
+
+# Recursive "all" directory target.
+transaction/entity_service/all: transaction/entity_service/CMakeFiles/es.dir/all
+
+.PHONY : transaction/entity_service/all
+
+# Recursive "clean" directory target.
+transaction/entity_service/clean: transaction/entity_service/CMakeFiles/es.dir/clean
+
+.PHONY : transaction/entity_service/clean
+
+# Recursive "preinstall" directory target.
+transaction/entity_service/preinstall:
+
+.PHONY : transaction/entity_service/preinstall
+
+#=============================================================================
+# Target rules for target transaction/entity_service/CMakeFiles/es.dir
+
+# All Build rule for target.
+transaction/entity_service/CMakeFiles/es.dir/all: CMakeFiles/base.dir/all
+	$(MAKE) -f transaction/entity_service/CMakeFiles/es.dir/build.make transaction/entity_service/CMakeFiles/es.dir/depend
+	$(MAKE) -f transaction/entity_service/CMakeFiles/es.dir/build.make transaction/entity_service/CMakeFiles/es.dir/build
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/gyz/grit/build/CMakeFiles --progress-num=15,16,17 "Built target es"
+.PHONY : transaction/entity_service/CMakeFiles/es.dir/all
+
+# Build rule for subdir invocation for target.
+transaction/entity_service/CMakeFiles/es.dir/rule: cmake_check_build_system
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/gyz/grit/build/CMakeFiles 6
+	$(MAKE) -f CMakeFiles/Makefile2 transaction/entity_service/CMakeFiles/es.dir/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/gyz/grit/build/CMakeFiles 0
+.PHONY : transaction/entity_service/CMakeFiles/es.dir/rule
+
+# Convenience name for target.
+es: transaction/entity_service/CMakeFiles/es.dir/rule
+
+.PHONY : es
+
+# clean rule for target.
+transaction/entity_service/CMakeFiles/es.dir/clean:
+	$(MAKE) -f transaction/entity_service/CMakeFiles/es.dir/build.make transaction/entity_service/CMakeFiles/es.dir/clean
+.PHONY : transaction/entity_service/CMakeFiles/es.dir/clean
 
 #=============================================================================
 # Directory level rules for directory transaction/gtm
@@ -128,15 +349,15 @@ transaction/gtm/preinstall:
 # Target rules for target transaction/gtm/CMakeFiles/gtm.dir
 
 # All Build rule for target.
-transaction/gtm/CMakeFiles/gtm.dir/all:
+transaction/gtm/CMakeFiles/gtm.dir/all: CMakeFiles/base.dir/all
 	$(MAKE) -f transaction/gtm/CMakeFiles/gtm.dir/build.make transaction/gtm/CMakeFiles/gtm.dir/depend
 	$(MAKE) -f transaction/gtm/CMakeFiles/gtm.dir/build.make transaction/gtm/CMakeFiles/gtm.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/gyz/grit/build/CMakeFiles --progress-num=1,2,3,4 "Built target gtm"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/gyz/grit/build/CMakeFiles --progress-num=18,19,20 "Built target gtm"
 .PHONY : transaction/gtm/CMakeFiles/gtm.dir/all
 
 # Build rule for subdir invocation for target.
 transaction/gtm/CMakeFiles/gtm.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/gyz/grit/build/CMakeFiles 4
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/gyz/grit/build/CMakeFiles 6
 	$(MAKE) -f CMakeFiles/Makefile2 transaction/gtm/CMakeFiles/gtm.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/gyz/grit/build/CMakeFiles 0
 .PHONY : transaction/gtm/CMakeFiles/gtm.dir/rule

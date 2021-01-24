@@ -39,6 +39,10 @@ endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for each subdirectory.
+  include("/home/gyz/grit/build/transaction/app/cmake_install.cmake")
+  include("/home/gyz/grit/build/transaction/dbservice/cmake_install.cmake")
+  include("/home/gyz/grit/build/transaction/dbtl/cmake_install.cmake")
+  include("/home/gyz/grit/build/transaction/entity_service/cmake_install.cmake")
   include("/home/gyz/grit/build/transaction/gtm/cmake_install.cmake")
 
 endif()

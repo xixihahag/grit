@@ -1,5 +1,4 @@
 file(REMOVE_RECURSE
-  "CMakeFiles/gtm.dir/__/__/base/configManager.cc.o"
   "CMakeFiles/gtm.dir/gtm.cc.o"
   "CMakeFiles/gtm.dir/gtmmain.cc.o"
   "gtm"

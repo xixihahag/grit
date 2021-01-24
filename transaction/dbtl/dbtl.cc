@@ -1,6 +1,5 @@
 #include "dbtl.h"
-#include "base/threadPool.h"
-#include "base/headerCmd.h"
+#include "headerCmd.h"
 #include "configManager.h"
 #include "rocksdb/write_batch.h"
 #include <unistd.h>
@@ -51,10 +50,14 @@ void Dbtl::solve(
     case kLog:
         if (ConfigManager::getInstance()->dbtlUseRocksDb())
             threadpool_->enqueue(bind(
-                &writeToDiskByRocksDb, this, dbtl->txid(), dbtl->data(), conn));
+                &Dbtl::writeToDiskByRocksDb,
+                this,
+                dbtl->txid(),
+                dbtl->data(),
+                conn));
         else
-            threadpool_->enqueue(
-                bind(&writeToDisk, this, dbtl->txid(), dbtl->data(), conn));
+            threadpool_->enqueue(bind(
+                &Dbtl::writeToDisk, this, dbtl->txid(), dbtl->data(), conn));
         break;
     case kLsn:
         retResult(kLsn, dbtl->txid(), applyLsn_++, conn);

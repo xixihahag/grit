@@ -22,7 +22,7 @@ void LogPlayer::init(Dbtl *dbtl, EventLoop *loop)
     TcpClient *dbClient_ = new TcpClient(loop, servAddr, "db");
     dbClient_->connect();
     dbClient_->setConnectionCallback(
-        bind(&onDbConnection, this, std::placeholders::_1));
+        bind(&LogPlayer::onDbConnection, this, std::placeholders::_1));
 
     // 初始化时间轮
     timeWheel_ = new TimeWheel(60 * 100);
@@ -40,7 +40,7 @@ void LogPlayer::playLog(int txid)
     // 将服务器下标添加进未应答队列里面
     if (answerTable_.find(txid) == answerTable_.end()) {
         retryTable_[txid].resize(dbConnVec_.size());
-        for (int i = 0; i < dbConnVec_.size(); i++) {
+        for (size_t i = 0; i < dbConnVec_.size(); i++) {
             answerTable_[txid].emplace_back(i);
             retryTable_[txid][i] = 0;
         }
@@ -73,6 +73,7 @@ void LogPlayer::playLog(int txid)
 void LogPlayer::solve(const LogPlayerMsg *data)
 {
     auto cmd = data->cmd();
+    int time = 0;
 
     switch (cmd) {
     case kExecTranSucc:
@@ -80,14 +81,14 @@ void LogPlayer::solve(const LogPlayerMsg *data)
         break;
     case kExecTranFail:
         // 针对每一个txid的每一个conn，设置定时器，设置重试次数，设置重试间隔时间
-        int time = ++retryTable_[data->txid()][data->id()];
+        time = ++retryTable_[data->txid()][data->id()];
         if (time > ConfigManager::getInstance()->lpMaxRetryTime())
             // 讲道理是不可能发生错误的，除非一整套分布式存储系统全部宕机
             LOG(WARNING) << "Maximum retry limit reached";
         else
             timeWheel_->addTimer(
                 pow(2, time) * 1000,
-                bind(playLog, this, data->txid()),
+                bind(&LogPlayer::playLog, this, data->txid()),
                 nullptr);
 
         // playLog(data->txid());

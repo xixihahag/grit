@@ -1,3 +1,4 @@
+#pragma once
 #include <functional>
 #include <vector>
 #include <iostream>
@@ -6,7 +7,7 @@
 #include <sys/time.h>
 #include <unistd.h>
 #include <glog/logging.h>
-#include "base/threadPool.h"
+#include "threadPool.h"
 
 namespace grit {
 
@@ -62,15 +63,15 @@ class TimeWheel
         if (1 == epollfd) LOG(ERROR) << "create epoll instance fail";
 
         pool_ = new ThreadPool(1);
-        pool_->enqueue(bind(&start, this));
+        pool_->enqueue(bind(&TimeWheel::start, this));
     }
 
     // 讲道理应该新开一个线程去做这件事情
     void start()
     {
         for (;;) {
-            int ret =
-                epoll_wait(epollfd, events, MAX_EVENT, 1000); // 基准频率 1s
+            // int ret =
+            epoll_wait(epollfd, events, MAX_EVENT, 1000); // 基准频率 1s
             // tw.tick(); 不要这么做，会导致误差累积
             takeAllTimeout();
         }
@@ -131,7 +132,8 @@ class TimeWheel
             }
         }
 
-        curslot_ = ++curslot_ % nslosts_;
+        ++curslot_;
+        curslot_ %= nslosts_;
     }
 
     void takeAllTimeout()
@@ -148,12 +150,12 @@ class TimeWheel
     int nslosts_;
     int curslot_;
 
+    std::vector<std::vector<Timer *> > slots_;
+
     unsigned long long starttime_;
     struct epoll_event ev, events[MAX_EVENT];
     int epollfd;
     ThreadPool *pool_;
-
-    std::vector<std::vector<Timer *> > slots_;
 };
 
 } // namespace grit

@@ -15,5 +15,10 @@ link_directories(${CMAKE_SOURCE_DIR}/third_part/lib)
 
 set(FLATC ${CMAKE_SOURCE_DIR}/third_part/bin/flatc)
 
+# 生成动态库
+set(LIBBASE base/configManager.cc base/mydb.cc)
+add_library(base SHARED ${LIBBASE})
+target_link_libraries(base mysqlclient)
+
 add_subdirectory(flatbuffer)
 add_subdirectory(transaction)

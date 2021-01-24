@@ -1,6 +1,7 @@
 #pragma once
 #include "muduo/net/TcpConnection.h"
 #include "muduo/net/EventLoop.h"
+#include "muduo/net/Buffer.h"
 #include "net_generated.h"
 #include <unordered_map>
 #include <list>
@@ -11,7 +12,7 @@ class App
 {
   public:
     // 与gtm建立连接
-    App(EventLoop *);
+    App(muduo::net::EventLoop *);
 
     // 开启一个事务
     void startTran(std::string);
@@ -27,7 +28,10 @@ class App
     void commit();
 
     // 负责传输协议的解析
-    void onMessage(const TcpConnectionPtr &, Buffer *, muduo::Timestamp);
+    void onMessage(
+        const muduo::net::TcpConnectionPtr &,
+        muduo::net::Buffer *,
+        muduo::Timestamp);
 
     // 汇报事务执行结果，(状态，txid)
     void showResult(int, int);
@@ -39,10 +43,10 @@ class App
     // 维护gtm的连接
     muduo::net::TcpConnectionPtr gtmConn_;
 
-    EventLoop *loop_;
+    muduo::net::EventLoop *loop_;
 
     int txid_;
-    list<muduo::net::TcpConnectionPtr> connList_;
+    std::list<muduo::net::TcpConnectionPtr> connList_;
 };
 
 } // namespace grit
